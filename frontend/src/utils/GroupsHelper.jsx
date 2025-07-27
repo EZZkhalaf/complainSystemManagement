@@ -52,10 +52,32 @@ export const addGroupHook = async(userId , name , description , navigate) =>{
         })
       });
       const data = await res.json();
-      console.log(data)
+    //   console.log(data)
       if (data.success) {
         toast.success("group created successfully")
         navigate("/adminPage/groups")
+      } else {
+        toast.error(data.error || "something wrong with the server ")
+        return 
+      }
+    } catch (error) {
+      console.error("Failed to fetch groups:", error);
+    } 
+}
+
+export const getGroupInfoHook = async(groupId)=>{
+        try {
+            console.log(groupId)
+      const res = await fetch(`http://localhost:5000/api/group/${groupId}`, {
+        method : "GET",
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        } 
+      });
+      const data = await res.json();
+    //   console.log(data)
+      if (data.success) {
+        return data
       } else {
         toast.error(data.error || "something wrong with the server ")
         return 

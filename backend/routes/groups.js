@@ -1,6 +1,6 @@
 const express = require('express');
 const { userMiddleware } = require('../middlware/userMiddlware');
-const { createGroup , addUserToGroup, removeUserFromGroup, listUsersInGroup, getUserGroups, listGroups } = require('../controllers/groupsControllers');
+const { createGroup , addUserToGroup, removeUserFromGroup, groupInfoAndUsers, listGroups, getUserGroups } = require('../controllers/groupsControllers');
 const { model } = require('mongoose');
 
 const router = express.Router();    
@@ -8,7 +8,7 @@ const router = express.Router();
 router.post('/:userId' , userMiddleware, createGroup);
 router.post('/addUser' , userMiddleware, addUserToGroup)
 router.post('/removeUser' , userMiddleware, removeUserFromGroup)
-router.get("/:groupId" , userMiddleware,listUsersInGroup )
+router.get("/:groupId" , userMiddleware,groupInfoAndUsers )
 router.get('/user/:id' , userMiddleware , getUserGroups);
 router.get('/admin/:id' , userMiddleware , listGroups);
 

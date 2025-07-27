@@ -87,17 +87,17 @@ const removeUserFromGroup = async (req, res) => {
     }
 }
 
-const listUsersInGroup = async (req, res) => {
+const groupInfoAndUsers = async (req, res) => {
     try {
         const { groupId } = req.params;
         const group = await Group.findById({_id: groupId }).populate('users', '-password');
         if (!group) {
             return res.status(404).json({ success: false, message: 'Group not found' });
         }   
-        res.status(200).json({ success: true, users: group.users });
+        res.status(200).json({ success: true, group });
     } catch (error) {
         console.log(error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({success : false , message: 'Server error' });
         
     }
 }
@@ -139,4 +139,4 @@ const listGroups = async(req,res)=>{
     }
 }
 
-module.exports = {createGroup , addUserToGroup , removeUserFromGroup , listUsersInGroup , getUserGroups , listGroups}
+module.exports = {createGroup , addUserToGroup , removeUserFromGroup , groupInfoAndUsers , getUserGroups , listGroups}
