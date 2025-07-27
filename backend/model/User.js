@@ -15,12 +15,7 @@ const userSchema = new mongo.Schema({
     password: {
         type: String,
         required: true
-    },
-    role: {
-        type: String,
-        default: 'user'
     }
-
 })
 
 

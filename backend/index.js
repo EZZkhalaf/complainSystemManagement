@@ -8,6 +8,8 @@ dotenv.config();
 
 const authRouter = require('./routes/auth.js');
 const groupRouter = require('./routes/groups.js');
+const complaintRouter = require('./routes/complaints.js');
+const userRouter = require('./routes/users.js');
 app.use(cors({
     origin : '*' ,
     credentials:true
@@ -18,10 +20,12 @@ mongoose.connect(process.env.CONNECTION_STRING)
   .then(() => console.log(" MongoDB connected..."))
   .catch((err) => console.error(" MongoDB connection error:", err));
 
-const port = 5000;
+const port = process.env.PORT || 5000;
 
 app.use("/api/auth" , authRouter)
+app.use("/api/user", userRouter);
 app.use("/api/group" , groupRouter)
+app.use("/api/complaints", complaintRouter);
 
 app.listen(port , () => {
     console.log('running on port 5000');

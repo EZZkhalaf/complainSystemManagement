@@ -9,7 +9,7 @@ const complaintSchema = new mongoose.Schema({
     description : {
         type: String ,
         default: 'no descrition provided',
-        required: true
+        
     },
     complaintAdmin :{
         type : mongoose.Schema.Types.ObjectId ,
@@ -20,6 +20,10 @@ const complaintSchema = new mongoose.Schema({
         type: String,
         enum: ['pending', 'in-progress', 'resolved', 'rejected'],
         default: 'pending'
+    },type: {
+        type: String,
+        enum: ['general', 'technical', 'billing', 'other'],
+        default: 'general'
     }
 })
 

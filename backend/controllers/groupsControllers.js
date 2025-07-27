@@ -2,6 +2,7 @@ const express=require('express')
 const Group = require('../model/Group.js');
 const { find } = require('../model/User.js');
 const User = require('../model/User.js');
+const Role = require('../model/Role.js');
 const createGroup = async (req, res) => {
     try {
         const { name, description } = req.body;
@@ -10,8 +11,9 @@ const createGroup = async (req, res) => {
             return res.status(400).json({ message: 'Name and description are required' });
         }
 
-        const user = await User.findById({_id : userId});
-        if(user.role !== 'admin') {
+        // const user = await User.findById({_id : userId});
+        const userRole = await Role.findOne({ userId: userId });
+        if(userRole.role !== 'admin') {
             return res.status(403).json({ message: 'Only admins can create groups' });
         }
 
@@ -80,7 +82,20 @@ const removeUserFromGroup = async (req, res) => {
     }
 }
 
-
+const listUsersInGroup = async (req, res) => {
+    try {
+        const { groupId } = req.params;
+        const group = await Group.findById({_id: groupId }).populate('users', '-password');
+        if (!group) {
+            return res.status(404).json({ success: false, message: 'Group not found' });
+        }   
+        res.status(200).json({ success: true, users: group.users });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: 'Server error' });
+        
+    }
+}
  
 
-module.exports = {createGroup , addUserToGroup , removeUserFromGroup}
+module.exports = {createGroup , addUserToGroup , removeUserFromGroup , listUsersInGroup}
