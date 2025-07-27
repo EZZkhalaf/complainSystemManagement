@@ -10,7 +10,7 @@ const register = async (req, res) => {
 
     const userExists = await User.findOne({ email });
     if (userExists) {
-      return res.status(400).json({ message: 'User already exists' });
+      return res.status(400).json({sucess : false ,  message: 'User already exists' });
     }
 
     const saltRounds = 10;
@@ -29,10 +29,10 @@ const register = async (req, res) => {
     });
     await newRole.save();
 
-    return res.status(201).json({ message: 'User registered successfully' });
+    return res.status(201).json({sucess : true ,  message: 'User registered successfully' });
   } catch (error) {
     console.warn('Registration error:', error);
-    return res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json({success : false ,  message: 'Internal server error' });
   }
 };
 
@@ -47,10 +47,17 @@ const login = async(req,res) => {
         
         if(!isPasswordValid)return res.status(400).json({success: false, error: 'wrong password' });
         
+        let tempRole
+        tempRole = await Role.findOne({user:user._id})
+        if(!tempRole){
+            tempRole = new Role({
+                user : user._id ,
+                role :"user"
+            })
+        }
         
-
-        const token = jwt.sign({_id : user._id , role:user.role}  , process.env.JWT_SECRET, {
-            expiresIn: '2h'
+        const token = jwt.sign({_id : user._id , role:tempRole.role}  , process.env.JWT_SECRET, {
+            expiresIn: '10d'
         }); 
 
         return res.status(200).json({
@@ -61,13 +68,14 @@ const login = async(req,res) => {
                 _id: user._id,
                 name: user.name,
                 email: user.email,
-                role: user.role
+                role: tempRole.role
             }
         })
         
     } catch (error) {
-        
-    }
+        console.warn('login error:', error);
+        return res.status(500).json({success : false ,  message: 'Internal server error' });
+  }
 }
 
 const changeUserRole = async (req, res) => {

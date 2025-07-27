@@ -1,5 +1,5 @@
 const User = require("../model/User");
-
+const jwt = require("jsonwebtoken")
 
  const userMiddleware = async(req, res, next) => {
     try {
@@ -16,6 +16,7 @@ const User = require("../model/User");
         if(!user){
             return res.status(404).json({ message: 'User not found' });
         }
+        console.log("middlware is working ")
 
         next();
 

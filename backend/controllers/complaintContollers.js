@@ -7,18 +7,19 @@ const Role = require('../model/Role');
 
 const addComplaint = async (req, res) => {
     try {
-        const { description, userId ,type} = req.body;
-        if (!description || !userId) {
+        const { description ,type} = req.body;
+        const {id} = req.params;
+        if (!description || !id) {
             return res.status(400).json({ message: 'Description and userId are required'});
         }
-        const user = await User.findById({ _id : userId });
+        const user = await User.findById({ _id : id });
         if(!user) {
             return res.status(404).json({ message: 'User not found' });
         }
         const newComplaint = new Complaint({
             
             description,
-            userId: userId,
+            userId: id,
             type: type 
         });
         if (!newComplaint) {
@@ -59,4 +60,26 @@ const changeComplaintStatus = async (req, res) => {
 }
 
 
-module.exports = { addComplaint , changeComplaintStatus };
+const listComplaints = async(req,res)=>{
+    try {
+        const {id} = req.params;
+        const isAdmin = await Role.findOne({user : id});
+        
+        if(isAdmin.role !== 'admin'){
+            return res.status(400).json({success : false , error : "the user should be an admin to perform this action "})
+        }else if(isAdmin.role === 'admin'){
+            const complaints = await Complaint.find().populate("userId" , "-password");
+            return res.status(200).json({success : true , complaints})
+        }
+
+        
+    }catch (error) {
+        console.log(error);
+        res.status(500).json({ message: 'Server error' });
+        
+    }
+}
+
+
+
+module.exports = { addComplaint , changeComplaintStatus , listComplaints };

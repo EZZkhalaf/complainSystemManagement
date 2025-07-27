@@ -6,15 +6,20 @@ const Role = require('../model/Role.js');
 const createGroup = async (req, res) => {
     try {
         const { name, description } = req.body;
-        const {userId} = req.body;
+        const {userId} = req.params;
         if (!name || !description) {
             return res.status(400).json({ message: 'Name and description are required' });
         }
 
+        const nameExist = await Group.findOne({name : name });
+
+        if(nameExist) return res.status(400).json({success:false , error : "group name already exist"})
+
+
         // const user = await User.findById({_id : userId});
-        const userRole = await Role.findOne({ userId: userId });
+        const userRole = await Role.findOne({ user: userId });
         if(userRole.role !== 'admin') {
-            return res.status(403).json({ message: 'Only admins can create groups' });
+            return res.status(403).json({success : false , message: 'Only admins can create groups' });
         }
 
         const newGroup = new Group({
@@ -24,7 +29,7 @@ const createGroup = async (req, res) => {
         });
 
         await newGroup.save();
-        res.status(201).json({ message: 'Group created successfully', group: newGroup });
+        res.status(201).json({success : true,  message: 'Group created successfully', group: newGroup });
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: 'Server error' });
@@ -96,6 +101,42 @@ const listUsersInGroup = async (req, res) => {
         
     }
 }
+
+const getUserGroups = async (req, res) => {
+  try {
+    const { id } = req.params; 
+
+    if (!id) {
+      return res.status(400).json({ success: false, message: "user id is required" });
+    }
+
+    const groups = await Group.find({ users: id }).populate('users', '-password');
+
+    if (groups.length === 0) {
+      return res.status(404).json({ success: false, message: "User is not in any group" });
+    }
+
+    res.status(200).json({ success: true, groups });
+  } catch (error) {
+    console.error("Error fetching groups:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
  
 
-module.exports = {createGroup , addUserToGroup , removeUserFromGroup , listUsersInGroup}
+const listGroups = async(req,res)=>{
+    try {
+        const {id} = req.params;
+        const isAdmin = await Role.findOne({ user: id });
+        if (!isAdmin || isAdmin.role !== 'admin') {
+            return res.status(403).json({ message: 'Only admins can change complaint status' });
+        }
+        const groups = await Group.find().populate("users" , "-password")
+        return res.status(200).json({success:true , groups})
+    } catch (error) {
+        console.error("Error fetching groups:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+}
+
+module.exports = {createGroup , addUserToGroup , removeUserFromGroup , listUsersInGroup , getUserGroups , listGroups}
