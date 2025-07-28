@@ -1,9 +1,10 @@
 const User = require('../model/User.js');
+const Role = require('../model/Role.js');
+const Group = require("../model/Group.js")
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
-const Role = require('../model/Role.js');
 const nodemailer = require("nodemailer");
-
+const Complaint = require('../model/Complaint.js');
 // const register = async (req, res) => {
 //   try {
 //     const { name, email, password, role } = req.body;
@@ -199,10 +200,44 @@ const fetchUsers = async(req,res) =>{
     }
 }
 
+
+
+const getAdminSummary = async(req,res)=>{
+    try {
+        // console.log("working")
+        const {id} = req.params ; 
+        const userRole = await Role.findOne({user : id})
+        if(userRole.role !== 'admin') return res.status(401).json({success : false , error:"only the admin can get the systme summary"});
+        
+        const users1 = await User.find();
+        const groups1 = await Group.find();
+        const comaplaints1 = await Complaint.find();
+
+        const users = users1.length || 0
+        const complaints = comaplaints1.length || 0;
+        const groups = groups1.length || 0
+        return res.status(200).json({success : true , users , groups , complaints})
+    }  catch (error) {
+        console.error( error);
+        res.status(500).json({ success : false , message: 'Server error' });
+    }
+}
+
+
+// const changeUserInfo = async(req,res) =>{
+//     try {
+//         const {newName , newPassword } = req.b
+//     }  catch (error) {
+//         console.error( error);
+//         res.status(500).json({ success : false , message: 'Server error' });
+//     }
+// }
+
 module.exports = {
     register ,
     login ,
     changeUserRole ,
     fetchUsers , 
-    verifyEmail
+    verifyEmail , 
+    getAdminSummary
 };

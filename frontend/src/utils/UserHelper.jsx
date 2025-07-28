@@ -79,3 +79,25 @@ export const removeUserFromGroupHook = async(groupId , userId) =>{
         throw new Error(error)   
     }
 }
+
+
+export const fetchAdminSummaryHook = async(id) =>{
+    try {
+        const response = await fetch(`http://localhost:5000/api/user/getSummary/${id}` , {
+            headers : {
+                "Authorization": `Bearer ${localStorage.getItem('token')}` , 
+            } 
+        })
+        
+        const data = await response.json();
+        if(data.success){
+            return data
+        }else {
+            toast.error(data.message || "error fetching the summary ")
+            return
+        }
+    } catch (error) {
+        console.log(error)
+        throw new Error(error)   
+    }
+}

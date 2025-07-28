@@ -1,9 +1,33 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { fetchAdminSummaryHook } from '../../utils/UserHelper';
+import { useParams } from 'react-router-dom';
+import { useAuthContext } from '../../Context/authContext';
 
 const AdminHero = () => {
-  const complaintCount = 13 ;
-  const userCount = 100;
-  const groupsCount = 5;
+  const { user } = useAuthContext();
+
+  const [complaintCount, setComplaintCount] = useState(0);
+  const [userCount, setUserCount] = useState(0);
+  const [groupsCount, setGroupsCount] = useState(0);
+
+  const fetchSummary = async () => {
+    try {
+      const data = await fetchAdminSummaryHook(user._id);
+      console.log(data);
+      setComplaintCount(data.complaints);
+      setUserCount(data.users);
+      setGroupsCount(data.groups);
+    } catch (error) {
+      console.error("Failed to fetch summary:", error);
+    }
+  };
+  useEffect(() => {
+
+    
+      fetchSummary();
+    
+  }, [user]);
+
   return (
     <div className="w-full px-6 py-10">
       <div className="max-w-5xl mx-auto space-y-8">

@@ -1,5 +1,5 @@
 const express = require('express');
-const { changeUserRole, fetchUsers } = require('../controllers/authControllers');
+const { changeUserRole, fetchUsers, getAdminSummary } = require('../controllers/authControllers');
 const { userMiddleware } = require('../middlware/userMiddlware');
 const { addUserToGroup } = require('../controllers/groupsControllers');
 const router = express.Router();
@@ -133,4 +133,9 @@ router.get("/" , userMiddleware,fetchUsers);
  *         description: Server error
  */
 router.post("/add" , addUserToGroup);
+
+
+
+router.get("/getSummary/:id" , userMiddleware , getAdminSummary)
+
 module.exports = router;
