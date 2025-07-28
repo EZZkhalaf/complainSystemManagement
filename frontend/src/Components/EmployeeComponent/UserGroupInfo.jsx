@@ -35,37 +35,7 @@ const UserGroupInfo = () => {
         setLoading(false);
       }
     };
-    // console.log(group)
-  
-  //   const removeUserFromGroup = async (e, userId) => {
-  //     e.preventDefault();
-  
-  //     try {
-  //       setLoading(true);
-  //       const response = await removeUserFromGroupHook(id, userId);
-  //       console.log(response)
-  //       if (response.success) {
-  //         setGroup(prevGroup => {
-  //           if (!prevGroup) return prevGroup;
-  
-  //           return {
-  //             ...prevGroup,
-  //             group: {
-  //               ...prevGroup.group,
-  //               users: prevGroup.group.users.filter(user => user._id !== userId)
-  //             }
-  //           };
-  //         });
-  //       } else {
-  //         // handle failure, e.g. show error toast
-  //         console.error("Failed to remove user");
-  //       }
-  //     } catch (error) {
-  //       console.error(error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  // };
+
   
   
     useEffect(() => {

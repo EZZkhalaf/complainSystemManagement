@@ -13,7 +13,6 @@ const ListUserGroups = () => {
     setGroups(data)
     
   };
-  console.log(groups)
   useEffect(() => {
     if (user?._id) {
       fetchUserGroups();

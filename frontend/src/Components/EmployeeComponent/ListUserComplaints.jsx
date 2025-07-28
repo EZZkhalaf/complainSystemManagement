@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { listComplaintsHook, ListUserComplaintsHook } from '../../utils/ComplaintsHelper';
 import { useAuthContext } from '../../Context/authContext';
 import { useNavigate } from 'react-router-dom';
+import { OrbitProgress } from 'react-loading-indicators';
 
 const getStatusStyles = (status) => {
   const styles = {
@@ -42,11 +43,13 @@ const ComplaintCard = ({ complaint }) => {
 const ListUserComplaints = () => {
     const [complaints, setComplaints] = useState([]);
     const { user } = useAuthContext();
-  
+    const [loading , setLoading ] = useState(false)
     const fetchComplaints = async () => {
       try {
+        setLoading(true)
         const data = await ListUserComplaintsHook(user._id);
         setComplaints(data);
+        setLoading(false)
       } catch (error) {
         console.error('Error fetching complaints:', error);
       }
@@ -55,6 +58,11 @@ const ListUserComplaints = () => {
     useEffect(() => {
       fetchComplaints();
     }, []);
+    if(loading) return(
+            <div className="max-w-md mx-auto p-8 bg-gradient-to-br space-y-6 flex justify-center items-center">
+                <OrbitProgress color="#32cd32" size="medium" text="" textColor="" />
+            </div>
+    )
   
     return (
       <div className="max-w-6xl mx-auto px-6 py-8">

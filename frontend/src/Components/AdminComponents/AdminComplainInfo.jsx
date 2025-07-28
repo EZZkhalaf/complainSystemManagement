@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react'
 import { changeComplaintStatusHook, getComaplintInfoHook } from '../../utils/ComplaintsHelper';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuthContext } from '../../Context/authContext';
+import { OrbitProgress } from 'react-loading-indicators';
 
 const AdminComplainInfo = () => {
    const [complaint, setComplaints] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [newStatus , setNewStatus] = useState("");
   const {id} = useParams();
   const {user} = useAuthContext();
@@ -13,6 +14,7 @@ const AdminComplainInfo = () => {
 
   const fetchComplaints = async () => {
     try {
+        setLoading(true)
       const response = await getComaplintInfoHook(id)
       setComplaints(response);
       setNewStatus(response.status)
@@ -38,7 +40,11 @@ useEffect(() => {
     fetchComplaints();
 }, []);
 
-  if (loading) return <div className="text-center mt-10">Loading complaints...</div>;
+  if(loading) return(
+            <div className="max-w-md mx-auto p-8 bg-gradient-to-br space-y-6 flex justify-center items-center">
+                <OrbitProgress color="#32cd32" size="medium" text="" textColor="" />
+            </div>
+    )
 
   const getStatusStyle = (status) => {
     switch (status) {

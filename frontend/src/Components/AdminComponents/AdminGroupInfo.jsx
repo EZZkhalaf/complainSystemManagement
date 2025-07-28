@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getGroupInfoHook } from '../../utils/GroupsHelper';
 import { removeUserFromGroupHook } from '../../utils/UserHelper';
+import { OrbitProgress } from 'react-loading-indicators';
 
 const AdminGroupInfo = () => {
   const [group, setGroup] = useState(null);
@@ -44,9 +45,7 @@ const AdminGroupInfo = () => {
     try {
       setLoading(true);
       const response = await removeUserFromGroupHook(id, userId);
-      console.log(response)
       if (response.success) {
-        // Remove user locally from state
         setGroup(prevGroup => {
           if (!prevGroup) return prevGroup;
 
@@ -74,7 +73,11 @@ const AdminGroupInfo = () => {
     fetchGroup();
   }, [id ]);
 
-  if (loading) return <div className="text-center mt-10">Loading...</div>;
+  if(loading) return(
+            <div className="max-w-md mx-auto p-8 bg-gradient-to-br space-y-6 flex justify-center items-center">
+                <OrbitProgress color="#32cd32" size="medium" text="" textColor="" />
+            </div>
+    )
   if (error) return <div className="text-center mt-10 text-red-500">{error}</div>;
   if (!group) return null; 
 

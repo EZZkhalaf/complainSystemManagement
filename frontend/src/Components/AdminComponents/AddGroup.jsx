@@ -3,19 +3,27 @@ import React, { useState } from 'react'
 import { useAuthContext } from '../../Context/authContext';
 import { addGroupHook } from '../../utils/GroupsHelper';
 import { useNavigate } from 'react-router-dom';
+import { OrbitProgress } from 'react-loading-indicators';
 
 const AddGroup = () => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [userId, setUserId] = useState(''); // Optional: replace with auth context later
+  const [userId, setUserId] = useState(''); 
+  const [loading, setLoading] = useState(false)
   const { user } = useAuthContext();
   const navigate = useNavigate();
   const handleSubmit = async(e) => {
     e.preventDefault();
-
+    setLoading(true)
     await addGroupHook(user._id , name , description , navigate);
-    
+    setLoading(false)
   };
+
+  if(loading) return(
+            <div className="max-w-md mx-auto p-8 bg-gradient-to-br space-y-6 flex justify-center items-center">
+                <OrbitProgress color="#32cd32" size="medium" text="" textColor="" />
+            </div>
+    )
 
   return (
     <div className="max-w-md mx-auto mt-10 bg-white p-6 rounded-xl shadow-md">

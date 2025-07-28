@@ -7,7 +7,20 @@ const AdminSideBar = () => {
 
     const activeLinkStyles = 'bg-blue-700';
   return (
-    <div className='w-60 bg-blue-700 min-h-screen flex flex-col p-4'>
+    <div className='w-60 bg-blue-800 min-h-screen flex flex-col p-4'>
+
+        <NavLink 
+            to={"/adminPage/"}
+            className={({ isActive }) =>
+            `${navLinkStyles} ${isActive ? activeLinkStyles : ''}`
+            }
+        >
+            <span>
+                Summary
+            </span>
+        </NavLink>
+
+
         <NavLink 
             to={"/adminPage/complaints"}
             className={({ isActive }) =>
@@ -30,16 +43,7 @@ const AdminSideBar = () => {
             </span>
         </NavLink>
 
-        <NavLink 
-            // to={"/aadminPage/complaints"}
-            className={({ isActive }) =>
-            `${navLinkStyles} ${isActive ? activeLinkStyles : ''}`
-            }
-        >
-            <span>
-                IDK
-            </span>
-        </NavLink>
+
 
 
     </div>
