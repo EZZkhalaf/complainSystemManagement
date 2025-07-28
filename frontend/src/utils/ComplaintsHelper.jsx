@@ -52,3 +52,80 @@ export const AddComplaintHook = async(userId , description , type ,navigate) => 
         throw new Error(error)
     }
 }
+
+
+export const getComaplintInfoHook = async(id) =>{
+    try {
+        const response = await fetch(`http://localhost:5000/api/complaints/info/${id}` , {
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem('token')}` , 
+            } 
+        })
+
+        const data= await response.json();
+        if(data.success){
+            return data.complaint;
+        }else {
+            toast.error(data.error)
+            return
+        }
+    }  catch (error) {
+        console.log(error)
+        throw new Error(error)
+    }
+}
+
+
+export const changeComplaintStatusHook = async(complaintId, status ,userId) =>{
+    try {
+         const response = await fetch(`http://localhost:5000/api/complaints/` , {
+            method : 'PUT',
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem('token')}` , 
+                'Content-Type' : 'application/json'
+            } , 
+            body : JSON.stringify({
+                complaintId ,
+                status , 
+                userId
+            })
+        })
+
+        const data= await response.json();
+        console.log(data)
+        if(data.success){
+            return data.complaint;
+        }else {
+            toast.error(data.message)
+            return
+        }
+    } catch (error) {
+        console.log(error)
+        throw new Error(error)
+    }
+}
+
+export const ListUserComplaintsHook = async(id) =>{
+    try {
+        console.log(id)
+         const response = await fetch(`http://localhost:5000/api/complaints/user/${id}` , {
+           
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem('token')}` , 
+                
+            } 
+        })
+
+        const data= await response.json();
+        // console.log(data)
+        if(data.success){
+            return data.complaints;
+        }else {
+            toast.error(data.message)
+            return
+        }
+    } catch (error) {
+        console.log(error)
+        throw new Error(error)
+    }
+}

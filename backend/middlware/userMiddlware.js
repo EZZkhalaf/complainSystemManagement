@@ -16,7 +16,7 @@ const jwt = require("jsonwebtoken")
         if(!user){
             return res.status(404).json({ message: 'User not found' });
         }
-        console.log("middlware is working ")
+        // console.log("middlware is working ")
 
         next();
 

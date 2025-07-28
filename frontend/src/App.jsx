@@ -18,6 +18,11 @@ import ListUserGroups from './Components/EmployeeComponent/ListUserGroups'
 import UserGroupInfo from './Components/EmployeeComponent/UserGroupInfo'
 import AddGroup from './Components/AdminComponents/AddGroup'
 import AdminGroupInfo from './Components/AdminComponents/AdminGroupInfo'
+import AddEmployeeToGroup from './Components/AdminComponents/AddEmployeeToGroup'
+import AdminComplainInfo from './Components/AdminComponents/AdminComplainInfo'
+import UserHero from './Components/EmployeeComponent/UserHero'
+import ListUserComplaints from './Components/EmployeeComponent/ListUserComplaints'
+import UserComplaintInfo from './Components/EmployeeComponent/UserComplaintInfo'
 
 const App = ()=> {
 
@@ -41,6 +46,8 @@ const App = ()=> {
           <Route path="/adminPage/groups" element = {<ListGroups />}></Route>
           <Route path="/adminPage/add-group" element = {<AddGroup />}></Route>        
           <Route path="/adminPage/current-group/:id" element = {<AdminGroupInfo />}></Route>        
+          <Route path="/adminPage/add-employee/:id" element = {<AddEmployeeToGroup />}></Route>        
+          <Route path="/adminPage/complaint/:id" element = {<AdminComplainInfo />}></Route>        
 
           </Route>
         <Route path='/userPage' element={
@@ -50,7 +57,10 @@ const App = ()=> {
               </RoleBasedRoutes>
             </PrivateRoutes>
         }>
+          <Route index element = {<UserHero />}></Route>
           <Route path="/userPage/add-complaint" element = {<AddComplaint />}></Route>        
+          <Route path="/userPage/list-complaints/:id" element = {<ListUserComplaints />}></Route>        
+          <Route path="/userPage/complaint/:id" element = {<UserComplaintInfo />}></Route>        
           <Route path="/userPage/current-groups" element = {<ListUserGroups />}></Route>        
           <Route path="/userPage/current-group/:id" element = {<UserGroupInfo />}></Route>        
         </Route>

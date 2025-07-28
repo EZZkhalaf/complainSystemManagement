@@ -60,8 +60,8 @@ export const registerHook = async(name , email , password , navigate) =>{
         const data = await response.json();
         console.log(data)
         if(data.success){
-            toast.success("user created successfully");
-            navigate('/login')
+            toast.success("Verification email sent. Check your inbox.");
+            navigate('/login');
         }else{
             toast.error(data.message || "something wrong with the server")
         }

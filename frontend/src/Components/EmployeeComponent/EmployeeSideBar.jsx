@@ -1,7 +1,9 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom';
+import { useAuthContext } from '../../Context/authContext';
 
 const EmployeeSideBar = () => {
+    const {user} = useAuthContext();
   const navLinkStyles =
         'flex items-center gap-3 text-white px-4 py-2 rounded-lg transition-colors duration-200 hover:bg-blue-700';
 
@@ -31,13 +33,13 @@ const EmployeeSideBar = () => {
         </NavLink>
 
         <NavLink 
-            // to={"/aadminPage/complaints"}
+            to={`/userPage/list-complaints/${user._id}`}
             className={({ isActive }) =>
             `${navLinkStyles} ${isActive ? activeLinkStyles : ''}`
             }
         >
             <span>
-                IDK
+                My Complaints
             </span>
         </NavLink>
 

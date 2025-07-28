@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { listComplaintsHook } from '../../utils/ComplaintsHelper';
+import { listComplaintsHook, ListUserComplaintsHook } from '../../utils/ComplaintsHelper';
 import { useAuthContext } from '../../Context/authContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -17,7 +17,7 @@ const ComplaintCard = ({ complaint }) => {
   const navigate = useNavigate();
   return (
     <div 
-      onClick={() => navigate(`/adminPage/complaint/${complaint._id}`)}
+      onClick={() => navigate(`/userPage/complaint/${complaint._id}`)}
       className="bg-white rounded-2xl shadow-md p-6 border border-gray-200 hover:shadow-xl transition duration-200 flex flex-col justify-between">
       <div className="mb-3">
         <h3 className="text-xl font-semibold text-gray-900 mb-1 capitalize">
@@ -39,38 +39,38 @@ const ComplaintCard = ({ complaint }) => {
   );
 };
 
-const ListComplaints = () => {
-  const [complaints, setComplaints] = useState([]);
-  const { user } = useAuthContext();
+const ListUserComplaints = () => {
+    const [complaints, setComplaints] = useState([]);
+    const { user } = useAuthContext();
+  
+    const fetchComplaints = async () => {
+      try {
+        const data = await ListUserComplaintsHook(user._id);
+        setComplaints(data);
+      } catch (error) {
+        console.error('Error fetching complaints:', error);
+      }
+    };
+  
+    useEffect(() => {
+      fetchComplaints();
+    }, []);
+  
+    return (
+      <div className="max-w-6xl mx-auto px-6 py-8">
+        <h1 className="text-3xl font-bold text-center text-blue-900 mb-8">Your Complaints</h1>
+  
+        {complaints?.length === 0 ? (
+          <p className="text-center text-gray-600">No complaints found.</p>
+        ) : (
+          <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {complaints?.map((complaint) => (
+              <ComplaintCard key={complaint._id} complaint={complaint} />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+}
 
-  const fetchComplaints = async () => {
-    try {
-      const data = await listComplaintsHook(user._id);
-      setComplaints(data.complaints);
-    } catch (error) {
-      console.error('Error fetching complaints:', error);
-    }
-  };
-
-  useEffect(() => {
-    fetchComplaints();
-  }, []);
-
-  return (
-    <div className="max-w-6xl mx-auto px-6 py-8">
-      <h1 className="text-3xl font-bold text-center text-blue-900 mb-8">All Complaints</h1>
-
-      {complaints.length === 0 ? (
-        <p className="text-center text-gray-600">No complaints found.</p>
-      ) : (
-        <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {complaints.map((complaint) => (
-            <ComplaintCard key={complaint._id} complaint={complaint} />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default ListComplaints;
+export default ListUserComplaints

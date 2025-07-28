@@ -39,6 +39,7 @@ const createGroup = async (req, res) => {
 
 const addUserToGroup = async (req, res) => {
     try {   
+        console.log("working")
         const { groupId, userId } = req.body;
         const group = await Group.findById({_id: groupId });
         if (!group) {
@@ -58,7 +59,7 @@ const addUserToGroup = async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({success : false ,  message: 'Server error' });
     }
 
 }
@@ -83,7 +84,7 @@ const removeUserFromGroup = async (req, res) => {
 
     }catch (error) {
         console.log(error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({success : false ,  message: 'Server error' });
     }
 }
 
@@ -113,7 +114,7 @@ const getUserGroups = async (req, res) => {
     const groups = await Group.find({ users: id }).populate('users', '-password');
 
     if (groups.length === 0) {
-      return res.status(404).json({ success: false, message: "User is not in any group" });
+      return res.status(200).json({ success: true, groups });
     }
 
     res.status(200).json({ success: true, groups });
