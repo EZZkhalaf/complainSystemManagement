@@ -3,11 +3,137 @@ const { addComplaint, changeComplaintStatus, listComplaints, getComplaintInfo, l
 const { userMiddleware } = require('../middlware/userMiddlware');
 const router = express.Router();
 
+/**
+ * @swagger
+ * tags:
+ *   name: Complaints
+ *   description: Complaints management endpoints
+ */
 
+/**
+ * @swagger
+ * /api/complaints/{id}:
+ *   post:
+ *     summary: Add a complaint for a user
+ *     tags: [Complaints]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               description:
+ *                 type: string
+ *               type:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Complaint created successfully
+ *       400:
+ *         description: Missing fields or invalid data
+ */
 router.post('/:id', userMiddleware,addComplaint);
+
+
+
+/**
+ * @swagger
+ * /api/complaints:
+ *   put:
+ *     summary: Change the status of a complaint (admin only)
+ *     tags: [Complaints]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               complaintId:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *               userId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Complaint status updated
+ *       403:
+ *         description: Only admins can change complaint status
+ *       404:
+ *         description: Complaint not found
+ */
 router.put('/', userMiddleware,changeComplaintStatus);
+
+
+/**
+ * @swagger
+ * /api/complaints/{id}:
+ *   get:
+ *     summary: List complaints for a specific group or entity
+ *     tags: [Complaints]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Group or entity ID
+ *     responses:
+ *       200:
+ *         description: Complaints retrieved
+ */
 router.get('/:id' , userMiddleware,listComplaints)
+
+
+
+/**
+ * @swagger
+ * /api/complaints/info/{id}:
+ *   get:
+ *     summary: Get detailed info of a complaint
+ *     tags: [Complaints]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Complaint ID
+ *     responses:
+ *       200:
+ *         description: Complaint info retrieved
+ *       404:
+ *         description: Complaint not found
+ */
 router.get('/info/:id' , userMiddleware,getComplaintInfo)
+
+
+/**
+ * @swagger
+ * /api/complaints/user/{id}:
+ *   get:
+ *     summary: List complaints made by a user
+ *     tags: [Complaints]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: User complaints retrieved
+ */
 router.get('/user/:id' , userMiddleware,listUserComplaints)
 
 

@@ -86,7 +86,6 @@ const register = async (req, res) => {
 };
 
 
-// controllers/authController.js
 const verifyEmail = async (req, res) => {
   try {
     const { token } = req.query;

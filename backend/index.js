@@ -27,6 +27,10 @@ app.use("/api/user", userRouter);
 app.use("/api/group" , groupRouter)
 app.use("/api/complaints", complaintRouter);
 
+
+const swagger = require('./swagger')
+
+swagger(app)
 app.listen(port , () => {
     console.log('running on port 5000');
 })

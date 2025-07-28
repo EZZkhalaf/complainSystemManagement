@@ -55,7 +55,7 @@ const ListComplaints = () => {
   useEffect(() => {
     fetchComplaints();
   }, []);
-
+// console.log(complaints)
   return (
     <div className="max-w-6xl mx-auto px-6 py-8">
       <h1 className="text-3xl font-bold text-center text-blue-900 mb-8">All Complaints</h1>
@@ -64,7 +64,9 @@ const ListComplaints = () => {
         <p className="text-center text-gray-600">No complaints found.</p>
       ) : (
         <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {complaints.map((complaint) => (
+          {[...complaints]
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // Sort newest first
+          .map((complaint) => (
             <ComplaintCard key={complaint._id} complaint={complaint} />
           ))}
         </div>

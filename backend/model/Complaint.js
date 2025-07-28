@@ -24,7 +24,11 @@ const complaintSchema = new mongoose.Schema({
         type: String,
         enum: ['general', 'technical', 'billing', 'other'],
         default: 'general'
-    }
+    } ,
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
 })
 
 const Complaint = mongoose.model('Complaint', complaintSchema);
