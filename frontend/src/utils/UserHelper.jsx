@@ -129,3 +129,24 @@ export const editUserInfoHook = async(formdata , id )=>{
         throw new Error(error)   
     }
 }
+
+export const getUserByIdHook = async(id) =>{
+    try {
+        const response = await fetch(`http://localhost:5000/api/user/getUser/${id}` , {
+            headers : {
+                "Authorization": `Bearer ${localStorage.getItem('token')}` , 
+            } ,
+        })
+
+        const data =await response.json();
+        if(data.success){
+            return data
+        }else{
+            toast.error(data.message);
+            return
+        }
+    } catch (error) {
+        console.log(error)
+        throw new Error(error)   
+    }
+}

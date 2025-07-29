@@ -303,6 +303,22 @@ const editUserInfo = async(req,res) =>{
     }
 }
 
+
+const getUserById = async(req,res)=>{
+  try {
+    const {id} = req.params ;
+    if(!id) return res.status(400).json({success : false , message : "id need to be provided"})
+
+      const user = await Role.findOne({user:id}).populate("user" , '-password')
+      if(!user) return res.status(404).json({success : false , message : "user not found :("})
+        const groups = await Group.find({users : id})
+        return res.status(200).json({success : true , user , groups})
+  } catch (error) {
+        console.error( error);
+        res.status(500).json({ success : false , message: 'Server error' });
+    }
+}
+
 module.exports = {
     register ,
     login ,
@@ -310,5 +326,6 @@ module.exports = {
     fetchUsers , 
     verifyEmail , 
     getAdminSummary , 
-    editUserInfo
+    editUserInfo , 
+    getUserById
 };
