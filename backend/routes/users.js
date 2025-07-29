@@ -136,6 +136,46 @@ router.post("/add" , addUserToGroup);
 
 
 
-router.get("/getSummary/:id" , userMiddleware , getAdminSummary)
+
+/**
+ * @swagger
+ * /getSummary/{id}:
+ *   get:
+ *     summary: Get system summary for admin
+ *     tags:
+ *       - Users
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID of the admin user
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Summary retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 users:
+ *                   type: integer
+ *                   example: 10
+ *                 groups:
+ *                   type: integer
+ *                   example: 5
+ *                 complaints:
+ *                   type: integer
+ *                   example: 20
+ *       401:
+ *         description: Unauthorized (only admin can access)
+ *       500:
+ *         description: Server error
+ */
+router.get("/getSummary/:id", userMiddleware, getAdminSummary);
 
 module.exports = router;
