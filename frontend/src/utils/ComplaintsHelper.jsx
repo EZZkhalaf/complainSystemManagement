@@ -129,3 +129,29 @@ export const ListUserComplaintsHook = async(id) =>{
         throw new Error(error)
     }
 }
+
+export const deleteComplaintHook = async(complaintId, userId , navigate) =>{
+    try {
+         const response = await fetch(`http://localhost:5000/api/complaints/delete/${userId}` , {
+           method:"DELETE" ,
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem('token')}` , 
+                'Content-Type' : 'application/json'
+            } ,
+             body : JSON.stringify({complaintId})
+        })
+
+        const data= await response.json();
+        
+        if(data.success){
+            toast.success("complaint deleted successfully")
+            navigate(-1)
+        }else {
+            toast.error(data.message)
+            return
+        }
+    } catch (error) {
+        console.log(error)
+        throw new Error(error)
+    }
+}

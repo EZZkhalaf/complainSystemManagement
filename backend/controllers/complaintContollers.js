@@ -165,4 +165,40 @@ const listUserComplaints = async(req,res) =>{
 }
 
 
-module.exports = { addComplaint , changeComplaintStatus , listComplaints , getComplaintInfo , listUserComplaints};
+
+const deleteComplaint = async (req, res) => {
+  try {
+    const { complaintId } = req.body;
+    const { userId } = req.params;
+
+    const complaint = await Complaint.findById(complaintId);
+    if (!complaint) {
+      return res.status(404).json({ success: false, message: "Complaint not found" });
+    }
+
+    const user = await Role.findOne({user : userId}).populate("user", "-password");
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const isOwner = complaint.userId.toString() === user.user._id.toString();
+    const isAdmin = user.role === "admin";
+
+    if (!isOwner && !isAdmin) {
+      return res.status(401).json({
+        success: false,
+        message: "User not authorized to delete this complaint",
+      });
+    }
+
+    await Complaint.findByIdAndDelete(complaintId);
+    return res.status(200).json({ success: true, message: "Complaint deleted successfully" });
+
+  } catch (error) {
+    console.error("Error deleting complaint:", error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+
+module.exports = { addComplaint , changeComplaintStatus , listComplaints , getComplaintInfo , listUserComplaints , deleteComplaint};

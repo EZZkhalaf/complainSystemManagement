@@ -35,6 +35,18 @@ const EmployeeSideBar = () => {
         </NavLink>
 
         <NavLink 
+            to={`/userPage/list-complaints/${user._id}`}
+            className={({ isActive }) =>
+            `${navLinkStyles} ${isActive ? activeLinkStyles : ''}`
+            }
+        >
+            <span>
+                My Complaints
+            </span>
+        </NavLink>
+
+
+        <NavLink 
             to={"/userPage/current-groups"}
             className={({ isActive }) =>
             `${navLinkStyles} ${isActive ? activeLinkStyles : ''}`
@@ -45,16 +57,7 @@ const EmployeeSideBar = () => {
             </span>
         </NavLink>
 
-        <NavLink 
-            to={`/userPage/list-complaints/${user._id}`}
-            className={({ isActive }) =>
-            `${navLinkStyles} ${isActive ? activeLinkStyles : ''}`
-            }
-        >
-            <span>
-                My Complaints
-            </span>
-        </NavLink>
+        
 
 
     </div>

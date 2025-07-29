@@ -1,4 +1,4 @@
-import { changeComplaintStatusHook, getComaplintInfoHook } from '../../utils/ComplaintsHelper';
+import { changeComplaintStatusHook, deleteComplaintHook, getComaplintInfoHook } from '../../utils/ComplaintsHelper';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuthContext } from '../../Context/authContext';
 import { useState,useEffect } from 'react';
@@ -24,17 +24,19 @@ const UserComplaintInfo = () => {
       }
   };
   
-  const changeComaplaintStatus = async(e , value) =>{
-      let complaintId = id 
-      let userId = user._id
-      
-      let status = value
-      
   
-      const data = await changeComplaintStatusHook(complaintId , status , userId)
-      setComplaints(data);
-  }
+
+
+  const handleDeleteComplaint = async () => {
+    if (!window.confirm("Are you sure you want to delete this complaint?")) return;
   
+    
+      await deleteComplaintHook(complaint._id, user._id , navigate);
+      
+    
+  };
+
+
   useEffect(() => {
       fetchComplaints();
   }, []);
@@ -54,12 +56,21 @@ const UserComplaintInfo = () => {
   
     return (
       <div className="max-w-4xl mx-auto p-6">
-          <button
-          onClick={() => navigate(`/userPage/list-complaints/${user._id}`)}
-          className="inline-flex items-center gap-2 px-4 py-2 mb-6 text-sm font-medium text-blue-700 bg-blue-100 border border-blue-300 rounded-lg hover:bg-blue-200 hover:text-blue-900 transition"
-          >
-           Back to Complaints
-          </button>
+          <div className="flex justify-between items-center mb-6">
+            <button
+              onClick={() => navigate(`/userPage/list-complaints/${user._id}`)}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-700 bg-blue-100 border border-blue-300 rounded-lg hover:bg-blue-200 hover:text-blue-900 transition"
+            >
+              Back to Complaints
+            </button>
+
+            <button
+              onClick={handleDeleteComplaint}
+              className="px-5 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition"
+            >
+              Delete Complaint
+            </button>
+          </div>
   
         <h1 className="text-3xl font-bold text-blue-800 mb-6">Complaint Details</h1>
   
@@ -86,7 +97,7 @@ const UserComplaintInfo = () => {
   
           <div>
               <span className="block font-medium text-gray-700">Status:</span>
-              {complaint.status === "pending" ? (
+              {/* {complaint.status === "pending" ? (
                   <select
                   className="mt-1 px-3 py-2 border rounded-md text-sm text-gray-800 bg-white"
                   defaultValue={complaint.status}
@@ -100,7 +111,7 @@ const UserComplaintInfo = () => {
                   <option value="resolved">Resolved</option>
                   <option value="rejected">Rejected</option>
                   </select>
-              ) : (
+              ) : ( */}
                   <span
                   className={`inline-block mt-1 px-3 py-1 rounded-full text-sm font-medium ${getStatusStyle(
                       complaint.status
@@ -108,7 +119,7 @@ const UserComplaintInfo = () => {
                   >
                   {complaint.status}
                   </span>
-              )}
+              {/* )} */}
               </div>
         </div>
       </div>

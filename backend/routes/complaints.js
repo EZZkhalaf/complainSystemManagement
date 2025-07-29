@@ -1,5 +1,5 @@
 const express = require('express');
-const { addComplaint, changeComplaintStatus, listComplaints, getComplaintInfo, listUserComplaints } = require('../controllers/complaintContollers');
+const { addComplaint, changeComplaintStatus, listComplaints, getComplaintInfo, listUserComplaints, deleteComplaint } = require('../controllers/complaintContollers');
 const { userMiddleware } = require('../middlware/userMiddlware');
 const router = express.Router();
 
@@ -136,6 +136,54 @@ router.get('/info/:id' , userMiddleware,getComplaintInfo)
  */
 router.get('/user/:id' , userMiddleware,listUserComplaints)
 
+
+/**
+ * @swagger
+ * /delete/{userId}:
+ *   delete:
+ *     summary: Delete a complaint by ID (admin or owner only)
+ *     tags:
+ *       - Complaints
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the user making the request
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               complaintId:
+ *                 type: string
+ *                 description: ID of the complaint to delete
+ *             required:
+ *               - complaintId
+ *     responses:
+ *       200:
+ *         description: Complaint deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       401:
+ *         description: Unauthorized (not complaint owner or admin)
+ *       404:
+ *         description: Complaint or user not found
+ *       500:
+ *         description: Internal server error
+ */
+
+router.delete("/delete/:userId" , deleteComplaint);
 
 
 module.exports = router;

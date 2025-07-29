@@ -86,9 +86,11 @@ const AdminGroupInfo = () => {
       {/* Group Info Card */}
       <div className="bg-white shadow-lg rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-blue-800 mb-1">
-            {group.group.name}
-          </h1>
+          <div className='flex justify-center items-center'>
+            <h1 className="text-2xl sm:text-3xl font-bold text-blue-800 mb-1">
+              {group.group.name}
+            </h1>
+          </div>
           <p className="text-gray-500 text-sm">
             Created at: {new Date(group.group?.createdAt).toLocaleDateString()}
           </p>
