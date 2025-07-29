@@ -23,6 +23,9 @@ import AdminComplainInfo from './Components/AdminComponents/AdminComplainInfo'
 import UserHero from './Components/EmployeeComponent/UserHero'
 import ListUserComplaints from './Components/EmployeeComponent/ListUserComplaints'
 import UserComplaintInfo from './Components/EmployeeComponent/UserComplaintInfo'
+import EditEmployeeProfile from './Components/EmployeeComponent/EditEmployeeProfile'
+import ManageEmployees from './Components/AdminComponents/ManageEmployees'
+import EmployeeInfo from './Components/AdminComponents/EmployeeInfo'
 
 const App = ()=> {
 
@@ -47,7 +50,13 @@ const App = ()=> {
           <Route path="/adminPage/add-group" element = {<AddGroup />}></Route>        
           <Route path="/adminPage/current-group/:id" element = {<AdminGroupInfo />}></Route>        
           <Route path="/adminPage/add-employee/:id" element = {<AddEmployeeToGroup />}></Route>        
-          <Route path="/adminPage/complaint/:id" element = {<AdminComplainInfo />}></Route>        
+          <Route path="/adminPage/complaint/:id" element = {<AdminComplainInfo />}></Route>     
+
+          <Route path="/adminPage/settings" element = {<EditEmployeeProfile />}></Route>   
+
+          <Route path="/adminPage/listEmployees" element = {<ManageEmployees />}></Route>        
+          <Route path="/adminPage/listEmployees/employee/:id" element = {<EmployeeInfo />}></Route>        
+
 
           </Route>
         <Route path='/userPage' element={
@@ -62,7 +71,11 @@ const App = ()=> {
           <Route path="/userPage/list-complaints/:id" element = {<ListUserComplaints />}></Route>        
           <Route path="/userPage/complaint/:id" element = {<UserComplaintInfo />}></Route>        
           <Route path="/userPage/current-groups" element = {<ListUserGroups />}></Route>        
-          <Route path="/userPage/current-group/:id" element = {<UserGroupInfo />}></Route>        
+          <Route path="/userPage/current-group/:id" element = {<UserGroupInfo />}></Route> 
+
+
+
+          <Route path="/userPage/settings" element = {<EditEmployeeProfile />}></Route>        
         </Route>
       </Routes>
       <ToastContainer 

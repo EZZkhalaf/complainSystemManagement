@@ -1,7 +1,8 @@
 const express = require('express');
-const { changeUserRole, fetchUsers, getAdminSummary } = require('../controllers/authControllers');
+const { changeUserRole, fetchUsers, getAdminSummary, editUserInfo } = require('../controllers/authControllers');
 const { userMiddleware } = require('../middlware/userMiddlware');
 const { addUserToGroup } = require('../controllers/groupsControllers');
+const upload = require('../middlware/upload');
 const router = express.Router();
 
 /**
@@ -177,5 +178,10 @@ router.post("/add" , addUserToGroup);
  *         description: Server error
  */
 router.get("/getSummary/:id", userMiddleware, getAdminSummary);
+
+
+
+router.put('/editInfo/:id' , upload.single("profilePicture"),editUserInfo)
+
 
 module.exports = router;

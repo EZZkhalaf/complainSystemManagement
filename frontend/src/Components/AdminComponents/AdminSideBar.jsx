@@ -36,6 +36,16 @@ const AdminSideBar = () => {
       >
         <span>List Groups</span>
       </NavLink>
+
+      <NavLink
+        to="/adminPage/listEmployees"
+        className={({ isActive }) =>
+          `${navLinkStyles} ${isActive ? activeLinkStyles : ''}`
+        }
+      >
+        <span>Manage Employees</span>
+      </NavLink>
+
     </div>
   );
 };

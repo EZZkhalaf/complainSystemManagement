@@ -20,6 +20,7 @@ export const loginHook = async(email,password,navigate,login) =>{
         })
 
         const data = await response.json();
+        console.log(data)
         if(!data.success) {
             toast.error("error in the login ")
             return 
@@ -71,3 +72,6 @@ export const registerHook = async(name , email , password , navigate) =>{
         throw new Error(error)
     }
 }
+
+
+

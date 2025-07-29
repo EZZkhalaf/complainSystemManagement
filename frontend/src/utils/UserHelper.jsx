@@ -101,3 +101,31 @@ export const fetchAdminSummaryHook = async(id) =>{
         throw new Error(error)   
     }
 }
+
+
+export const editUserInfoHook = async(formdata , id )=>{
+    try {
+        const response = await fetch(`http://localhost:5000/api/user/editInfo/${id}` , {
+            method : "PUT",
+            headers : {
+                "Authorization": `Bearer ${localStorage.getItem('token')}` , 
+            } ,
+            body : formdata
+        })
+
+        const data = await response.json();
+        console.log(data)
+        if(data.success){
+            toast.success("updated info successfully")
+            localStorage.setItem("user" , JSON.stringify(data.newUser))
+            return data.newUser
+        }else{
+            toast.error(data.message)
+            return 
+        }
+
+    } catch (error) {
+        console.log(error)
+        throw new Error(error)   
+    }
+}

@@ -15,6 +15,10 @@ const userSchema = new mongo.Schema({
     password: {
         type: String,
         required: true
+    },  
+    profilePicture : {
+        type : String , 
+        default : "" 
     }
 })
 

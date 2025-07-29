@@ -120,9 +120,10 @@ const verifyEmail = async (req, res) => {
 const login = async(req,res) => {
     try {
         const{ email, password } = req.body;
+        
         const user = await User.findOne({ email: email });
         if(!user){
-            return res.status(404).json({ success : false ,error: 'User not found' });
+          return res.status(404).json({ success : false ,error: 'User not found' });
         }
         const isPasswordValid = await bcrypt.compare(password, user.password);
         
@@ -131,10 +132,10 @@ const login = async(req,res) => {
         let tempRole
         tempRole = await Role.findOne({user:user._id})
         if(!tempRole){
-            tempRole = new Role({
-                user : user._id ,
-                role :"user"
-            })
+          tempRole = new Role({
+            user : user._id ,
+            role :"user"
+          })
         }
         
         const token = jwt.sign({_id : user._id , role:tempRole.role}  , process.env.JWT_SECRET, {
@@ -149,12 +150,13 @@ const login = async(req,res) => {
                 _id: user._id,
                 name: user.name,
                 email: user.email,
-                role: tempRole.role
+                role: tempRole.role ,
+                profilePicture : user.profilePicture
             }
         })
         
     } catch (error) {
-        console.warn('login error:', error);
+        console.log('login error:', error);
         return res.status(500).json({success : false ,  message: 'Internal server error' });
   }
 }
@@ -224,14 +226,82 @@ const getAdminSummary = async(req,res)=>{
 }
 
 
-// const changeUserInfo = async(req,res) =>{
-//     try {
-//         const {newName , newPassword } = req.b
-//     }  catch (error) {
-//         console.error( error);
-//         res.status(500).json({ success : false , message: 'Server error' });
-//     }
-// }
+const editUserInfo = async(req,res) =>{
+  try {
+    
+      const {newName , newEmail , oldPassword , newPassword } = req.body ;
+      const {id} = req.params;
+      let imagePath = null;
+      if (req.file) {
+        imagePath = `/uploads/${req.file.filename}`;
+      }
+
+
+      const user = await User.findById(id);
+      if(!user) return res.status(404).json({success : false , message : "user not found "})
+
+      const passwordCorrect = await bcrypt.compare(oldPassword , user.password )
+      if(!passwordCorrect) return res.status(401).json({success : false  , message : "old password is not correct"})
+
+      const newHashPassword = await bcrypt.hash(newPassword , 10);
+      
+
+      //sending verification link to the email 
+      //the verification email route will be complete later 
+      if(newEmail && newEmail !== user.email ){
+        const userEmailExists = await User.findOne({email : newEmail})
+
+        if(userEmailExists) return res.status(400).json({success : false , message : 'email already taken.'})
+
+        const transporter = nodemailer.createTransport({
+          service : 'email' ,
+          auth : {
+            user : process.env.EMAIL_USER ,
+            pass : process.env.EMAIL_PASS
+          }
+        })
+
+        const token = jwt.sign({_id : id , newName , newEmail , newHashPassword }  , process.env.JWT_SECRET, {
+            expiresIn: '1h'
+        });
+
+        const mailOptions = {
+          from : process.env.EMAIL_USER ,
+          to : newEmail ,
+          subject: "Verify your new email",
+          text: `Please verify your email change with this code: ${token}`,
+        }
+
+        await transporter.sendMail(mailOptions);
+
+
+        return res.status(200).json({success : true , message : 'a verification link is sent to the new email '})
+      }
+
+
+      await User.findByIdAndUpdate({_id : id} , {
+        name : newName ,
+        email :newEmail ,
+        password : newHashPassword , 
+        profilePicture : imagePath
+      })
+
+      // console.log(imagePath)
+
+      const newUser = await Role.findOne({user : id}).populate("user" , "-password")
+      return res.status(200).json({success:true ,
+         newUser : {
+                _id: newUser.user._id,
+                name: newUser.user.name,
+                email: newUser.user.email,
+                role: newUser.role ,
+                profilePicture : newUser.user.profilePicture
+            } })
+    } catch (error) {
+        console.error( error);
+        res.status(500).json({ success : false , message: 'Server error' });
+    }
+}
 
 module.exports = {
     register ,
@@ -239,5 +309,6 @@ module.exports = {
     changeUserRole ,
     fetchUsers , 
     verifyEmail , 
-    getAdminSummary
+    getAdminSummary , 
+    editUserInfo
 };
