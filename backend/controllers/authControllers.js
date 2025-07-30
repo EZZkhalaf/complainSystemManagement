@@ -321,6 +321,43 @@ const editUserInfo = async(req,res) =>{
 }
 
 
+const adminEditUserInfo = async(req,res) =>{
+  try {
+    const {id} = req.params ;
+    const {userId , newName , newEmail , newPassword} = req.body ;
+
+    const isAdmin = await Role.findOne({user : id})
+    if(isAdmin.role !== 'admin'){
+      return res.status(401).json({success : false , message : "only the admin or the user can edit info"})
+    }
+
+    const user = await User.findById(userId);
+    if(!user) return res.status(404).json({success : false , message : "user not found"});
+
+    if(!newPassword){
+      await User.findByIdAndUpdate({_id : userId} , {
+        name : newName ,
+        email : newEmail ,
+
+      })
+    }else{
+      const newHashedPassword = await bcrypt.hash(newPassword , 10);
+      await User.findByIdAndUpdate({_id : userId} , {
+        name : newName ,
+        email : newEmail ,
+        password : newHashedPassword
+      })
+    }
+
+    const updatedUser = await User.findById(userId).select('-password')
+    return res.status(200).json({success : true , message:"user updated successfuly" , updatedUser})
+  } catch (error) {
+        console.error( error);
+        res.status(500).json({ success : false , message: 'Server error' });
+    }
+}
+
+
 const verifyEmailUpdate = async (req, res) => {
   try {
     const { token } = req.query;
@@ -377,5 +414,6 @@ module.exports = {
     getAdminSummary , 
     editUserInfo , 
     getUserById ,
-    verifyEmailUpdate
+    verifyEmailUpdate ,
+    adminEditUserInfo
 };
