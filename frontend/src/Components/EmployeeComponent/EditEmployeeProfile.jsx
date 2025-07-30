@@ -14,7 +14,6 @@ const EditEmployeeProfile = () => {
     const [isEditing , setIsEditing] = useState(false)
 
 
-    console.log(user)
 
     const handleSubmit = async(e)=>{
         e.preventDefault();
@@ -24,8 +23,9 @@ const EditEmployeeProfile = () => {
         formData.append("newEmail" , newEmail);
         formData.append("newPassword" , newPassword);
         formData.append("oldPassword" , oldPassword);
-        formData.append("profilePicture", profileImage);
-        // console.log(profileImage)
+        if (profileImage instanceof File) {
+            formData.append("profilePicture", profileImage);
+        }        
         const data = await editUserInfoHook(formData , user._id );
             
     }
@@ -69,6 +69,9 @@ const EditEmployeeProfile = () => {
                             if (file) {
                                 setProfileImage(file);
                                 setPreview(URL.createObjectURL(file));
+                            }else{
+                                setProfileImage(user.profilePicture)
+                                
                             }
                             }}
                             className="hidden"

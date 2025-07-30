@@ -20,9 +20,8 @@ export const loginHook = async(email,password,navigate,login) =>{
         })
 
         const data = await response.json();
-        console.log(data)
         if(!data.success) {
-            toast.error("error in the login ")
+            toast.error(data.message)
             return 
         }
         if(data.success){
@@ -35,7 +34,7 @@ export const loginHook = async(email,password,navigate,login) =>{
                 navigate('/userPage')
             }
         }else{
-            toast.error("error in the server ")
+            toast.error(data.message)
         }
 
     } catch (error) {

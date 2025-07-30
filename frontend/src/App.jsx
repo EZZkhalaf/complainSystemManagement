@@ -26,6 +26,7 @@ import UserComplaintInfo from './Components/EmployeeComponent/UserComplaintInfo'
 import EditEmployeeProfile from './Components/EmployeeComponent/EditEmployeeProfile'
 import ManageEmployees from './Components/AdminComponents/ManageEmployees'
 import EmployeeInfo from './Components/AdminComponents/EmployeeInfo'
+import EmailVerified from './Components/EmailVerified'
 
 const App = ()=> {
 
@@ -37,6 +38,7 @@ const App = ()=> {
         <Route path="/" element = {<Navigate to = "adminPage"/>} ></Route>
         <Route path='/login' element={<SignIn />}/>
         <Route path='/register' element={<SingUp />}/>
+        <Route path='/email-verified' element={<EmailVerified />}/>
         <Route path='/adminPage' element={
           <PrivateRoutes>
             <RoleBasedRoutes requiredRole={[ 'admin']}>

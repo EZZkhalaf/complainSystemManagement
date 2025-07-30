@@ -9,29 +9,32 @@ const EmpCard = ({ emp }) => {
 const {user} = useAuthContext();
 const navigate = useNavigate();
   return (
-    <div >
-        <div 
-        
-        onClick = {() => navigate(`/adminPage/listEmployees/employee/${emp._id}`)}
-        className="bg-white rounded-2xl shadow-md p-6 border border-gray-200 hover:shadow-xl transition duration-200 flex flex-col justify-between items-center">
-        <img 
-            src={emp.profilePicture ? `http://localhost:5000${emp.profilePicture}` : defaultPhoto}
-            alt="Profile"
-            className="w-32 h-32 rounded-full object-cover border-2 border-gray-300 shadow-md"
+    <div>
+      <div
+        onClick={() => navigate(`/adminPage/listEmployees/employee/${emp.user._id}`)}
+        className="bg-white rounded-3xl shadow-md p-6 border border-gray-100 hover:shadow-xl hover:border-blue-200 transition duration-200 flex flex-col justify-between items-center cursor-pointer group"
+      >
+        <img
+          src={emp.user.profilePicture ? `http://localhost:5000${emp.user.profilePicture}` : defaultPhoto}
+          alt="Profile"
+          className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-lg group-hover:scale-105 transition-transform duration-300"
         />
-        <div className="mb-3">
-            <h3 className="text-xl font-semibold text-gray-900 mb-1 capitalize">
-            {emp.name} 
-            </h3>
-            {/* <p className="text-gray-600">{complaint.description}</p> */}
+
+        <div className="mt-4 text-center">
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-800 capitalize">
+            {emp.user.name}
+          </h3>
+          <p className="mt-1 text-sm text-gray-500">{emp.user.email}</p>
         </div>
-            <div>
-                <p>{emp.role}</p>
-            </div>
-        
-        
+
+        <div className="mt-3">
+          <span className="inline-block px-3 py-1 text-sm rounded-full bg-blue-100 text-blue-700 capitalize font-medium">
+            {emp.role}
+          </span>
         </div>
+      </div>
     </div>
+
 
   );
 };
@@ -44,10 +47,17 @@ const ManageEmployees = () => {
 
     const getEmployees = async()=>{
         const data = await fetchUsersHook();
-        console.log(data)
-        setEmployees(data);
-        setFilteredEmployees(data)
+
+        setEmployees(data.filter(emp => (
+          user._id !== emp.user._id
+        )));
+        setFilteredEmployees(data.filter(emp => (
+          user._id !== emp.user._id
+        )))
+        
     }
+
+    console.log(employees)
 
     useEffect(()=>{
         getEmployees();
@@ -57,8 +67,8 @@ const ManageEmployees = () => {
     const lower = search.toLowerCase();
     setFilteredEmployees(
         employees.filter(emp =>
-        emp.name.toLowerCase().includes(lower) ||
-        emp.email.toLowerCase().includes(lower)
+        (emp.user.name.toLowerCase().includes(lower) ||
+        emp.user.email.toLowerCase().includes(lower)) && (user._id !== emp.user._id)
         )
     );
     }, [search]);
@@ -80,7 +90,7 @@ const ManageEmployees = () => {
         <div>
             <div className='grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
         {filteredEmployees.map((emp) => (
-                <EmpCard key={emp._id} emp = {emp}/>
+                <EmpCard key={emp.user._id} emp = {emp}/>
             ))}
             </div>
         </div>

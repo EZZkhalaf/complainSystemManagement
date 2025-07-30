@@ -150,3 +150,28 @@ export const getUserByIdHook = async(id) =>{
         throw new Error(error)   
     }
 }
+
+export const changeUserRoleHook = async(userId , newRole) =>{
+    try {
+
+        console.log("testing")
+        const response = await fetch(`http://localhost:5000/api/user/changeRole` , {
+            method : "POST",
+            headers : {
+                "Authorization": `Bearer ${localStorage.getItem('token')}` , 
+                'Content-Type' : 'application/json'
+            },
+            body : JSON.stringify({
+                userId , 
+                newRole
+            }) 
+        })
+
+        const data =await response.json();
+        console.log(data)
+       return data;
+    } catch (error) {
+        console.log(error)
+        throw new Error(error)   
+    }
+}

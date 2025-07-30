@@ -1,5 +1,5 @@
 const express = require('express');
-const { changeUserRole, fetchUsers, getAdminSummary, editUserInfo, getUserById } = require('../controllers/authControllers');
+const { changeUserRole, fetchUsers, getAdminSummary, editUserInfo, getUserById, verifyEmailUpdate } = require('../controllers/authControllers');
 const { userMiddleware } = require('../middlware/userMiddlware');
 const { addUserToGroup } = require('../controllers/groupsControllers');
 const upload = require('../middlware/upload');
@@ -185,5 +185,5 @@ router.put('/editInfo/:id' , upload.single("profilePicture"),editUserInfo)
 
 router.get('/getUser/:id' , getUserById)
 
-
+router.get('/verify-email' , verifyEmailUpdate)
 module.exports = router;

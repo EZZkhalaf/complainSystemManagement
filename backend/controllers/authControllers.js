@@ -123,11 +123,11 @@ const login = async(req,res) => {
         
         const user = await User.findOne({ email: email });
         if(!user){
-          return res.status(404).json({ success : false ,error: 'User not found' });
+          return res.status(404).json({ success : false ,message: 'User not found' });
         }
         const isPasswordValid = await bcrypt.compare(password, user.password);
         
-        if(!isPasswordValid)return res.status(400).json({success: false, error: 'wrong password' });
+        if(!isPasswordValid)return res.status(400).json({success: false, message: 'wrong password' });
         
         let tempRole
         tempRole = await Role.findOne({user:user._id})
@@ -176,7 +176,7 @@ const changeUserRole = async (req, res) => {
                 role: newRole
             });
             await addUserRole.save();
-            return res.status(201).json({ message: 'User role added successfully', role: addUserRole });
+            return res.status(201).json({ success : true ,message: 'User role added successfully', role: addUserRole });
         }
 
         role.role = newRole;
@@ -193,7 +193,7 @@ const changeUserRole = async (req, res) => {
 
 const fetchUsers = async(req,res) =>{
     try {
-        const users = await User.find();
+        const users = await Role.find().populate("user" , '-password');
         const notAdmins = await Role.find({user : users._id})
         return res.status(200).json({success : true , users})
     } catch (error) {
@@ -249,33 +249,50 @@ const editUserInfo = async(req,res) =>{
       //sending verification link to the email 
       //the verification email route will be complete later 
       if(newEmail && newEmail !== user.email ){
-        const userEmailExists = await User.findOne({email : newEmail})
+            const userEmailExists = await User.findOne({email : newEmail})
+            
+            if(userEmailExists) return res.status(400).json({success : false , message : 'email already taken.'})
+              
+              const transporter = nodemailer.createTransport({
+                host: process.env.EMAIL_HOST,
+                port: process.env.EMAIL_PORT,
+                secure: false, // true if using port 465
+                auth: {
+                  user: process.env.EMAIL_USER,
+                  pass: process.env.EMAIL_PASS,
+                },
+              });
+              
+              let token ;
+              if(req.file){
+                
+                token = jwt.sign({_id : id , newName , newEmail , newHashPassword ,imagePath}  , process.env.JWT_SECRET, {
+                  expiresIn: '1h'
+                });
+              }else{
+                token = jwt.sign({_id : id , newName , newEmail , newHashPassword }  , process.env.JWT_SECRET, {
+                  expiresIn: '1h'
+                });
+              }
+              
+              const verificationLink = `http://localhost:5000/api/user/verify-email?token=${token}`;
 
-        if(userEmailExists) return res.status(400).json({success : false , message : 'email already taken.'})
-
-        const transporter = nodemailer.createTransport({
-          service : 'email' ,
-          auth : {
-            user : process.env.EMAIL_USER ,
-            pass : process.env.EMAIL_PASS
-          }
-        })
-
-        const token = jwt.sign({_id : id , newName , newEmail , newHashPassword }  , process.env.JWT_SECRET, {
-            expiresIn: '1h'
-        });
-
-        const mailOptions = {
-          from : process.env.EMAIL_USER ,
-          to : newEmail ,
-          subject: "Verify your new email",
-          text: `Please verify your email change with this code: ${token}`,
-        }
-
-        await transporter.sendMail(mailOptions);
+              const mailOptions = {
+                from : process.env.EMAIL_USER ,
+                to : newEmail ,
+                subject: 'Verify your email',
+                html: `
+                  <h2>Welcome, ${newName}!</h2>
+                  <p>Please verify your email by clicking the link below:</p>
+                  <a href="${verificationLink}">${verificationLink}</a>
+                  <p>This link will expire in 1 hour.</p>
+                `,
+              }
+              
+              await transporter.sendMail(mailOptions);
 
 
-        return res.status(200).json({success : true , message : 'a verification link is sent to the new email '})
+            return res.status(200).json({success : true , message : 'a verification link is sent to the new email '})
       }
 
 
@@ -304,6 +321,37 @@ const editUserInfo = async(req,res) =>{
 }
 
 
+const verifyEmailUpdate = async (req, res) => {
+  try {
+    const { token } = req.query;
+
+    if (!token) {
+      return res.status(400).json({ success: false, message: 'No token provided' });
+    }
+
+    console.log("Verifying token...");
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const { _id, newName, newEmail, newHashPassword, imagePath } = decoded;
+
+    await User.findByIdAndUpdate(_id, {
+      name: newName,
+      email: newEmail,
+      password: newHashPassword,
+      ...(imagePath && { profilePicture: imagePath })  // only set image if it's provided
+    });
+
+    const redirectUrl = `http://localhost:5173/email-verified?token=${token}`;
+    return res.redirect(redirectUrl);
+
+  } catch (error) {
+    console.error('Verification error:', error.message);
+    return res.status(400).json({ success: false, message: 'Invalid or expired token' });
+  }
+};
+
+
+
 const getUserById = async(req,res)=>{
   try {
     const {id} = req.params ;
@@ -312,7 +360,8 @@ const getUserById = async(req,res)=>{
       const user = await Role.findOne({user:id}).populate("user" , '-password')
       if(!user) return res.status(404).json({success : false , message : "user not found :("})
         const groups = await Group.find({users : id})
-        return res.status(200).json({success : true , user , groups})
+      const complaints = await Complaint.find({userId : id})
+        return res.status(200).json({success : true , user , groups , complaints})
   } catch (error) {
         console.error( error);
         res.status(500).json({ success : false , message: 'Server error' });
@@ -327,5 +376,6 @@ module.exports = {
     verifyEmail , 
     getAdminSummary , 
     editUserInfo , 
-    getUserById
+    getUserById ,
+    verifyEmailUpdate
 };
