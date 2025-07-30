@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import defaultPhoto from '../../assets/defaultPhoto.png';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useScroll } from 'framer-motion';
-import { changeUserRoleHook, getUserByIdHook } from '../../utils/UserHelper';
+import { adminUpdateUserInfoHook, changeUserRoleHook, getUserByIdHook } from '../../utils/UserHelper';
 import { toast } from 'react-toastify';
+import { useAuthContext } from '../../Context/authContext';
 
 
 
@@ -46,9 +47,14 @@ const getStatusStyles = (status) => {
 const EmployeeInfo = () => {
     const {id} = useParams();
     
+    const{user} = useAuthContext();
     const [employee , setEmployee] = useState(null)
     const [groups , setGroups] = useState([])
     const [complaints , setComplaints] = useState([])
+
+
+
+
     const navigate = useNavigate();
 
 
@@ -56,29 +62,49 @@ const EmployeeInfo = () => {
 
     const [editing, setEditing] = useState(false);
     const [selectedRole, setSelectedRole] = useState(employee?.role || 'User');
+    const [editableName, setEditableName] = useState('');
+    const [editableEmail, setEditableEmail] = useState('');
+    const [newPassword, setNewPassword] = useState('');
 
-    const handleRoleChange = async(e) => {
+
+    const handleSaveChanges = async(e) => {
       e.preventDefault();
       let userId = id ;
       let newRole = selectedRole;
       if(employee.role !== selectedRole){
         const data = await changeUserRoleHook(userId , newRole);
-        console.log(data)
-
-
-        if(data.success){
-          
+        if(data.success){         
           setSelectedRole(newRole)
           toast.success(data.message)
-        }else if(!data.success){
-            
-            
+        }else if(!data.success){ 
             toast.info(data.message)
-          }
+        }
       }
+      if(editableEmail !== employee.user.email || editableName !== employee.user.name){
+        let newName = editableName ;
+        let newEmail = editableEmail ;
+        let adminId = user._id ;
+        let userId = id ;
+        const data = await adminUpdateUserInfoHook(adminId , userId , newName , newEmail , newPassword);
+        if(data.success){
+          toast.success(data.message)
+          setEmployee(prev => ({
+            ...prev,
+            user: {
+              ...prev.user,
+              name: newName,
+              email: newEmail
+            }
+          }));
+
+      }else{
+        toast.error(data.message)
+      }
+      }
+
+      setEditing(false);
     };
 
-    console.log(employee)
 
 
     const getUserData = async()=>{
@@ -87,7 +113,8 @@ const EmployeeInfo = () => {
         setGroups(data.groups)
         setComplaints(data.complaints)
         setSelectedRole(data.user.role)
-        
+        setEditableName(data.user.user.name)
+        setEditableEmail(data.user.user.email)        
     }
     useEffect(()=>{
         getUserData()
@@ -99,8 +126,30 @@ const EmployeeInfo = () => {
   }
 }, [employee]);
 
+  console.log(user)
   return (
     <div className="max-w-full mx-auto p-6 sm:p-10 bg-white rounded-3xl shadow-xl  border border-gray-200">
+      <div className="flex justify-end mb-4">
+
+        {user.role === 'admin' && (
+          <button
+            onClick={() => setEditing((prev) => !prev)}
+            className="bg-red-500 text-white px-4 py-1 rounded-lg hover:bg-red-600 transition mr-4"
+          >
+            {editing ? 'Cancel Edit' : 'Edit'}
+          </button>
+
+        )}
+
+        {editing && (
+          <button
+            onClick={handleSaveChanges}
+            className="bg-green-500 text-white px-4 py-1 rounded-lg hover:bg-green-600 transition "
+          >
+            Save Changes
+          </button>
+        )}
+      </div>
       <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
         <img
           src={employee?.user.profilePicture ? `http://localhost:5000${employee.user.profilePicture}` : defaultPhoto}
@@ -108,8 +157,41 @@ const EmployeeInfo = () => {
           className="w-32 h-32 rounded-full object-cover border-2 border-gray-300"
         />
         <div className="text-center sm:text-left">
-          <h2 className="text-2xl font-bold text-blue-800 capitalize">{employee?.user.name || 'Employee Name'}</h2>
-          <p className="text-gray-600 mt-1">{employee?.user.email || 'email@example.com'}</p>
+          {!editing ? (
+              <>
+                <h2 className="text-2xl font-bold text-blue-800 capitalize">{employee?.user.name}</h2>
+                <p className="text-gray-600 mt-1">{employee?.user.email}</p>
+              </>
+            ) : (
+              <div className='flex flex-col'>
+                <input
+                  type="text"
+                  name = "editableName"
+                  id = 'editableName'
+                  className="border rounded-lg px-3 py-1 text-xl font-semibold text-blue-800 capitalize"
+                  value={editableName}
+                  onChange={(e) => setEditableName(e.target.value)}
+                />
+                <input
+                  type="email"
+                  name = "editableEmail"
+                  id = 'editableEmail'
+                  className="border rounded-lg px-3 py-1 mt-2 text-gray-700"
+                  value={editableEmail}
+                  onChange={(e) => setEditableEmail(e.target.value)}
+                />
+
+                <input
+                  type="password"
+                  id = 'newPassword'
+                  placeholder='Change User Password'
+                  className="border rounded-lg px-3 py-1 mt-2 text-gray-700"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+              </div>
+            )}
+
         </div>
       </div>
 
@@ -129,42 +211,16 @@ const EmployeeInfo = () => {
                       onChange={(e)=> setSelectedRole(e.target.value)}
                       className="border rounded px-2 py-1 text-md scroll-auto"
                     >
-                      <option value="admin" >admin</option>
+                      <option value="admin">admin</option>
                       <option value="user">user</option>
                       <option value="moderator">moderator</option>
                     </select>
                   )}
                 </span>
 
-                  {!editing && (
-                      <button
-                        onClick={() => setEditing((prev) => !prev)}
-                        className="text-white bg-gray-400 p-1 rounded-full  text-md  "
-                      >
-                        Edit Role
-                      </button>
-                  )}
-                {editing && (
-                  <div>
-                
-                    <button
-                      onClick={() => setEditing((prev) => !prev)}
-                      className="text-white bg-red-500 p-1 rounded-full  text-sm mr-2"
-                    >
-                      Cancel
-                    </button>
 
-                    <button
-                      onClick={(e) => {
-                        setEditing((prev) => !prev)
-                        handleRoleChange(e);
-                      }}
-                    className="text-white bg-gray-400 p-1 rounded-full  text-sm"
-                    >
-                      Confirm
-                    </button>
-                </div>
-                )}
+                  
+          
 
               </div>
             <div className='flex items-center'>

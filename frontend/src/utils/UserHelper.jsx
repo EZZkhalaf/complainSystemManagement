@@ -175,3 +175,28 @@ export const changeUserRoleHook = async(userId , newRole) =>{
         throw new Error(error)   
     }
 }
+
+export const adminUpdateUserInfoHook = async(adminId , userId , newName , newEmail ,newPassword)=>{
+    try {
+
+        const response = await fetch(`http://localhost:5000/api/user/editInfo/admin/${adminId}` , {
+            method : "PUT",
+            headers : {
+                "Authorization": `Bearer ${localStorage.getItem('token')}` , 
+                'Content-Type' : 'application/json'
+            },
+            body : JSON.stringify({
+                userId ,
+                newName , 
+                newEmail ,
+                newPassword
+            }) 
+        })
+
+        const data =await response.json();
+        return data;
+    } catch (error) {
+        console.log(error)
+        throw new Error(error)   
+    }
+}
