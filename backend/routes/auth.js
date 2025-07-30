@@ -1,5 +1,6 @@
 const express = require('express');
 const {register , login, verifyEmail} = require("../controllers/authControllers.js");
+const { userMiddleware } = require('../middlware/userMiddlware.js');
 const router = express.Router();
 
 /**
@@ -86,6 +87,8 @@ router.get('/verify-email', verifyEmail);
  *         description: Login successful
  */
 router.post('/login',login);
+
+
 
 
 module.exports = router;

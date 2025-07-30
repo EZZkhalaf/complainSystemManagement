@@ -39,7 +39,7 @@ const createGroup = async (req, res) => {
 
 const addUserToGroup = async (req, res) => {
     try {   
-        console.log("working")
+        // console.log("working")
         const { groupId, userId } = req.body;
         const group = await Group.findById({_id: groupId });
         if (!group) {

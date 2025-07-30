@@ -59,12 +59,6 @@ const EmployeeSideBar = () => {
         </NavLink>
 
 
-
-        
-
-        
-
-
     </div>
   )
 }
