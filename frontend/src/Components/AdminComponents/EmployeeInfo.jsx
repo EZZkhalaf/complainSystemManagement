@@ -66,44 +66,139 @@ const EmployeeInfo = () => {
     const [editableEmail, setEditableEmail] = useState('');
     const [newPassword, setNewPassword] = useState('');
 
+    const [editablePermissions, setEditablePermissions] = useState(employee?.permissions || []);
+    const allPermissions = [
+      'viewUsers',
+      'editUsers',
+      'deleteComplaints',
+      'viewGroups',
+      'assignRoles',
+      'removeUsersFromGroups'
+    ];
 
-    const handleSaveChanges = async(e) => {
-      e.preventDefault();
-      let userId = id ;
-      let newRole = selectedRole;
-      if(employee.role !== selectedRole){
-        const data = await changeUserRoleHook(userId , newRole);
-        if(data.success){         
-          setSelectedRole(newRole)
-          toast.success(data.message)
-        }else if(!data.success){ 
-            toast.info(data.message)
+
+    // const handleSaveChanges = async(e) => {
+    //   e.preventDefault();
+    //   const allPermissions = [
+    //   "viewUsers",
+    //   "editUsers",
+    //   "deleteComplaints",
+    //   "viewGroups",
+    //   "assignRoles",
+    //   "removeUsersFromGroups"
+    // ];
+
+    //   const mappedPermissions = {};
+    //   allPermissions.forEach((perm) => {
+    //     mappedPermissions[perm] = editablePermissions.includes(perm);
+    //   });
+    
+
+
+    //   let userId = id ;
+    //   let newRole = selectedRole;
+    //   if(employee.role !== selectedRole){
+    //     const data = await changeUserRoleHook(userId , newRole);
+    //     if(data.success){         
+    //       setSelectedRole(newRole)
+    //       toast.success(data.message)
+    //     }else if(!data.success){ 
+    //         toast.info(data.message)
+    //     }
+    //   }
+    //   if(editableEmail !== employee.user.email || editableName !== employee.user.name || ){
+    //     let newName = editableName ;
+    //     let newEmail = editableEmail ;
+    //     let adminId = user._id ;
+    //     let userId = id ;
+
+    //     const data = await adminUpdateUserInfoHook(adminId , userId , newName , newEmail , newPassword , mappedPermissions);
+    //     if(data.success){
+    //       toast.success(data.message)
+    //       setEmployee(prev => ({
+    //         ...prev,
+    //         user: {
+    //           ...prev.user,
+    //           name: newName,
+    //           email: newEmail
+    //         }
+    //       }));
+
+    //   }else{
+    //     toast.error(data.message)
+    //   }
+    //   }
+
+    //   setEditing(false);
+    // };
+
+
+    const handleSaveChanges = async (e) => {
+  e.preventDefault();
+
+  const allPermissions = [
+    "viewUsers",
+    "editUsers",
+    "deleteComplaints",
+    "viewGroups",
+    "assignRoles",
+    "removeUsersFromGroups"
+  ];
+
+  const mappedPermissions = {};
+  allPermissions.forEach((perm) => {
+    mappedPermissions[perm] = editablePermissions.includes(perm);
+  });
+
+  const userId = id;
+  const newRole = selectedRole;
+
+  if (employee.role !== selectedRole) {
+    const data = await changeUserRoleHook(userId, newRole);
+    if (data.success) {
+      setSelectedRole(newRole);
+      toast.success(data.message);
+    } else {
+      toast.info(data.message);
+    }
+  }
+
+  if (
+    editableEmail !== employee.user.email ||
+    editableName !== employee.user.name ||
+    newPassword.trim() !== ""
+  ) {
+    const newName = editableName;
+    const newEmail = editableEmail;
+    const adminId = user._id;
+
+    const data = await adminUpdateUserInfoHook(
+      adminId,
+      userId,
+      newName,
+      newEmail,
+      newPassword,
+      mappedPermissions
+    );
+
+    if (data.success) {
+      toast.success(data.message);
+      setEmployee((prev) => ({
+        ...prev,
+        user: {
+          ...prev.user,
+          name: newName,
+          email: newEmail
         }
-      }
-      if(editableEmail !== employee.user.email || editableName !== employee.user.name){
-        let newName = editableName ;
-        let newEmail = editableEmail ;
-        let adminId = user._id ;
-        let userId = id ;
-        const data = await adminUpdateUserInfoHook(adminId , userId , newName , newEmail , newPassword);
-        if(data.success){
-          toast.success(data.message)
-          setEmployee(prev => ({
-            ...prev,
-            user: {
-              ...prev.user,
-              name: newName,
-              email: newEmail
-            }
-          }));
+      }));
+    } else {
+      toast.error(data.message);
+    }
+  }
 
-      }else{
-        toast.error(data.message)
-      }
-      }
+  setEditing(false);
+};
 
-      setEditing(false);
-    };
 
 
 
@@ -121,12 +216,19 @@ const EmployeeInfo = () => {
     },[])
 
     useEffect(() => {
-  if (employee?.role) {
-    setSelectedRole(selectedRole); // sync role after data is fetched
-  }
-}, [employee]);
+      if (employee?.role) {
+        setSelectedRole(selectedRole); // sync role after data is fetched
+      }
+      if (employee?.permissions) {
+        const enabledPermissions = Object.keys(employee.permissions).filter(
+          (key) => employee.permissions[key] === true
+        );
+        setEditablePermissions(enabledPermissions);
+      }
+    }, [employee]);
 
-  console.log(user)
+
+
   return (
     <div className="max-w-full mx-auto p-6 sm:p-10 bg-white rounded-3xl shadow-xl  border border-gray-200">
       <div className="flex justify-end mb-4">
@@ -201,28 +303,47 @@ const EmployeeInfo = () => {
           <div className='flex justify-around items-center'>
 
             <div className="flex items-center gap-3">
-                <span className="px-3 capitalize text-xl flex items-center gap-2">
-                  <span className="text-gray-500">Role:</span>
-                  {!editing ? (
-                    <span>{selectedRole}</span>
-                  ) : (
-                    <select
-                      value={selectedRole}
-                      onChange={(e)=> setSelectedRole(e.target.value)}
-                      className="border rounded px-2 py-1 text-md scroll-auto"
-                    >
-                      <option value="admin">admin</option>
-                      <option value="user">user</option>
-                      <option value="moderator">moderator</option>
-                    </select>
-                  )}
-                </span>
+                <span className="px-3 capitalize text-xl flex flex-col gap-2 text-md">
+                    <div className='flex items-center gap-2'>
+                      <span className="text-gray-500">Role:</span>
+                      <select
+                        value={selectedRole}
+                        onChange={(e)=> setSelectedRole(e.target.value)}
+                        className="border rounded px-2 py-1 text-md"
+                      >
+                        <option value="admin">admin</option>
+                        <option value="moderator">moderator</option>
+                        <option value="user">user</option>
+                      </select>
+                    </div>
 
-
-                  
-          
-
+                    
+                  </span>
               </div>
+              {editing && (
+
+              <div className='mt-2'>
+                  <p className='text-gray-500 font-medium mb-1'>Permissions:</p>
+                  <div className='grid grid-cols-2 gap-2'>
+                    {allPermissions.map((perm) => (
+                      <label key={perm} className='flex items-center gap-2 text-sm text-gray-700'>
+                        <input
+                            type="checkbox"
+                            checked={editablePermissions.includes(perm)}
+                            onChange={() => {
+                              setEditablePermissions((prev) =>
+                                prev.includes(perm)
+                                  ? prev.filter((p) => p !== perm)
+                                  : [...prev, perm]
+                              );
+                            }}
+                          />
+                        {perm}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
             <div className='flex items-center'>
               <p className="text-m text-gray-500">Joined :</p>
               <p className="text-gray-700 font-medium ml-2">{employee?.createdAt?.slice(0, 10) || 'N/A'}</p>
@@ -230,6 +351,8 @@ const EmployeeInfo = () => {
           </div>
         </div>
         <h1 className='flex text-xl text-gray-500 '>Groups : </h1>
+
+        {/* groups listing */}
         {groups && groups.length > 0 ? (
             <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
                 {groups.map((g) => (
@@ -254,7 +377,11 @@ const EmployeeInfo = () => {
             <div className="text-center mt-6">
                 <p className="text-gray-600 italic">This user is not in any group at the moment.</p>
             </div>
-            )}
+        )}
+
+
+
+        {/* complaint listing */}
         <h1 className=' flex text-xl text-gray-500'>Complaints : </h1>
         {complaints.length > 0 ? (
           <div className='grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-3'>

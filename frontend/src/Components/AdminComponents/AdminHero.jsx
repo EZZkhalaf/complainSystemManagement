@@ -5,7 +5,7 @@ import { useAuthContext } from '../../Context/authContext';
 
 const AdminHero = () => {
   const { user } = useAuthContext();
-
+  console.log(user)
   const [complaintCount, setComplaintCount] = useState(0);
   const [userCount, setUserCount] = useState(0);
   const [groupsCount, setGroupsCount] = useState(0);
@@ -13,7 +13,6 @@ const AdminHero = () => {
   const fetchSummary = async () => {
     try {
       const data = await fetchAdminSummaryHook(user._id);
-      console.log(data);
       setComplaintCount(data.complaints);
       setUserCount(data.users);
       setGroupsCount(data.groups);

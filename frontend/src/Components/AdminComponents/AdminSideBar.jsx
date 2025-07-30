@@ -1,10 +1,12 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
+import { useAuthContext } from '../../Context/authContext';
 
 const AdminSideBar = () => {
   const navLinkStyles =
     'flex items-center gap-3 text-white px-4 py-2 rounded-lg transition-colors duration-200 hover:bg-blue-700';
 
+    const {user} = useAuthContext();
   const activeLinkStyles = 'bg-blue-700';
 
   return (
@@ -36,6 +38,7 @@ const AdminSideBar = () => {
       >
         <span>List Groups</span>
       </NavLink>
+
 
       <NavLink
         to="/adminPage/listEmployees"

@@ -176,7 +176,7 @@ export const changeUserRoleHook = async(userId , newRole) =>{
     }
 }
 
-export const adminUpdateUserInfoHook = async(adminId , userId , newName , newEmail ,newPassword)=>{
+export const adminUpdateUserInfoHook = async(adminId , userId , newName , newEmail ,newPassword , mappedPermissions)=>{
     try {
 
         const response = await fetch(`http://localhost:5000/api/user/editInfo/admin/${adminId}` , {
@@ -189,7 +189,8 @@ export const adminUpdateUserInfoHook = async(adminId , userId , newName , newEma
                 userId ,
                 newName , 
                 newEmail ,
-                newPassword
+                newPassword ,
+                newPermissions: mappedPermissions
             }) 
         })
 

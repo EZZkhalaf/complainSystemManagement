@@ -19,7 +19,15 @@ const RoleSchema = new mongoose.Schema({
     updatedAt: {
         type: Date,
         default: Date.now
-    }
+    },
+    permissions: {
+    viewUsers: { type: Boolean, default: false },
+    editUsers: { type: Boolean, default: false },
+    deleteComplaints: { type: Boolean, default: false },
+    viewGroups: { type: Boolean, default: false },
+    assignRoles: { type: Boolean, default: false },
+    removeUsersFromGroups: { type: Boolean, default: false }
+  }
 
 })
 

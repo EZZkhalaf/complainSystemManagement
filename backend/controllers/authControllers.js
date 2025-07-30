@@ -38,6 +38,36 @@ const Complaint = require('../model/Complaint.js');
 // };
 
 
+
+const defaultPermissions = {
+            admin: {
+              viewUsers: true,
+              editUsers: true,
+              deleteComplaints: true,
+              viewGroups: true,
+              assignRoles: true,
+              removeUsersFromGroups: true,
+            },
+            moderator: {
+              viewUsers: true,
+              editUsers: true,
+              deleteComplaints: true,
+              viewGroups: true,
+              assignRoles: false,
+              removeUsersFromGroups: true,
+            },
+            user: {
+              viewUsers: false,
+              editUsers: false,
+              deleteComplaints: false,
+              viewGroups: true,
+              assignRoles: false,
+              removeUsersFromGroups: false,
+            }
+          };
+
+
+
 const register = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
@@ -105,7 +135,10 @@ const verifyEmail = async (req, res) => {
     const newUser = new User({ name, email, password });
     await newUser.save();
 
-    const newRole = new Role({ user: newUser._id, role: role || 'user' });
+    const newRole = new Role({ user: newUser._id, 
+      role: role || 'user', 
+      permissions : defaultPermissions[role ||"user"]
+    });
     await newRole.save();
 
     return res.status(201).json({ success: true, message: 'Account verified and created successfully' });
@@ -151,7 +184,8 @@ const login = async(req,res) => {
                 name: user.name,
                 email: user.email,
                 role: tempRole.role ,
-                profilePicture : user.profilePicture
+                profilePicture : user.profilePicture ,
+                permissions : tempRole.permissions
             }
         })
         
@@ -169,20 +203,23 @@ const changeUserRole = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
+
         const role = await Role.findOne({ user: userId });
         if (!role) {
             const addUserRole = new Role({
                 user: userId,
-                role: newRole
+                role: newRole,
+                permissions : defaultPermissions[newRole]
             });
             await addUserRole.save();
             return res.status(201).json({ success : true ,message: 'User role added successfully', role: addUserRole });
         }
 
         role.role = newRole;
+        role.permissions = defaultPermissions[newRole]
         await role.save();
 
-        res.status(200).json({ message: 'User role updated successfully', role });
+        res.status(200).json({ message: 'User role updated successfully', role  });
     }
     catch (error) {
         console.error('Error changing user role:', error);
@@ -321,41 +358,110 @@ const editUserInfo = async(req,res) =>{
 }
 
 
-const adminEditUserInfo = async(req,res) =>{
-  try {
-    const {id} = req.params ;
-    const {userId , newName , newEmail , newPassword} = req.body ;
+// const adminEditUserInfo = async(req,res) =>{
+//   try {
+//     const {id} = req.params ;
+//     const {userId , newName , newEmail , newPassword ,  newPermissions} = req.body ;
 
-    const isAdmin = await Role.findOne({user : id})
-    if(isAdmin.role !== 'admin'){
-      return res.status(401).json({success : false , message : "only the admin or the user can edit info"})
+
+
+
+
+//     const isAdmin = await Role.findOne({user : id})
+//     if(isAdmin.role !== 'admin'){
+//       return res.status(401).json({success : false , message : "only the admin or the user can edit info"})
+//     }
+
+//     const user = await User.findById(userId);
+//     if(!user) return res.status(404).json({success : false , message : "user not found"});
+
+//     if(!newPassword){
+//       await User.findByIdAndUpdate({_id : userId} , {
+//         name : newName ,
+//         email : newEmail ,
+
+//       })
+//     }else{
+//       const newHashedPassword = await bcrypt.hash(newPassword , 10);
+//       await User.findByIdAndUpdate({_id : userId} , {
+//         name : newName ,
+//         email : newEmail ,
+//         password : newHashedPassword
+//       })
+//     }
+
+//     const updatedUser = await User.findById(userId).select('-password')
+//     return res.status(200).json({success : true , message:"user updated successfuly" , updatedUser})
+//   } catch (error) {
+//         console.error( error);
+//         res.status(500).json({ success : false , message: 'Server error' });
+//     }
+// }
+
+
+const adminEditUserInfo = async (req, res) => {
+  try {
+    const { id } = req.params; // the admin performing the action
+    const { userId, newName, newEmail, newPassword, newPermissions } = req.body;
+
+    const isAdmin = await Role.findOne({ user: id });
+    if (!isAdmin || isAdmin.role !== 'admin') {
+      return res.status(401).json({ success: false, message: "Only the admin can edit user info" });
     }
 
     const user = await User.findById(userId);
-    if(!user) return res.status(404).json({success : false , message : "user not found"});
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-    if(!newPassword){
-      await User.findByIdAndUpdate({_id : userId} , {
-        name : newName ,
-        email : newEmail ,
+    // Update user basic info
+    const updatedFields = {
+      name: newName,
+      email: newEmail
+    };
 
-      })
-    }else{
-      const newHashedPassword = await bcrypt.hash(newPassword , 10);
-      await User.findByIdAndUpdate({_id : userId} , {
-        name : newName ,
-        email : newEmail ,
-        password : newHashedPassword
-      })
+    if (newPassword) {
+      const newHashedPassword = await bcrypt.hash(newPassword, 10);
+      updatedFields.password = newHashedPassword;
     }
 
-    const updatedUser = await User.findById(userId).select('-password')
-    return res.status(200).json({success : true , message:"user updated successfuly" , updatedUser})
+    await User.findByIdAndUpdate(userId, updatedFields);
+
+    // Update permissions if provided
+    if (newPermissions) {
+      const roleDoc = await Role.findOne({ user: userId });
+      if (roleDoc) {
+        // Update only valid permissions
+        const validPermissions = [
+          "viewUsers",
+          "editUsers",
+          "deleteComplaints",
+          "viewGroups",
+          "assignRoles",
+          "removeUsersFromGroups"
+        ];
+
+        validPermissions.forEach((perm) => {
+          if (perm in newPermissions) {
+            roleDoc.permissions[perm] = newPermissions[perm];
+          }
+        });
+
+        await roleDoc.save();
+      }
+    }
+
+    const updatedUser = await User.findById(userId).select('-password');
+    return res.status(200).json({
+      success: true,
+      message: "User updated successfully",
+      updatedUser
+    });
+
   } catch (error) {
-        console.error( error);
-        res.status(500).json({ success : false , message: 'Server error' });
-    }
-}
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
 
 
 const verifyEmailUpdate = async (req, res) => {
