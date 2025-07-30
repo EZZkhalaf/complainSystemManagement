@@ -15,9 +15,17 @@ const getStatusStyles = (status) => {
 
 const ComplaintCard = ({ complaint }) => {
   const navigate = useNavigate();
+  const {user} = useAuthContext();
   return (
     <div 
-      onClick={() => navigate(`/adminPage/complaint/${complaint._id}`)}
+      onClick={() => {
+        if(user.role === 'admin'){
+          navigate(`/adminPage/complaint/${complaint._id}`)
+        }else{
+          navigate(`/userPage/complaint/${complaint._id}`)
+
+        }
+    }}
       className="bg-white rounded-2xl shadow-md p-6 border border-gray-200 hover:shadow-xl transition duration-200 flex flex-col justify-between">
       <div className="mb-3">
         <h3 className="text-xl font-semibold text-gray-900 mb-1 capitalize">
@@ -65,6 +73,7 @@ const ListComplaints = () => {
         <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...complaints]
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // Sort newest first
+          .filter((comp => comp.userId._id !== user._id))
           .map((complaint) => (
             <ComplaintCard key={complaint._id} complaint={complaint} />
           ))}

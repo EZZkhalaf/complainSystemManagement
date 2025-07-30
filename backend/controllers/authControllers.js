@@ -67,6 +67,43 @@ const defaultPermissions = {
           };
 
 
+          const defaultPermissions2 = {
+            admin: {
+              viewUsers: true,
+              editUsers: true,
+              deleteUsers: true,
+              viewComplaints: true,
+              manageComplaints: true,
+              assignRoles: true,
+              viewGroups: true,
+              editGroups: true,
+              removeUsersFromGroups: true,
+            },
+            moderator: {
+              viewUsers: true,
+              editUsers: true,
+              deleteUsers: false,  // moderators cannot delete users
+              viewComplaints: true,
+              manageComplaints: true,
+              assignRoles: false, // moderators cannot assign roles
+              viewGroups: true,
+              editGroups: false,  // moderators cannot edit groups
+              removeUsersFromGroups: true,
+            },
+            user: {
+              viewUsers: false,
+              editUsers: false,
+              deleteUsers: false,
+              viewComplaints: true,  // can view own complaints
+              manageComplaints: false,
+              assignRoles: false,
+              viewGroups: true,
+              editGroups: false,
+              removeUsersFromGroups: false,
+            },
+          };
+
+
 
 const register = async (req, res) => {
   try {
@@ -433,11 +470,15 @@ const adminEditUserInfo = async (req, res) => {
         const validPermissions = [
           "viewUsers",
           "editUsers",
-          "deleteComplaints",
-          "viewGroups",
+          "deleteUsers",
+          "viewComplaints",
+          "manageComplaints",
           "assignRoles",
+          "viewGroups",
+          "editGroups",
           "removeUsersFromGroups"
         ];
+
 
         validPermissions.forEach((perm) => {
           if (perm in newPermissions) {

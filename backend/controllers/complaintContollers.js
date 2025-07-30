@@ -118,12 +118,12 @@ const listComplaints = async(req,res)=>{
         const {id} = req.params;
         const isAdmin = await Role.findOne({user : id});
         
-        if(isAdmin.role !== 'admin'){
-            return res.status(400).json({success : false , error : "the user should be an admin to perform this action "})
-        }else if(isAdmin.role === 'admin'){
+        // if(isAdmin.role !== 'admin'){
+        //     return res.status(400).json({success : false , error : "the user should be an admin to perform this action "})
+        // }else if(isAdmin.role === 'admin'){
             const complaints = await Complaint.find().populate("userId" , "-password");
             return res.status(200).json({success : true , complaints})
-        }
+    // }
 
         
     }catch (error) {

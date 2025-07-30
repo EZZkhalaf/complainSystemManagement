@@ -150,7 +150,7 @@ router.get('/user/:id' , userMiddleware , getUserGroups);
  *       200:
  *         description: Groups list retrieved successfully
  */
-router.get('/admin/:id' , userMiddleware , listGroups);
+router.get('/admin/:id' , userMiddleware , checkPermission("viewGroups") , listGroups);
 
 
 module.exports = router;

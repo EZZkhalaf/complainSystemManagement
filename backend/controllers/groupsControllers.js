@@ -3,6 +3,10 @@ const Group = require('../model/Group.js');
 const { find } = require('../model/User.js');
 const User = require('../model/User.js');
 const Role = require('../model/Role.js');
+
+
+
+
 const createGroup = async (req, res) => {
     try {
         const { name, description } = req.body;
@@ -128,10 +132,10 @@ const getUserGroups = async (req, res) => {
 const listGroups = async(req,res)=>{
     try {
         const {id} = req.params;
-        const isAdmin = await Role.findOne({ user: id });
-        if (!isAdmin || isAdmin.role !== 'admin') {
-            return res.status(403).json({ message: 'Only admins can change complaint status' });
-        }
+        // const isAdmin = await Role.findOne({ user: id });
+        // if (!isAdmin || isAdmin.role !== 'admin') {
+        //     return res.status(403).json({ message: 'Only admins can change complaint status' });
+        // }
         const groups = await Group.find().populate("users" , "-password")
         return res.status(200).json({success:true , groups})
     } catch (error) {

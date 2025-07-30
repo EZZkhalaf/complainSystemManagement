@@ -42,7 +42,7 @@ const AdminSideBar = () => {
           </NavLink>
         )}
       
-      {user.permissions.viewUsers &&(
+      {user?.permissions?.viewUsers &&(
         <NavLink
           to="/adminPage/listEmployees"
           className={({ isActive }) =>

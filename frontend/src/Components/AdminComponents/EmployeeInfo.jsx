@@ -67,81 +67,107 @@ const EmployeeInfo = () => {
     const [newPassword, setNewPassword] = useState('');
 
     const [editablePermissions, setEditablePermissions] = useState(employee?.permissions || []);
+
+    const permissionLabels = {
+      viewUsers: "View Users",
+      editUsers: "Edit Users",
+      deleteComplaints: "Delete Complaints",
+      viewGroups: "View Groups",
+      assignRoles: "Assign Roles",
+      removeUsersFromGroups: "Remove Users from Groups",
+      changeComplaintStatus: "Change Complaint Status"
+    };
+
+
+    const permissionsByRole = {
+      user: [], // no permissions for 'user'
+      moderator: [
+        "viewUsers",
+        "deleteComplaints",
+        "viewGroups",
+        "changeComplaintStatus",
+      ],
+      admin: [
+        "viewUsers",
+        "editUsers",
+        "deleteComplaints",
+        "viewGroups",
+        "assignRoles",
+        "removeUsersFromGroups",
+        "changeComplaintStatus"
+      ],
+      };
+
     const allPermissions = [
-      'viewUsers',
-      'editUsers',
-      'deleteComplaints',
-      'viewGroups',
-      'assignRoles',
-      'removeUsersFromGroups'
+      "viewUsers",
+      "editUsers",
+      "deleteComplaints",
+      "viewGroups",
+      "assignRoles",
+      "removeUsersFromGroups" ,
+      "changeComplaintStatus"
     ];
 
-
-
     const handleSaveChanges = async (e) => {
-  e.preventDefault();
+        e.preventDefault();
 
-  const allPermissions = [
-    "viewUsers",
-    "editUsers",
-    "deleteComplaints",
-    "viewGroups",
-    "assignRoles",
-    "removeUsersFromGroups"
-  ];
 
-  const mappedPermissions = {};
-  allPermissions.forEach((perm) => {
-    mappedPermissions[perm] = editablePermissions.includes(perm);
-  });
 
-  const userId = id;
-  const newRole = selectedRole;
 
-  if (employee.role !== selectedRole) {
-    const data = await changeUserRoleHook(userId, newRole);
-    if (data.success) {
-      setSelectedRole(newRole);
-      toast.success(data.message);
-    } else {
-      toast.info(data.message);
-    }
-  }
+        const mappedPermissions = {};
+        allPermissions.forEach((perm) => {
+          mappedPermissions[perm] = editablePermissions.includes(perm);
+        });
 
-  if (
-    editableEmail !== employee.user.email ||
-    editableName !== employee.user.name ||
-    newPassword.trim() !== ""
-  ) {
-    const newName = editableName;
-    const newEmail = editableEmail;
-    const adminId = user._id;
 
-    const data = await adminUpdateUserInfoHook(
-      adminId,
-      userId,
-      newName,
-      newEmail,
-      newPassword,
-      mappedPermissions
-    );
+        const userId = id;
+        const newRole = selectedRole;
 
-    if (data.success) {
-      toast.success(data.message);
-      setEmployee((prev) => ({
-        ...prev,
-        user: {
-          ...prev.user,
-          name: newName,
-          email: newEmail
+        if (employee.role !== selectedRole) {
+          const data = await changeUserRoleHook(userId, newRole);
+          if (data.success) {
+            setSelectedRole(newRole);
+            toast.success(data.message);
+          } else {
+            toast.info(data.message);
+          }
         }
-      }));
-    } else {
-      toast.error(data.message);
-    }
-  }
 
-  setEditing(false);
+        if (
+          editableEmail !== employee.user.email ||
+          editableName !== employee.user.name ||
+          newPassword.trim() !== "" || 
+          JSON.stringify(mappedPermissions) !== JSON.stringify(employee?.permissions)
+        ) {
+          const newName = editableName;
+          const newEmail = editableEmail;
+          const adminId = user._id;
+
+          const data = await adminUpdateUserInfoHook(
+            adminId,
+            userId,
+            newName,
+            newEmail,
+            newPassword,
+            mappedPermissions
+          );
+
+          if (data.success) {
+            toast.success(data.message);
+            setEmployee((prev) => ({
+              ...prev,
+              user: {
+                ...prev.user,
+                name: newName,
+                email: newEmail
+              }
+            }));
+          } else {
+            toast.error(data.message);
+          }
+        }
+
+        setEditing(false);
 };
 
 
@@ -283,22 +309,23 @@ const EmployeeInfo = () => {
                   <div className='mt-2'>
                       <p className='text-gray-500 font-medium mb-1'>Permissions:</p>
                       <div className='grid grid-cols-2 gap-2'>
-                        {allPermissions.map((perm) => (
-                          <label key={perm} className='flex items-center gap-2 text-sm text-gray-700'>
-                            <input
-                                type="checkbox"
-                                checked={editablePermissions.includes(perm)}
-                                onChange={() => {
-                                  setEditablePermissions((prev) =>
-                                    prev.includes(perm)
-                                      ? prev.filter((p) => p !== perm)
-                                      : [...prev, perm]
-                                  );
-                                }}
-                              />
-                            {perm}
-                          </label>
-                        ))}
+                {permissionsByRole[selectedRole].map((perm) => (
+                    <label key={perm} className='flex items-center gap-2 text-sm text-gray-700'>
+                      <input
+                        type="checkbox"
+                        checked={editablePermissions.includes(perm)}
+                        onChange={() => {
+                          setEditablePermissions((prev) =>
+                            prev.includes(perm)
+                              ? prev.filter((p) => p !== perm)
+                              : [...prev, perm]
+                          );
+                        }}
+                      />
+                      {permissionLabels[perm] || perm}
+                    </label>
+                  ))}
+
                       </div>
                     </div>
                 )}

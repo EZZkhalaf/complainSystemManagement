@@ -21,13 +21,14 @@ const RoleSchema = new mongoose.Schema({
         default: Date.now
     },
     permissions: {
-    viewUsers: { type: Boolean, default: false },
-    editUsers: { type: Boolean, default: false },
-    deleteComplaints: { type: Boolean, default: false },
-    viewGroups: { type: Boolean, default: false },
-    assignRoles: { type: Boolean, default: false },
-    removeUsersFromGroups: { type: Boolean, default: false }
-  }
+        viewUsers: { type: Boolean, default: false },
+        editUsers: { type: Boolean, default: false },
+        deleteComplaints: { type: Boolean, default: false },
+        viewGroups: { type: Boolean, default: false },
+        assignRoles: { type: Boolean, default: false },
+        removeUsersFromGroups: { type: Boolean, default: false },
+        changeComplaintStatus : {type:Boolean , default : false}
+    }
 
 })
 

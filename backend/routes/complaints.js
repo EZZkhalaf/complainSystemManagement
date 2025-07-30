@@ -72,7 +72,7 @@ router.post('/:id', userMiddleware,addComplaint);
  *       404:
  *         description: Complaint not found
  */
-router.put('/', userMiddleware,changeComplaintStatus);
+router.put('/', userMiddleware, checkPermission("changeComplaintStatus"), changeComplaintStatus);
 
 
 /**
