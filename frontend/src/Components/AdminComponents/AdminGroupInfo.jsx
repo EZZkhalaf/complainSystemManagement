@@ -3,12 +3,13 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { getGroupInfoHook } from '../../utils/GroupsHelper';
 import { removeUserFromGroupHook } from '../../utils/UserHelper';
 import { OrbitProgress } from 'react-loading-indicators';
+import { useAuthContext } from '../../Context/authContext';
 
 const AdminGroupInfo = () => {
   const [group, setGroup] = useState(null);
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null);
-
+  const {user} = useAuthContext()
 
 
   const [currentPage , setCurrentPage] = useState(1);
@@ -38,6 +39,7 @@ const AdminGroupInfo = () => {
     }
   };
   // console.log(group)
+
 
   const removeUserFromGroup = async (e, userId) => {
     e.preventDefault();
@@ -69,9 +71,12 @@ const AdminGroupInfo = () => {
 };
 
 
+
   useEffect(() => {
     fetchGroup();
+    
   }, [id ]);
+  console.log(group)
 
   if(loading) return(
             <div className="max-w-md mx-auto p-8 bg-gradient-to-br space-y-6 flex justify-center items-center">
@@ -80,6 +85,7 @@ const AdminGroupInfo = () => {
     )
   if (error) return <div className="text-center mt-10 text-red-500">{error}</div>;
   if (!group) return null; 
+
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
@@ -115,17 +121,18 @@ const AdminGroupInfo = () => {
           <div className="text-gray-500 italic">No users yet in this group.</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {group.group.users?.map(user => (
+            {group?.group?.users.map(user1 => (
               <div
-                key={user._id}
+                key={user1._id}
+                onClick={() => navigate(`/${user?.role === 'admin' ? 'adminPage' : 'userPage'}/listEmployees/employee/${user1._id}`)}
                 className="bg-white border rounded-xl p-4 shadow-sm hover:shadow-md transition-all flex items-center justify-between"
               >
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-800">{user.name}</h3>
-                  <p className="text-gray-600 text-sm">{user.email}</p>
+                  <h3 className="text-lg font-semibold text-gray-800">{user1.name}</h3>
+                  <p className="text-gray-600 text-sm">{user1.email}</p>
                 </div>
 
-                {user.permissions.removeUsersFromGroups && (
+                {user?.permissions?.removeUsersFromGroups && (
                   <button 
                     onClick={(e) => {
                       removeUserFromGroup(e , user._id)

@@ -93,7 +93,11 @@ const App = ()=> {
             <Route path="/userPage/listEmployees" element = {<ManageEmployees />}></Route> 
           )}
 
-          <Route path="/userPage/settings" element = {<EditEmployeeProfile />}></Route>        
+          <Route path="/userPage/settings" element = {<EditEmployeeProfile />}></Route>  
+
+         
+          <Route path="/userPage/listEmployees/employee/:id" element = {<EmployeeInfo />}></Route>        
+      
         </Route>
       </Routes>
       <ToastContainer 

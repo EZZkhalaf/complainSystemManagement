@@ -31,9 +31,9 @@ const AddEmployeeToGroup = () => {
   useEffect(() => {
     const lower = search.toLowerCase();
     setFilteredEmployees(
-      employees.filter(emp =>
-        emp.name.toLowerCase().includes(lower) ||
-        emp.email.toLowerCase().includes(lower)
+      employees?.filter(emp =>
+        emp?.user.name.toLowerCase().includes(lower) ||
+        emp?.user.email.toLowerCase().includes(lower)
       )
     );
   }, [search, employees]);
@@ -78,13 +78,13 @@ const AddEmployeeToGroup = () => {
               }`}
             >
               <div>
-                <p className="font-semibold text-gray-800">{emp.name}</p>
-                <p className="text-sm text-gray-500">{emp.email}</p>
+                <p className="font-semibold text-gray-800">{emp.user.name}</p>
+                <p className="text-sm text-gray-500">{emp.user.email}</p>
               </div>
               <input
                 type="radio"
-                checked={selectedEmployee === emp._id}
-                onChange={() => setSelectedEmployee(emp._id)}
+                checked={selectedEmployee === emp.user._id}
+                onChange={() => setSelectedEmployee(emp.user._id)}
                 className="w-5 h-5 text-blue-600"
               />
             </div>
