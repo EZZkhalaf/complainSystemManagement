@@ -21,6 +21,7 @@ const AdminSideBar = () => {
         <span>Summary</span>
       </NavLink>
 
+
       <NavLink
         to="/adminPage/complaints"
         className={({ isActive }) =>
@@ -30,24 +31,27 @@ const AdminSideBar = () => {
         <span>List Complaints</span>
       </NavLink>
 
-      <NavLink
-        to="/adminPage/groups"
-        className={({ isActive }) =>
-          `${navLinkStyles} ${isActive ? activeLinkStyles : ''}`
-        }
-      >
-        <span>List Groups</span>
-      </NavLink>
-
-
-      <NavLink
-        to="/adminPage/listEmployees"
-        className={({ isActive }) =>
-          `${navLinkStyles} ${isActive ? activeLinkStyles : ''}`
-        }
-      >
-        <span>Manage Employees</span>
-      </NavLink>
+        {user.permissions.viewGroups &&(
+          <NavLink
+            to="/adminPage/groups"
+            className={({ isActive }) =>
+              `${navLinkStyles} ${isActive ? activeLinkStyles : ''}`
+            }
+          >
+            <span>List Groups</span>
+          </NavLink>
+        )}
+      
+      {user.permissions.viewUsers &&(
+        <NavLink
+          to="/adminPage/listEmployees"
+          className={({ isActive }) =>
+            `${navLinkStyles} ${isActive ? activeLinkStyles : ''}`
+          }
+        >
+          <span>Manage Employees</span>
+        </NavLink>
+      )}
 
     </div>
   );

@@ -1,8 +1,9 @@
 const express = require('express');
 const { changeUserRole, fetchUsers, getAdminSummary, editUserInfo, getUserById, verifyEmailUpdate, adminEditUserInfo } = require('../controllers/authControllers');
-const { userMiddleware } = require('../middlware/userMiddlware');
+const  userMiddleware  = require('../middlware/userMiddlware');
 const { addUserToGroup } = require('../controllers/groupsControllers');
 const upload = require('../middlware/upload');
+const checkPermission = require('../middlware/checkPermission');
 const router = express.Router();
 
 /**
@@ -133,7 +134,7 @@ router.get("/" , userMiddleware,fetchUsers);
  *       500:
  *         description: Server error
  */
-router.post("/add" , addUserToGroup);
+router.post("/add" , userMiddleware ,addUserToGroup);
 
 
 
@@ -184,7 +185,7 @@ router.get("/getSummary/:id", userMiddleware, getAdminSummary);
 router.put('/editInfo/:id' , upload.single("profilePicture"),editUserInfo)
 
 
-router.put('/editInfo/admin/:id' , adminEditUserInfo)
+router.put('/editInfo/admin/:id' ,userMiddleware , checkPermission("editUsers") , adminEditUserInfo)
 
 router.get('/getUser/:id' , getUserById)
 

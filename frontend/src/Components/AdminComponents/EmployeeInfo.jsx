@@ -77,61 +77,6 @@ const EmployeeInfo = () => {
     ];
 
 
-    // const handleSaveChanges = async(e) => {
-    //   e.preventDefault();
-    //   const allPermissions = [
-    //   "viewUsers",
-    //   "editUsers",
-    //   "deleteComplaints",
-    //   "viewGroups",
-    //   "assignRoles",
-    //   "removeUsersFromGroups"
-    // ];
-
-    //   const mappedPermissions = {};
-    //   allPermissions.forEach((perm) => {
-    //     mappedPermissions[perm] = editablePermissions.includes(perm);
-    //   });
-    
-
-
-    //   let userId = id ;
-    //   let newRole = selectedRole;
-    //   if(employee.role !== selectedRole){
-    //     const data = await changeUserRoleHook(userId , newRole);
-    //     if(data.success){         
-    //       setSelectedRole(newRole)
-    //       toast.success(data.message)
-    //     }else if(!data.success){ 
-    //         toast.info(data.message)
-    //     }
-    //   }
-    //   if(editableEmail !== employee.user.email || editableName !== employee.user.name || ){
-    //     let newName = editableName ;
-    //     let newEmail = editableEmail ;
-    //     let adminId = user._id ;
-    //     let userId = id ;
-
-    //     const data = await adminUpdateUserInfoHook(adminId , userId , newName , newEmail , newPassword , mappedPermissions);
-    //     if(data.success){
-    //       toast.success(data.message)
-    //       setEmployee(prev => ({
-    //         ...prev,
-    //         user: {
-    //           ...prev.user,
-    //           name: newName,
-    //           email: newEmail
-    //         }
-    //       }));
-
-    //   }else{
-    //     toast.error(data.message)
-    //   }
-    //   }
-
-    //   setEditing(false);
-    // };
-
 
     const handleSaveChanges = async (e) => {
   e.preventDefault();
@@ -234,13 +179,16 @@ const EmployeeInfo = () => {
       <div className="flex justify-end mb-4">
 
         {user.role === 'admin' && (
-          <button
-            onClick={() => setEditing((prev) => !prev)}
-            className="bg-red-500 text-white px-4 py-1 rounded-lg hover:bg-red-600 transition mr-4"
-          >
-            {editing ? 'Cancel Edit' : 'Edit'}
-          </button>
-
+          <div>
+              {user.permissions.editUsers && (
+                <button
+                  onClick={() => setEditing((prev) => !prev)}
+                  className="bg-red-500 text-white px-4 py-1 rounded-lg hover:bg-red-600 transition mr-4"
+                >
+                  {editing ? 'Cancel Edit' : 'Edit'}
+                </button>
+              )}
+          </div>
         )}
 
         {editing && (
@@ -306,6 +254,8 @@ const EmployeeInfo = () => {
                 <span className="px-3 capitalize text-xl flex flex-col gap-2 text-md">
                     <div className='flex items-center gap-2'>
                       <span className="text-gray-500">Role:</span>
+
+                    {editing ? (
                       <select
                         value={selectedRole}
                         onChange={(e)=> setSelectedRole(e.target.value)}
@@ -315,34 +265,46 @@ const EmployeeInfo = () => {
                         <option value="moderator">moderator</option>
                         <option value="user">user</option>
                       </select>
+
+                    ):(
+                      <p>{selectedRole}</p>
+                    )}
+
+
+
                     </div>
 
                     
                   </span>
               </div>
               {editing && (
-
-              <div className='mt-2'>
-                  <p className='text-gray-500 font-medium mb-1'>Permissions:</p>
-                  <div className='grid grid-cols-2 gap-2'>
-                    {allPermissions.map((perm) => (
-                      <label key={perm} className='flex items-center gap-2 text-sm text-gray-700'>
-                        <input
-                            type="checkbox"
-                            checked={editablePermissions.includes(perm)}
-                            onChange={() => {
-                              setEditablePermissions((prev) =>
-                                prev.includes(perm)
-                                  ? prev.filter((p) => p !== perm)
-                                  : [...prev, perm]
-                              );
-                            }}
-                          />
-                        {perm}
-                      </label>
-                    ))}
-                  </div>
+                <div>
+                {user.permissions.assignRoles && (
+                  <div className='mt-2'>
+                      <p className='text-gray-500 font-medium mb-1'>Permissions:</p>
+                      <div className='grid grid-cols-2 gap-2'>
+                        {allPermissions.map((perm) => (
+                          <label key={perm} className='flex items-center gap-2 text-sm text-gray-700'>
+                            <input
+                                type="checkbox"
+                                checked={editablePermissions.includes(perm)}
+                                onChange={() => {
+                                  setEditablePermissions((prev) =>
+                                    prev.includes(perm)
+                                      ? prev.filter((p) => p !== perm)
+                                      : [...prev, perm]
+                                  );
+                                }}
+                              />
+                            {perm}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                )}
                 </div>
+
+
               )}
             <div className='flex items-center'>
               <p className="text-m text-gray-500">Joined :</p>

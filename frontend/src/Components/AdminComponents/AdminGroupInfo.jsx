@@ -95,6 +95,8 @@ const AdminGroupInfo = () => {
             Created at: {new Date(group.group?.createdAt).toLocaleDateString()}
           </p>
         </div>
+
+        
         <button
           onClick={() => navigate(`/adminPage/add-employee/${id}`)}
           className="bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2 rounded-lg shadow transition-all"
@@ -122,13 +124,16 @@ const AdminGroupInfo = () => {
                   <h3 className="text-lg font-semibold text-gray-800">{user.name}</h3>
                   <p className="text-gray-600 text-sm">{user.email}</p>
                 </div>
-                <button 
-                  onClick={(e) => {
-                    removeUserFromGroup(e , user._id)
-                  }}
-                  className="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-md shadow-sm transition-colors">
-                  Remove
-                </button>
+
+                {user.permissions.removeUsersFromGroups && (
+                  <button 
+                    onClick={(e) => {
+                      removeUserFromGroup(e , user._id)
+                    }}
+                    className="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-md shadow-sm transition-colors">
+                    Remove
+                  </button>
+                )}
               </div>
             ))}
           </div>

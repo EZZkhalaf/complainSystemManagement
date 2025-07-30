@@ -1,7 +1,8 @@
 const express = require('express');
-const { userMiddleware } = require('../middlware/userMiddlware');
+const  userMiddleware  = require('../middlware/userMiddlware');
 const { createGroup , addUserToGroup, removeUserFromGroup, groupInfoAndUsers, listGroups, getUserGroups } = require('../controllers/groupsControllers');
 const { model } = require('mongoose');
+const checkPermission = require('../middlware/checkPermission');
 
 const router = express.Router();    
 
@@ -81,7 +82,7 @@ router.post('/:userId' , userMiddleware, createGroup);
  *         description: Invalid request
  */
 
-router.delete('/removeUser' , userMiddleware, removeUserFromGroup)
+router.delete('/removeUser' , userMiddleware,checkPermission("removeUsersFromGroups"), removeUserFromGroup)
 
 
 /**

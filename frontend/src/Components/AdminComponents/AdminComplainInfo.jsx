@@ -5,7 +5,7 @@ import { useAuthContext } from '../../Context/authContext';
 import { OrbitProgress } from 'react-loading-indicators';
 
 const AdminComplainInfo = () => {
-   const [complaint, setComplaints] = useState([]);
+  const [complaint, setComplaints] = useState([]);
   const [loading, setLoading] = useState(false);
   const [newStatus , setNewStatus] = useState("");
   const {id} = useParams();
@@ -76,12 +76,17 @@ return (
         Back to Complaints
       </button>
 
-      <button
-        onClick={handleDeleteComplaint}
-        className="px-5 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition"
-      >
-        Delete Complaint
-      </button>
+
+      {user.permissions.deleteComplaints && (
+        <button
+          onClick={handleDeleteComplaint}
+          className="px-5 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition"
+        >
+          Delete Complaint
+        </button>
+      )}
+
+
     </div>
 
     <h1 className="text-3xl font-bold text-blue-800 mb-6">Complaint Details</h1>
@@ -89,7 +94,10 @@ return (
     <div className="bg-white p-6 rounded-xl shadow-md space-y-4">
       <div>
         <span className="block font-medium text-gray-700">User:</span>
-        <span className="text-gray-900">{complaint.userId?.name || 'Unknown'}</span>
+        <div 
+         onClick={()=>navigate(`/adminPage/listEmployees/employee/${complaint?.userId?._id}`)}>
+        <span className="text-gray-900 bg-gray-400 p-1 rounded-full hover:bg-gray-600 hover:text-white ">{complaint.userId?.name || 'Unknown'}</span>
+        </div>
       </div>
 
       <div>

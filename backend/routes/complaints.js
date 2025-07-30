@@ -1,6 +1,7 @@
 const express = require('express');
 const { addComplaint, changeComplaintStatus, listComplaints, getComplaintInfo, listUserComplaints, deleteComplaint } = require('../controllers/complaintContollers');
-const { userMiddleware } = require('../middlware/userMiddlware');
+const  userMiddleware = require('../middlware/userMiddlware');
+const checkPermission = require('../middlware/checkPermission');
 const router = express.Router();
 
 /**
@@ -183,7 +184,7 @@ router.get('/user/:id' , userMiddleware,listUserComplaints)
  *         description: Internal server error
  */
 
-router.delete("/delete/:userId" , deleteComplaint);
+router.delete("/delete/:userId" , userMiddleware ,checkPermission("deleteComplaints"),deleteComplaint);
 
 
 module.exports = router;
