@@ -68,7 +68,7 @@ const UserComplaintInfo = () => {
               onClick={handleDeleteComplaint}
               className="px-5 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition"
             >
-              Delete Complaint
+              Delete Complaints
             </button>
           </div>
   

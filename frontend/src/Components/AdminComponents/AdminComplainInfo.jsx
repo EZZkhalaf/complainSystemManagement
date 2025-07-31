@@ -3,6 +3,7 @@ import { changeComplaintStatusHook, deleteComplaintHook, getComaplintInfoHook } 
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuthContext } from '../../Context/authContext';
 import { OrbitProgress } from 'react-loading-indicators';
+import { toast } from 'react-toastify';
 
 const AdminComplainInfo = () => {
   const [complaint, setComplaints] = useState([]);
@@ -30,6 +31,11 @@ const changeComaplaintStatus = async(e , value) =>{
     let userId = user._id
     
     let status = value
+
+    if(!user.permissions.changeComplaintStatus){
+      toast.error("permission denied .")
+      return null;
+    }
     
 
     const data = await changeComplaintStatusHook(complaintId , status , userId)
@@ -38,12 +44,8 @@ const changeComaplaintStatus = async(e , value) =>{
 
 
 const handleDeleteComplaint = async () => {
-  if (!window.confirm("Are you sure you want to delete this complaint?")) return;
-
-  
-    await deleteComplaintHook(complaint._id, user._id , navigate);
-    
-  
+  if (!window.confirm("Are you sure you want to delete this complaint?")) return; 
+  await deleteComplaintHook(complaint._id, user._id , navigate);
 };
 
 useEffect(() => {
@@ -65,12 +67,11 @@ useEffect(() => {
       default: return '';
     }
   };
-//   console.log(newStatus)
 return (
   <div className="max-w-4xl mx-auto p-6">
     <div className="flex justify-between items-center mb-6">
       <button
-        onClick={() => navigate("/adminPage/complaints")}
+        onClick={() => navigate(`/${user.role === 'admin' ? "adminpage" : "userPage"}/complaints`)}
         className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-700 bg-blue-100 border border-blue-300 rounded-lg hover:bg-blue-200 hover:text-blue-900 transition"
       >
         Back to Complaints
@@ -94,10 +95,10 @@ return (
     <div className="bg-white p-6 rounded-xl shadow-md space-y-4">
       <div>
         <span className="block font-medium text-gray-700">User:</span>
-        <div 
-         onClick={()=>navigate(`/adminPage/listEmployees/employee/${complaint?.userId?._id}`)}>
-        <span className="text-gray-900 bg-gray-400 p-1 rounded-full hover:bg-gray-600 hover:text-white ">{complaint.userId?.name || 'Unknown'}</span>
-        </div>
+          <div 
+          onClick={()=>navigate(`/${user.role === 'admin' ? "adminPage" : "userPage" }/listEmployees/employee/${complaint?.userId?._id}`)}>
+          <span className="text-gray-900 bg-gray-400 p-1 rounded-full hover:bg-gray-600 hover:text-white ">{complaint.userId?.name || 'Unknown'}</span>
+          </div>
       </div>
 
       <div>

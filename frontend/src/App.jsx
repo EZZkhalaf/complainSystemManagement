@@ -83,20 +83,22 @@ const App = ()=> {
           
           {(user?.permissions?.deleteComplaints || user?.permissions?.changeComplaintStatus) && (
             <>
-            <Route path="/userPage/complaints" element = {<ListComplaints />}></Route>
-            <Route path="/userPage/complaint/:id" element = {<AdminComplainInfo />}></Route>     
+              <Route path="/userPage/complaints" element = {<ListComplaints />}></Route>
+              <Route path="/userPage/otherComplaint/:id" element = {<AdminComplainInfo />}></Route>     
             </>
             
           )}
 
           {user?.permissions?.viewUsers && (
-            <Route path="/userPage/listEmployees" element = {<ManageEmployees />}></Route> 
+            <>
+              <Route path="/userPage/listEmployees" element = {<ManageEmployees />}></Route> 
+              <Route path="/userPage/listEmployees/employee/:id" element = {<EmployeeInfo />}></Route>        
+            </>
           )}
 
           <Route path="/userPage/settings" element = {<EditEmployeeProfile />}></Route>  
 
          
-          <Route path="/userPage/listEmployees/employee/:id" element = {<EmployeeInfo />}></Route>        
       
         </Route>
       </Routes>

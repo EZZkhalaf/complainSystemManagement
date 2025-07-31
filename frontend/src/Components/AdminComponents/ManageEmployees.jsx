@@ -11,7 +11,8 @@ const navigate = useNavigate();
   return (
     <div>
       <div
-        onClick={() => navigate(`/adminPage/listEmployees/employee/${emp.user._id}`)}
+        // onClick={() => navigate(`/adminPage/listEmployees/employee/${emp.user._id}`)}
+        onClick={() => navigate(`/${user.role === 'admin' ? "adminPage" : "userPage"}/listEmployees/employee/${emp.user._id}`)}
         className="bg-white rounded-3xl shadow-md p-6 border border-gray-100 hover:shadow-xl hover:border-blue-200 transition duration-200 flex flex-col justify-between items-center cursor-pointer group"
       >
         <img

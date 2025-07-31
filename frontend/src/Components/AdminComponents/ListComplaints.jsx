@@ -22,7 +22,7 @@ const ComplaintCard = ({ complaint }) => {
         if(user.role === 'admin'){
           navigate(`/adminPage/complaint/${complaint._id}`)
         }else{
-          navigate(`/userPage/complaint/${complaint._id}`)
+          navigate(`/userPage/otherComplaint/${complaint._id}`)
 
         }
     }}
@@ -46,6 +46,7 @@ const ComplaintCard = ({ complaint }) => {
     </div>
   );
 };
+
 
 const ListComplaints = () => {
   const [complaints, setComplaints] = useState([]);
