@@ -27,6 +27,7 @@ export const listGroupsHook = async(id) =>{
         }
       });
       const data = await res.json();
+      console.log(data)
       if (data.success) {
         return data.groups
       } else {
@@ -75,7 +76,7 @@ export const getGroupInfoHook = async(groupId)=>{
         } 
       });
       const data = await res.json();
-    //   console.log(data)
+      // console.log(data)
       if (data.success) {
         return data
       } else {

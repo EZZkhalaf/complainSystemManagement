@@ -67,47 +67,47 @@ const defaultPermissions = {
           };
 
 
-          const defaultPermissions2 = {
-            admin: {
-              viewUsers: true,
-              editUsers: true,
-              deleteUsers: true,
-              viewComplaints: true,
-              manageComplaints: true,
-              assignRoles: true,
-              viewGroups: true,
-              editGroups: true,
-              removeUsersFromGroups: true,
-            },
-            moderator: {
-              viewUsers: true,
-              editUsers: true,
-              deleteUsers: false,  // moderators cannot delete users
-              viewComplaints: true,
-              manageComplaints: true,
-              assignRoles: false, // moderators cannot assign roles
-              viewGroups: true,
-              editGroups: false,  // moderators cannot edit groups
-              removeUsersFromGroups: true,
-            },
-            user: {
-              viewUsers: false,
-              editUsers: false,
-              deleteUsers: false,
-              viewComplaints: true,  // can view own complaints
-              manageComplaints: false,
-              assignRoles: false,
-              viewGroups: true,
-              editGroups: false,
-              removeUsersFromGroups: false,
-            },
-          };
+const defaultPermissions2 = {
+  admin: {
+    viewUsers: true,
+    editUsers: true,
+    deleteUsers: true,
+    viewComplaints: true,
+    manageComplaints: true,
+    assignRoles: true,
+    viewGroups: true,
+    editGroups: true,
+    removeUsersFromGroups: true,
+  },
+  moderator: {
+    viewUsers: true,
+    editUsers: true,
+    deleteUsers: false,  // moderators cannot delete users
+    viewComplaints: true,
+    manageComplaints: true,
+    assignRoles: false, // moderators cannot assign roles
+    viewGroups: true,
+    editGroups: false,  // moderators cannot edit groups
+    removeUsersFromGroups: true,
+  },
+  user: {
+    viewUsers: false,
+    editUsers: false,
+    deleteUsers: false,
+    viewComplaints: true,  // can view own complaints
+    manageComplaints: false,
+    assignRoles: false,
+    viewGroups: true,
+    editGroups: false,
+    removeUsersFromGroups: false,
+  },
+};
 
 
 
 const register = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password,  } = req.body;
 
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -117,6 +117,7 @@ const register = async (req, res) => {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
+    let role = 'user'
     const token = jwt.sign(
       { name, email, password: hashedPassword, role },
       process.env.JWT_SECRET,
@@ -154,6 +155,37 @@ const register = async (req, res) => {
 };
 
 
+// const verifyEmail = async (req, res) => {
+//   try {
+//     const { token } = req.query;
+//     if (!token) {
+//       return res.status(400).json({ success: false, message: 'No token provided' });
+//     }
+
+//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+//     const { name, email, password, role } = decoded;
+
+//     const existingUser = await User.findOne({ email });
+//     if (existingUser) {
+//       return res.status(400).json({ success: false, message: 'User already verified' });
+//     }
+
+//     const newUser = new User({ name, email, password });
+//     await newUser.save();
+
+//     const newRole = new Role({ user: newUser._id, 
+//       role: role || 'user', 
+//     });
+//     await newRole.save();
+
+//     return res.status(201).json({ success: true, message: 'Account verified and created successfully' });
+//   } catch (error) {
+//     console.error('Verification error:', error);
+//     return res.status(400).json({ success: false, message: 'Invalid or expired token' });
+//   }
+// };
+
+
 const verifyEmail = async (req, res) => {
   try {
     const { token } = req.query;
@@ -172,18 +204,32 @@ const verifyEmail = async (req, res) => {
     const newUser = new User({ name, email, password });
     await newUser.save();
 
-    const newRole = new Role({ user: newUser._id, 
-      role: role || 'user', 
-      permissions : defaultPermissions[role ||"user"]
-    });
-    await newRole.save();
+    // Find existing role by role name
+    const roleDoc = await Role.findOne({ role: role || 'user' });
+
+    if (roleDoc) {
+      // Push newUser._id into the user array if not already included
+      if (!roleDoc.user.includes(newUser._id)) {
+        roleDoc.user.push(newUser._id);
+        await roleDoc.save();
+      }
+    } else {
+      // If role does not exist, create new role document with the user
+      const newRole = new Role({
+        user: [newUser._id],
+        role: role || 'admin',
+      });
+      await newRole.save();
+    }
 
     return res.status(201).json({ success: true, message: 'Account verified and created successfully' });
+
   } catch (error) {
     console.error('Verification error:', error);
     return res.status(400).json({ success: false, message: 'Invalid or expired token' });
   }
 };
+
 
 
 
@@ -201,16 +247,18 @@ const login = async(req,res) => {
         
         let tempRole
         tempRole = await Role.findOne({user:user._id})
-        if(!tempRole){
-          tempRole = new Role({
-            user : user._id ,
-            role :"user"
-          })
-        }
+        // if(!tempRole){
+        //   tempRole = new Role({
+        //     user : user._id ,
+        //     role :"user"
+        //   })
+        // }
         
         const token = jwt.sign({_id : user._id , role:tempRole.role}  , process.env.JWT_SECRET, {
             expiresIn: '10d'
         }); 
+        
+
 
         return res.status(200).json({
             success: true,
@@ -222,7 +270,7 @@ const login = async(req,res) => {
                 email: user.email,
                 role: tempRole.role ,
                 profilePicture : user.profilePicture ,
-                permissions : tempRole.permissions
+                // permissions : tempRole.permissions
             }
         })
         
@@ -240,23 +288,28 @@ const changeUserRole = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
+        await Role.updateMany(
+          {user:userId} ,
+          {$pull : {user:userId}}
+        )
 
-        const role = await Role.findOne({ user: userId });
+        
+
+        let role = await Role.findOne({ role: newRole });
         if (!role) {
-            const addUserRole = new Role({
-                user: userId,
-                role: newRole,
-                permissions : defaultPermissions[newRole]
-            });
-            await addUserRole.save();
-            return res.status(201).json({ success : true ,message: 'User role added successfully', role: addUserRole });
+            
+            return res.status(404).json({ success : true ,message: 'role not found'});
         }
 
-        role.role = newRole;
-        role.permissions = defaultPermissions[newRole]
-        await role.save();
-
-        res.status(200).json({ message: 'User role updated successfully', role  });
+        if(!role.user.includes(userId)){
+            role.user.push(userId)
+            await role.save();  
+        }
+        return res.status(200).json({
+          success: true,
+          message: 'User role updated successfully',
+          role
+        });
     }
     catch (error) {
         console.error('Error changing user role:', error);
@@ -269,12 +322,69 @@ const fetchUsers = async(req,res) =>{
     try {
         const users = await Role.find().populate("user" , '-password');
         const notAdmins = await Role.find({user : users._id})
-        return res.status(200).json({success : true , users})
+                let roleId = users._id
+        const roles = await Role.find();
+        return res.status(200).json({success : true , users , roleId , roles})
     } catch (error) {
         console.error('Error changing user role:', error);
         res.status(500).json({ success : false , message: 'Server error' });
     }
 }
+
+
+
+// const fetchUsersRoleEdition = async (req, res) => {
+//   try {
+//     // 1. Users with roles (populated)
+//     const roles = await Role.find().populate('user', '-password');
+//     const usersWithRoles = roles.flatMap(role => role.user);
+
+//     // 2. Get IDs of users who already have a role
+//     const usersWithRoleIds = usersWithRoles.map(user => user._id.toString());
+
+//     // 3. Users without roles
+//     const usersWithoutRoles = await User.find({
+//       _id: { $nin: usersWithRoleIds }
+//     }).select('-password');
+
+//     return res.status(200).json({
+//       success: true,
+//       usersWithRoles,
+//       usersWithoutRoles
+//     });
+
+//   } catch (error) {
+//     console.error('Error fetching users:', error);
+//     res.status(500).json({ success: false, message: 'Server error' });
+//   }
+// };
+const fetchUsersRoleEdition = async (req, res) => {
+  try {
+    const roles = await Role.find().populate('user', '-password');
+
+    // Map users with roles
+    let usersWithRoles = [];
+    roles.forEach(role => {
+      role.user.forEach(user => {
+        usersWithRoles.push({
+          user,
+          role: role.role
+        });
+      });
+    });
+    const roles2 = await Role.find().select("-permissions");
+
+    return res.status(200).json({
+      success: true,
+      users: usersWithRoles , 
+      roles2
+    });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
 
 
 
@@ -379,14 +489,17 @@ const editUserInfo = async(req,res) =>{
 
       // console.log(imagePath)
 
-      const newUser = await Role.findOne({user : id}).populate("user" , "-password")
+      // const newUser = await Role.findOne({user : id}).populate("user" , "-password")
+      const newUser = await User.findOne({_id : id});
+      const role = await Role.findOne({user : id})
+
       return res.status(200).json({success:true ,
          newUser : {
-                _id: newUser.user._id,
-                name: newUser.user.name,
-                email: newUser.user.email,
-                role: newUser.role ,
-                profilePicture : newUser.user.profilePicture
+                _id: newUser._id,
+                name: newUser.name,
+                email: newUser.email,
+                role: role.role ,
+                profilePicture : newUser.profilePicture
             } })
     } catch (error) {
         console.error( error);
@@ -395,51 +508,13 @@ const editUserInfo = async(req,res) =>{
 }
 
 
-// const adminEditUserInfo = async(req,res) =>{
-//   try {
-//     const {id} = req.params ;
-//     const {userId , newName , newEmail , newPassword ,  newPermissions} = req.body ;
 
-
-
-
-
-//     const isAdmin = await Role.findOne({user : id})
-//     if(isAdmin.role !== 'admin'){
-//       return res.status(401).json({success : false , message : "only the admin or the user can edit info"})
-//     }
-
-//     const user = await User.findById(userId);
-//     if(!user) return res.status(404).json({success : false , message : "user not found"});
-
-//     if(!newPassword){
-//       await User.findByIdAndUpdate({_id : userId} , {
-//         name : newName ,
-//         email : newEmail ,
-
-//       })
-//     }else{
-//       const newHashedPassword = await bcrypt.hash(newPassword , 10);
-//       await User.findByIdAndUpdate({_id : userId} , {
-//         name : newName ,
-//         email : newEmail ,
-//         password : newHashedPassword
-//       })
-//     }
-
-//     const updatedUser = await User.findById(userId).select('-password')
-//     return res.status(200).json({success : true , message:"user updated successfuly" , updatedUser})
-//   } catch (error) {
-//         console.error( error);
-//         res.status(500).json({ success : false , message: 'Server error' });
-//     }
-// }
 
 
 const adminEditUserInfo = async (req, res) => {
   try {
     const { id } = req.params; // the admin performing the action
-    const { userId, newName, newEmail, newPassword, newPermissions } = req.body;
+    const { userId, newName, newEmail, newPassword } = req.body;
 
     const isAdmin = await Role.findOne({ user: id });
     if (!isAdmin || isAdmin.role !== 'admin') {
@@ -463,32 +538,32 @@ const adminEditUserInfo = async (req, res) => {
     await User.findByIdAndUpdate(userId, updatedFields);
 
     // Update permissions if provided
-    if (newPermissions) {
-      const roleDoc = await Role.findOne({ user: userId });
-      if (roleDoc) {
-        // Update only valid permissions
-        const validPermissions = [
-          "viewUsers",
-          "editUsers",
-          "deleteUsers",
-          "viewComplaints",
-          "manageComplaints",
-          "assignRoles",
-          "viewGroups",
-          "editGroups",
-          "removeUsersFromGroups"
-        ];
+    // if (newPermissions) {
+    //   const roleDoc = await Role.findOne({ user: userId });
+    //   if (roleDoc) {
+    //     // Update only valid permissions
+    //     // const validPermissions = [
+    //     //   "viewUsers",
+    //     //   "editUsers",
+    //     //   "deleteUsers",
+    //     //   "viewComplaints",
+    //     //   "manageComplaints",
+    //     //   "assignRoles",
+    //     //   "viewGroups",
+    //     //   "editGroups",
+    //     //   "removeUsersFromGroups"
+    //     // ];
 
 
-        validPermissions.forEach((perm) => {
-          if (perm in newPermissions) {
-            roleDoc.permissions[perm] = newPermissions[perm];
-          }
-        });
+    //     validPermissions.forEach((perm) => {
+    //       if (perm in newPermissions) {
+    //         roleDoc.permissions[perm] = newPermissions[perm];
+    //       }
+    //     });
 
-        await roleDoc.save();
-      }
-    }
+    //     await roleDoc.save();
+    //   }
+    // }
 
     const updatedUser = await User.findById(userId).select('-password');
     return res.status(200).json({
@@ -536,21 +611,38 @@ const verifyEmailUpdate = async (req, res) => {
 
 
 
-const getUserById = async(req,res)=>{
+const getUserById = async (req, res) => {
   try {
-    const {id} = req.params ;
-    if(!id) return res.status(400).json({success : false , message : "id need to be provided"})
+    const { id } = req.params;
 
-      const user = await Role.findOne({user:id}).populate("user" , '-password')
-      if(!user) return res.status(404).json({success : false , message : "user not found :("})
-        const groups = await Group.find({users : id})
-      const complaints = await Complaint.find({userId : id})
-        return res.status(200).json({success : true , user , groups , complaints})
-  } catch (error) {
-        console.error( error);
-        res.status(500).json({ success : false , message: 'Server error' });
+    if (!id) {
+      return res.status(400).json({ success: false, message: "ID must be provided" });
     }
-}
+
+    // Find the user through Role and populate user details
+    const role = await Role.findOne({ user: id }).populate("user", "-password");
+    if (!role || !role.user) {
+      return res.status(404).json({ success: false, message: "User not found :(" });
+    }
+
+    // Fetch user's groups and complaints
+    const groups = await Group.find({ users: id });
+    const complaints = await Complaint.find({ userId: id });
+
+    return res.status(200).json({
+      success: true,
+      user: role.user,     // only the populated user object
+      role: role.role,     // role string (if needed)
+      groups,
+      complaints,
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
 
 module.exports = {
     register ,
@@ -562,5 +654,6 @@ module.exports = {
     editUserInfo , 
     getUserById ,
     verifyEmailUpdate ,
-    adminEditUserInfo
+    adminEditUserInfo , 
+    fetchUsersRoleEdition
 };

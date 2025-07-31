@@ -14,6 +14,9 @@ const authRouter = require('./routes/auth.js');
 const groupRouter = require('./routes/groups.js');
 const complaintRouter = require('./routes/complaints.js');
 const userRouter = require('./routes/users.js');
+const roleRouter = require("./routes/roles.js")
+
+
 app.use(cors({
     origin : '*' ,
     credentials:true
@@ -34,6 +37,7 @@ app.use("/api/auth" , authRouter)
 app.use("/api/user", userRouter);
 app.use("/api/group" , groupRouter)
 app.use("/api/complaints", complaintRouter);
+app.use("/api/role", roleRouter);
 
 
 const swagger = require('./swagger')

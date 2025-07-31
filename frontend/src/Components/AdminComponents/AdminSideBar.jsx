@@ -10,7 +10,7 @@ const AdminSideBar = () => {
   const activeLinkStyles = 'bg-blue-700';
 
   return (
-    <div className="w-60 bg-blue-800 min-h-screen flex flex-col p-4 space-y-4">
+    <div className="w-53 bg-blue-800 min-h-screen flex flex-col p-4 space-y-4">
       <NavLink
         to="/adminPage/"
         end
@@ -31,7 +31,7 @@ const AdminSideBar = () => {
         <span>List Complaints</span>
       </NavLink>
 
-        {user.permissions.viewGroups &&(
+        {/* {user.permissions.viewGroups &&( */}
           <NavLink
             to="/adminPage/groups"
             className={({ isActive }) =>
@@ -40,9 +40,9 @@ const AdminSideBar = () => {
           >
             <span>List Groups</span>
           </NavLink>
-        )}
+        {/* )} */}
       
-      {user?.permissions?.viewUsers &&(
+      {/* {user?.permissions?.viewUsers &&( */}
         <NavLink
           to="/adminPage/listEmployees"
           className={({ isActive }) =>
@@ -51,8 +51,16 @@ const AdminSideBar = () => {
         >
           <span>Manage Employees</span>
         </NavLink>
-      )}
+      {/* )} */}
 
+      <NavLink
+          to="/adminPage/manageRoles"
+          className={({ isActive }) =>
+            `${navLinkStyles} ${isActive ? activeLinkStyles : ''}`
+          }
+        >
+          <span>Manage Roles</span>
+        </NavLink>
     </div>
   );
 };

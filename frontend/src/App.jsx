@@ -13,7 +13,7 @@ import AdminHero from './Components/AdminComponents/AdminHero'
 import ListComplaints from './Components/AdminComponents/ListComplaints'
 import ListGroups from './Components/AdminComponents/ListGroups'
 import AddComplaint from './Components/EmployeeComponent/AddComplaint'
-import CurrentGroupInfo from './Components/EmployeeComponent/ListUserGroups'
+// import CurrentGroupInfo from './Components/EmployeeComponent/ListUserGroups'
 import ListUserGroups from './Components/EmployeeComponent/ListUserGroups'
 import UserGroupInfo from './Components/EmployeeComponent/UserGroupInfo'
 import AddGroup from './Components/AdminComponents/AddGroup'
@@ -28,6 +28,10 @@ import ManageEmployees from './Components/AdminComponents/ManageEmployees'
 import EmployeeInfo from './Components/AdminComponents/EmployeeInfo'
 import EmailVerified from './Components/EmailVerified'
 import { useAuthContext } from './Context/authContext'
+// import AddRolePage from './Components/RoleManagement/ManageRoles'
+import ManageRoles from './Components/RoleManagement/ManageRoles'
+import AssignUsersToRole from './Components/RoleManagement/AssignUsersToRole'
+import AddPermissionsToRole from './Components/RoleManagement/AddPermissionsToRole'
 
 const App = ()=> {
   const {user} = useAuthContext()
@@ -40,6 +44,7 @@ const App = ()=> {
         <Route path='/login' element={<SignIn />}/>
         <Route path='/register' element={<SingUp />}/>
         <Route path='/email-verified' element={<EmailVerified />}/>
+
         <Route path='/adminPage' element={
           <PrivateRoutes>
             <RoleBasedRoutes requiredRole={[ 'admin']}>
@@ -52,20 +57,23 @@ const App = ()=> {
           <Route path="/adminPage/groups" element = {<ListGroups />}></Route>
           <Route path="/adminPage/add-group" element = {<AddGroup />}></Route>        
           <Route path="/adminPage/current-group/:id" element = {<AdminGroupInfo />}></Route>        
-          <Route path="/adminPage/add-employee/:id" element = {<AddEmployeeToGroup />}></Route>        
+          <Route path="/adminPage/add-employee/:id" element = {<AddEmployeeToGroup />}></Route>   
+
           <Route path="/adminPage/complaint/:id" element = {<AdminComplainInfo />}></Route>     
 
           <Route path="/adminPage/settings" element = {<EditEmployeeProfile />}></Route>   
 
-          {user?.permissions?.viewUsers && (
+          {/* {user?.permissions?.viewUsers && ( */}
             <>
               <Route path="/adminPage/listEmployees" element = {<ManageEmployees />}></Route> 
               <Route path="/adminPage/listEmployees/employee/:id" element = {<EmployeeInfo />}></Route>        
             </>
-          )}
+          {/* )} */}
 
 
-
+          <Route path='/adminPage/manageRoles' element={<ManageRoles />}/>
+          <Route path='/adminPage/manageRoles/role/adduser/:id' element={<AssignUsersToRole />}/>
+          <Route path='/adminPage/manageRoles/role/addPermission/:id' element={<AddPermissionsToRole />}/>
 
           </Route>
         <Route path='/userPage' element={
@@ -83,26 +91,29 @@ const App = ()=> {
           <Route path="/userPage/current-group/:id" element = {<UserGroupInfo />}></Route> 
 
           
-          {(user?.permissions?.deleteComplaints || user?.permissions?.changeComplaintStatus) && (
+          {/* {(user?.permissions?.deleteComplaints || user?.permissions?.changeComplaintStatus) && ( */}
             <>
               <Route path="/userPage/complaints" element = {<ListComplaints />}></Route>
               <Route path="/userPage/otherComplaint/:id" element = {<AdminComplainInfo />}></Route>     
             </>
             
-          )}
+          {/* )} */}
 
-          {user?.permissions?.viewUsers && (
+          {/* {user?.permissions?.viewUsers && ( */}
             <>
               <Route path="/userPage/listEmployees" element = {<ManageEmployees />}></Route> 
               <Route path="/userPage/listEmployees/employee/:id" element = {<EmployeeInfo />}></Route>        
             </>
-          )}
+          {/* )} */}
 
           <Route path="/userPage/settings" element = {<EditEmployeeProfile />}></Route>  
 
          
       
         </Route>
+
+
+
       </Routes>
       <ToastContainer 
           position="top-right"

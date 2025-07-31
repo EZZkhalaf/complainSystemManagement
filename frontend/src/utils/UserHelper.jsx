@@ -1,25 +1,30 @@
 import { toast } from "react-toastify";
 
-export const fetchUsersHook = async() => {
-    try {
-        const response = await fetch("http://localhost:5000/api/user/" , {
-            headers : {
-                "Authorization": `Bearer ${localStorage.getItem('token')}` , 
-            }
-        })
+export const fetchUsersHook = async () => {
+  try {
+    const response = await fetch("http://localhost:5000/api/user/getUsersRoleEdition", {
+      headers: {
+        "Authorization": `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
 
-        const data = await response.json();
-        if(!data.success){
-            toast.error("error fetching the users")
-            return;
-        }else if(data.success){
-            return data.users;
-        }
-    } catch (error) {
-        console.log(error)
-        throw new Error(error)   
+    const data = await response.json();
+    // console.log(data)
+    if (!response.ok || !data.success) {
+      toast.error("Error fetching the users");
+      return null;
     }
-}
+
+    return data;
+    
+
+  } catch (error) {
+    console.error("Fetch error:", error);
+    toast.error("Server error occurred.");
+    return null;
+  }
+};
+
 
 export const addEmployeeToGroupHelper = async(groupId , userId , navigate) => {
     console.log(groupId , userId)
@@ -154,7 +159,6 @@ export const getUserByIdHook = async(id) =>{
 export const changeUserRoleHook = async(userId , newRole) =>{
     try {
 
-        console.log("testing")
         const response = await fetch(`http://localhost:5000/api/user/changeRole` , {
             method : "POST",
             headers : {

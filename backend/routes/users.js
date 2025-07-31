@@ -1,5 +1,5 @@
 const express = require('express');
-const { changeUserRole, fetchUsers, getAdminSummary, editUserInfo, getUserById, verifyEmailUpdate, adminEditUserInfo } = require('../controllers/authControllers');
+const { changeUserRole, fetchUsers, getAdminSummary, editUserInfo, getUserById, verifyEmailUpdate, adminEditUserInfo, fetchUsersRoleEdition } = require('../controllers/authControllers');
 const  userMiddleware  = require('../middlware/userMiddlware');
 const { addUserToGroup } = require('../controllers/groupsControllers');
 const upload = require('../middlware/upload');
@@ -84,6 +84,7 @@ router.post("/changeRole" , userMiddleware,changeUserRole);
  *         description: Server error
  */
 router.get("/" , userMiddleware,fetchUsers);
+router.get("/getUsersRoleEdition" , userMiddleware,fetchUsersRoleEdition);
 
 
 
@@ -185,7 +186,7 @@ router.get("/getSummary/:id", userMiddleware, getAdminSummary);
 router.put('/editInfo/:id' , upload.single("profilePicture"),editUserInfo)
 
 
-router.put('/editInfo/admin/:id' ,userMiddleware , checkPermission("editUsers") , adminEditUserInfo)
+router.put('/editInfo/admin/:id' ,userMiddleware  , adminEditUserInfo)
 
 router.get('/getUser/:id' , getUserById)
 

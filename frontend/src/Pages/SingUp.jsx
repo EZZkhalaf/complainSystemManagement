@@ -35,7 +35,7 @@ const SingUp = () => {
 
             <div className="mb-6">
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email
+                Name
             </label>
             <input
                 id="name"

@@ -17,6 +17,7 @@ const ListGroups = () => {
 
   };
 
+
   useEffect(() => {
     if (user?._id) {
       fetchUserGroups();

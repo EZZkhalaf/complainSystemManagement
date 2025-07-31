@@ -72,7 +72,7 @@ router.post('/:id', userMiddleware,addComplaint);
  *       404:
  *         description: Complaint not found
  */
-router.put('/', userMiddleware, checkPermission("changeComplaintStatus"), changeComplaintStatus);
+router.put('/', userMiddleware, changeComplaintStatus);
 
 
 /**
@@ -184,7 +184,7 @@ router.get('/user/:id' , userMiddleware,listUserComplaints)
  *         description: Internal server error
  */
 
-router.delete("/delete/:userId" , userMiddleware ,checkPermission("deleteComplaints"),deleteComplaint);
+router.delete("/delete/:userId" , userMiddleware,deleteComplaint);
 
 
 module.exports = router;

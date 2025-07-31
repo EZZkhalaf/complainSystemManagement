@@ -111,6 +111,14 @@ const getUserGroups = async (req, res) => {
   try {
     const { id } = req.params; 
 
+//                     const existingRole = await Role.findOne({ role: "admin" });
+// if (!existingRole) {
+//   const newRoleee = new Role({ role: "admin" });
+//   await newRoleee.save();
+//   console.log("Role 'admin' created.");
+// } else {
+//   console.log("Role 'user' already exists.");
+// }
     if (!id) {
       return res.status(400).json({ success: false, message: "user id is required" });
     }
@@ -132,6 +140,10 @@ const getUserGroups = async (req, res) => {
 const listGroups = async(req,res)=>{
     try {
         const {id} = req.params;
+
+
+
+
         // const isAdmin = await Role.findOne({ user: id });
         // if (!isAdmin || isAdmin.role !== 'admin') {
         //     return res.status(403).json({ message: 'Only admins can change complaint status' });
@@ -144,13 +156,21 @@ const listGroups = async(req,res)=>{
     }
 }
 
-const deleteGroup = async(req,res) => {
-    try {
-        // const {id}
-    } catch (error) {
-        console.error("Error deleting group:", error);
-        res.status(500).json({ success: false, message: "Server error" });
-    }
-}
+// this controller not completed yet
+// const deleteGroup = async(req,res) => {
+//     try {
+//         const {id} = req.params;
+//         const {groupId} = req.body;
+
+//         const group = await Group.findById(groupId);
+//         if(!group) return res.status.json({success : false , message : "group not found"})
+        
+
+        
+    // } catch (error) {
+    //     console.error("Error deleting group:", error);
+    //     res.status(500).json({ success: false, message: "Server error" });
+    // }
+// }
 
 module.exports = {createGroup , addUserToGroup , removeUserFromGroup , groupInfoAndUsers , getUserGroups , listGroups}

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../../Context/authContext';
 import { fetchUsersHook } from '../../utils/UserHelper';
 import defaultPhoto from '../../assets/defaultPhoto.png'
+import { toast } from 'react-toastify';
 
 
 const EmpCard = ({ emp }) => {
@@ -46,17 +47,23 @@ const ManageEmployees = () => {
     const [employees , setEmployees] = useState([])
     const [filteredEmployees , setFilteredEmployees] = useState(employees)
 
-    const getEmployees = async()=>{
-        const data = await fetchUsersHook();
 
-        setEmployees(data.filter(emp => (
-          user._id !== emp.user._id
-        )));
-        setFilteredEmployees(data.filter(emp => (
-          user._id !== emp.user._id
-        )))
-        
-    }
+
+const getEmployees = async () => {
+  try {
+    const  roles  = await fetchUsersHook();
+
+    let updatedUsers = roles.users;
+    updatedUsers = updatedUsers.filter((emp) => user._id !== emp.user._id)
+    setEmployees(updatedUsers);
+    setFilteredEmployees(updatedUsers);
+  } catch (error) {
+    console.error("Error fetching employees:", error);
+    toast.error("Failed to load employees.");
+  }
+};
+
+
 
 
     useEffect(()=>{
@@ -68,12 +75,11 @@ const ManageEmployees = () => {
     setFilteredEmployees(
         employees.filter(emp =>
         (emp.user.name.toLowerCase().includes(lower) ||
-        emp.user.email.toLowerCase().includes(lower)) && (user._id !== emp.user._id)
-        )
+        emp.user.email.toLowerCase().includes(lower))  )
     );
-    }, [search]);
+    }, [search , employees]);
         
-
+// console.log(employees)
   return (
     <div className="max-w-full mx-auto p-8 bg-white shadow-2xl rounded-3xl border border-gray-200 space-y-6">
         <h2 className="text-3xl font-bold text-center text-blue-800">Add Employee to Group</h2>

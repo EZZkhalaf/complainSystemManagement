@@ -82,7 +82,7 @@ router.post('/:userId' , userMiddleware, createGroup);
  *         description: Invalid request
  */
 
-router.delete('/removeUser' , userMiddleware,checkPermission("removeUsersFromGroups"), removeUserFromGroup)
+router.delete('/removeUser' , userMiddleware, removeUserFromGroup)
 
 
 /**
@@ -150,7 +150,7 @@ router.get('/user/:id' , userMiddleware , getUserGroups);
  *       200:
  *         description: Groups list retrieved successfully
  */
-router.get('/admin/:id' , userMiddleware , checkPermission("viewGroups") , listGroups);
+router.get('/admin/:id' , userMiddleware , listGroups);
 
 
 module.exports = router;

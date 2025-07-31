@@ -5,6 +5,7 @@ import { useScroll } from 'framer-motion';
 import { adminUpdateUserInfoHook, changeUserRoleHook, getUserByIdHook } from '../../utils/UserHelper';
 import { toast } from 'react-toastify';
 import { useAuthContext } from '../../Context/authContext';
+import { fetchRolesHook } from '../../utils/RolesHelper';
 
 
 
@@ -12,7 +13,7 @@ const ComplaintCard = ({ complaint }) => {
   const navigate = useNavigate();
   return (
     <div 
-      onClick={() => navigate(`/adminPage/complaint/${complaint._id}`)}
+      onClick={() => navigate(`/${user.role === 'admin' ?"adminPage" : 'userPage'}/complaint/${complaint._id}`)}
       className="bg-white rounded-2xl shadow-md p-6 border border-gray-200 hover:shadow-xl transition duration-200 flex flex-col justify-between">
       <div className="mb-3">
         <h3 className="text-xl font-semibold text-gray-900 mb-1 capitalize">
@@ -51,7 +52,7 @@ const EmployeeInfo = () => {
     const [employee , setEmployee] = useState(null)
     const [groups , setGroups] = useState([])
     const [complaints , setComplaints] = useState([])
-
+    const [roles , setRoles] = useState([]);
 
 
 
@@ -68,56 +69,15 @@ const EmployeeInfo = () => {
 
     const [editablePermissions, setEditablePermissions] = useState(employee?.permissions || []);
 
-    const permissionLabels = {
-      viewUsers: "View Users",
-      editUsers: "Edit Users",
-      deleteComplaints: "Delete Complaints",
-      viewGroups: "View Groups",
-      assignRoles: "Assign Roles",
-      removeUsersFromGroups: "Remove Users from Groups",
-      changeComplaintStatus: "Change Complaint Status"
-    };
 
-
-    const permissionsByRole = {
-      user: [], // no permissions for 'user'
-      moderator: [
-        "viewUsers",
-        "deleteComplaints",
-        "viewGroups",
-        "changeComplaintStatus",
-      ],
-      admin: [
-        "viewUsers",
-        "editUsers",
-        "deleteComplaints",
-        "viewGroups",
-        "assignRoles",
-        "removeUsersFromGroups",
-        "changeComplaintStatus"
-      ],
-      };
-
-    const allPermissions = [
-      "viewUsers",
-      "editUsers",
-      "deleteComplaints",
-      "viewGroups",
-      "assignRoles",
-      "removeUsersFromGroups" ,
-      "changeComplaintStatus"
-    ];
+    console.log(employee)
 
     const handleSaveChanges = async (e) => {
         e.preventDefault();
-
-
-
-
-        const mappedPermissions = {};
-        allPermissions.forEach((perm) => {
-          mappedPermissions[perm] = editablePermissions.includes(perm);
-        });
+        //  const mappedPermissions = {};
+        // allPermissions.forEach((perm) => {
+        //   mappedPermissions[perm] = editablePermissions.includes(perm);
+        // });
 
 
         const userId = id;
@@ -134,8 +94,8 @@ const EmployeeInfo = () => {
         }
 
         if (
-          editableEmail !== employee.user.email ||
-          editableName !== employee.user.name ||
+          editableEmail !== employee.email ||
+          editableName !== employee.name ||
           newPassword.trim() !== "" || 
           JSON.stringify(mappedPermissions) !== JSON.stringify(employee?.permissions)
         ) {
@@ -168,19 +128,33 @@ const EmployeeInfo = () => {
         }
 
         setEditing(false);
-};
+    };
+
+
+
 
 
 
 
     const getUserData = async()=>{
         const data = await getUserByIdHook(id);
-        setEmployee(data.user);
-        setGroups(data.groups)
-        setComplaints(data.complaints)
-        setSelectedRole(data.user.role)
-        setEditableName(data.user.user.name)
-        setEditableEmail(data.user.user.email)        
+        
+        const roles = await fetchRolesHook();
+        setRoles(roles.map(({user , ...rest}) => rest))
+
+
+        if (!data || !data.user || data.user.length === 0) return;
+
+        const user = data.user[0]; 
+
+        setEmployee(user);
+        setGroups(data.groups);
+        setComplaints(data.complaints);
+        setSelectedRole(data.role); // You already have role in response
+
+        setEditableName(user.name);
+        setEditableEmail(user.email);
+              
     }
     useEffect(()=>{
         getUserData()
@@ -199,21 +173,20 @@ const EmployeeInfo = () => {
     }, [employee]);
 
 
-
   return (
     <div className="max-w-full mx-auto p-6 sm:p-10 bg-white rounded-3xl shadow-xl  border border-gray-200">
       <div className="flex justify-end mb-4">
 
         {user.role === 'admin' && (
           <div>
-              {user.permissions.editUsers && (
+              {/* {user.permissions.editUsers && ( */}
                 <button
                   onClick={() => setEditing((prev) => !prev)}
                   className="bg-red-500 text-white px-4 py-1 rounded-lg hover:bg-red-600 transition mr-4"
                 >
                   {editing ? 'Cancel Edit' : 'Edit'}
                 </button>
-              )}
+              {/* )} */}
           </div>
         )}
 
@@ -228,15 +201,15 @@ const EmployeeInfo = () => {
       </div>
       <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
         <img
-          src={employee?.user.profilePicture ? `http://localhost:5000${employee.user.profilePicture}` : defaultPhoto}
+          src={employee?.profilePicture ? `http://localhost:5000${employee.profilePicture}` : defaultPhoto}
           alt="Profile"
           className="w-32 h-32 rounded-full object-cover border-2 border-gray-300"
         />
         <div className="text-center sm:text-left">
           {!editing ? (
               <>
-                <h2 className="text-2xl font-bold text-blue-800 capitalize">{employee?.user.name}</h2>
-                <p className="text-gray-600 mt-1">{employee?.user.email}</p>
+                <h2 className="text-2xl font-bold text-blue-800 capitalize">{employee?.name}</h2>
+                <p className="text-gray-600 mt-1">{employee?.email}</p>
               </>
             ) : (
               <div className='flex flex-col'>
@@ -287,52 +260,20 @@ const EmployeeInfo = () => {
                         onChange={(e)=> setSelectedRole(e.target.value)}
                         className="border rounded px-2 py-1 text-md"
                       >
-                        <option value="admin">admin</option>
-                        <option value="moderator">moderator</option>
-                        <option value="user">user</option>
+                        {roles.map((role) => (
+                          <option key={role._id} value={role.role}>{role.role}</option>
+                        ))}
                       </select>
-
                     ):(
                       <p>{selectedRole}</p>
                     )}
 
 
 
-                    </div>
-
-                    
+                    </div>         
                   </span>
               </div>
-              {editing && (
-                <div>
-                {user.permissions.assignRoles && (
-                  <div className='mt-2'>
-                      <p className='text-gray-500 font-medium mb-1'>Permissions:</p>
-                      <div className='grid grid-cols-2 gap-2'>
-                {permissionsByRole[selectedRole].map((perm) => (
-                    <label key={perm} className='flex items-center gap-2 text-sm text-gray-700'>
-                      <input
-                        type="checkbox"
-                        checked={editablePermissions.includes(perm)}
-                        onChange={() => {
-                          setEditablePermissions((prev) =>
-                            prev.includes(perm)
-                              ? prev.filter((p) => p !== perm)
-                              : [...prev, perm]
-                          );
-                        }}
-                      />
-                      {permissionLabels[perm] || perm}
-                    </label>
-                  ))}
-
-                      </div>
-                    </div>
-                )}
-                </div>
-
-
-              )}
+             
             <div className='flex items-center'>
               <p className="text-m text-gray-500">Joined :</p>
               <p className="text-gray-700 font-medium ml-2">{employee?.createdAt?.slice(0, 10) || 'N/A'}</p>
@@ -347,7 +288,7 @@ const EmployeeInfo = () => {
                 {groups.map((g) => (
                 <div
                     key={g._id}
-                    onClick={()=> navigate(`/adminPage/current-group/${g._id}`)}
+                    onClick={()=> navigate(`/${user.role === 'admin' ? 'adminPage' : 'userPage'}/current-group/${g._id}`)}
                     className="p-4 bg-white rounded-2xl shadow-md border border-gray-200 hover:shadow-lg transition"
                 >
                     <h3 className="text-lg font-semibold text-blue-800 mb-2 capitalize">

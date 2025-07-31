@@ -48,7 +48,7 @@ const EmployeeSideBar = () => {
         </NavLink>
 
 
-        {(user?.permissions?.deleteComplaints || user?.permissions?.changeComplaintStatus )&& (
+        {/* {(user?.permissions?.deleteComplaints || user?.permissions?.changeComplaintStatus )&& ( */}
 
                 <NavLink 
                 to={"/userPage/complaints"}
@@ -61,7 +61,7 @@ const EmployeeSideBar = () => {
                 </span>
             </NavLink>
 
-        )}
+        {/* )} */}
         <NavLink 
             to={"/userPage/current-groups"}
             className={({ isActive }) =>
@@ -74,7 +74,7 @@ const EmployeeSideBar = () => {
         </NavLink>
 
 
-        {user.permissions.viewUsers &&(
+        {/* {user.permissions.viewUsers &&( */}
             <NavLink
             to="/userPage/listEmployees"
             className={({ isActive }) =>
@@ -83,7 +83,7 @@ const EmployeeSideBar = () => {
             >
             <span>View Employees</span>
             </NavLink>
-        )}
+        {/* )} */}
 
 
 

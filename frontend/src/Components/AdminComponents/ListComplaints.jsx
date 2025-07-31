@@ -55,6 +55,7 @@ const ListComplaints = () => {
   const fetchComplaints = async () => {
     try {
       const data = await listComplaintsHook(user._id);
+      console.log(data)
       setComplaints(data.complaints);
     } catch (error) {
       console.error('Error fetching complaints:', error);
