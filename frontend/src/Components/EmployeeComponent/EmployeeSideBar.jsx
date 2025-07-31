@@ -10,11 +10,12 @@ const EmployeeSideBar = () => {
 
     const activeLinkStyles = 'bg-blue-700';
   return (
-    <div className='w-60 bg-blue-700 min-h-screen flex flex-col p-4'>
+    <div className='w-60 bg-blue-800 min-h-screen flex flex-col p-4 space-y-4"'>
         
         
         <NavLink 
             to={"/userPage/"}
+            end
             className={({ isActive }) =>
             `${navLinkStyles} ${isActive ? activeLinkStyles : ''}`
             }

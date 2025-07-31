@@ -58,7 +58,6 @@ const ManageEmployees = () => {
         
     }
 
-    console.log(employees)
 
     useEffect(()=>{
         getEmployees();

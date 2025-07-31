@@ -144,4 +144,13 @@ const listGroups = async(req,res)=>{
     }
 }
 
+const deleteGroup = async(req,res) => {
+    try {
+        // const {id}
+    } catch (error) {
+        console.error("Error deleting group:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+}
+
 module.exports = {createGroup , addUserToGroup , removeUserFromGroup , groupInfoAndUsers , getUserGroups , listGroups}

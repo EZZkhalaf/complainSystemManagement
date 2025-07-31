@@ -4,11 +4,14 @@ import { useAuthContext } from '../Context/authContext';
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { CiSettings } from 'react-icons/ci';
-
+import defaultPhoto from '../assets/defaultPhoto.png'
 const NavigationBar = () => {
     const { user, logout } = useAuthContext();
     const [menuOpen, setMenuOpen] = useState(false);
     const navigate = useNavigate();
+
+    const [preview , setPreview] = useState(user.profilePicture);
+
 // console.log(user)
     const handleLogout = () => {
         logout();
@@ -19,19 +22,27 @@ const NavigationBar = () => {
     return (
         <nav className="bg-blue-800 text-white px-6 py-4 relative">
             <div className="flex items-center justify-between">
-                <div className="text-xl sm:text-2xl font-semibold tracking-wide">
-                    <div>
-                    <div>
-                        <span className="text-white">Role: </span>
-                        <span className="text-yellow-400 capitalize">{user?.role}</span>
-                    </div>
 
-                    <span className="text-lg font-medium">
-                        Name: <span className="font-semibold">{user?.name}</span>
-                    </span>
-                    </div>
+                <div className='flex items-center'>
+                        <img
+                            src={(user.profilePicture ? `http://localhost:5000${user.profilePicture}` : defaultPhoto)}
+                            alt="Profile"
+                            className="rounded-full object-cover border-2 border-gray-300 shadow-md"
+                            style={{ width: "10vw", height: "10vw", maxWidth: "90px", maxHeight: "90px" }}
+                        />
+                        <div className="text-xl sm:text-2xl font-semibold tracking-wide ml-3">
+                            <div>
+                            <div>
+                                <span className="text-white">Role: </span>
+                                <span className="text-yellow-400 capitalize">{user?.role}</span>
+                            </div>
+
+                            <span className="text-lg font-medium">
+                                Name: <span className="font-semibold">{user?.name}</span>
+                            </span>
+                            </div>
+                        </div>
                 </div>
-
                 <div className="md:flex items-center gap-6">
 
                     <NavLink 

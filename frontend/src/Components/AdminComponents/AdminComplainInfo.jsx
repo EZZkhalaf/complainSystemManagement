@@ -95,10 +95,20 @@ return (
     <div className="bg-white p-6 rounded-xl shadow-md space-y-4">
       <div>
         <span className="block font-medium text-gray-700">User:</span>
-          <div 
-          onClick={()=>navigate(`/${user.role === 'admin' ? "adminPage" : "userPage" }/listEmployees/employee/${complaint?.userId?._id}`)}>
-          <span className="text-gray-900 bg-gray-400 p-1 rounded-full hover:bg-gray-600 hover:text-white ">{complaint.userId?.name || 'Unknown'}</span>
-          </div>
+          
+
+          {user.permissions.viewUsers ? (
+            <div>
+              <div 
+                  onClick={()=>navigate(`/${user.role === 'admin' ? "adminPage" : "userPage" }/listEmployees/employee/${complaint?.userId?._id}`)}>
+                  <span className="text-gray-900 bg-gray-400 p-1 rounded-full hover:bg-gray-600 hover:text-white ">{complaint.userId?.name || 'Unknown'}</span>
+                </div>
+            </div>
+          ):(
+            <div>
+                <span className="text-gray-900 bg-gray-400 p-1 rounded-full hover:bg-gray-600 hover:text-white ">{complaint.userId?.name || 'Unknown'}</span>
+            </div>
+          )}
       </div>
 
       <div>

@@ -58,11 +58,13 @@ const App = ()=> {
           <Route path="/adminPage/settings" element = {<EditEmployeeProfile />}></Route>   
 
           {user?.permissions?.viewUsers && (
-            <Route path="/adminPage/listEmployees" element = {<ManageEmployees />}></Route> 
+            <>
+              <Route path="/adminPage/listEmployees" element = {<ManageEmployees />}></Route> 
+              <Route path="/adminPage/listEmployees/employee/:id" element = {<EmployeeInfo />}></Route>        
+            </>
           )}
 
 
-          <Route path="/adminPage/listEmployees/employee/:id" element = {<EmployeeInfo />}></Route>        
 
 
           </Route>
