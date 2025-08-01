@@ -35,5 +35,118 @@ const getRoles = async(req,res)=>{
     }
 }
 
+const getRoleById = async(req,res)=>{
+    try {
+        const {id} = req.params ;
+        const role = await Role.findById(id).populate("permissions" )
+        if(!role) return res.status(404).json({success : false , message :"the role not found :("})
 
-module.exports = {addNewRole , getRoles}
+        return res.status(200).json({success: true , role})
+    } catch (error) {
+        console.error("Error deleting group:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+}
+
+// const getRoleEmployees
+
+const addPermissions = async(req,res) =>{
+    try {
+        const permissions = req.body ;
+
+        if(!Array.isArray(permissions)){
+            return res.status(400).json({success:false , message :"the req must be an array "})
+        }
+
+        const invalidPermissions = permissions.some( p=> typeof p!== 'object' || !p.name || !p.description)
+        if(invalidPermissions) return res.status(400).json({
+                                                        success: false,
+                                                        message: "Each permission must be an object with 'name' and 'description'",
+                                                    });
+        const uniqueByName = [
+            ...new Map(permissions.map(p => [p.name, p])).values()
+        ];          
+        const existing = await Permission.find({
+            name : {$in : uniqueByName.map(p => p.name)}
+        }).select('name')
+        const existingNames = new Set(existing.map(p => p.name));
+        const newPermissions = uniqueByName.filter(p => !existingNames.has(p.name))
+
+        if(newPermissions.length=== 0)
+            return res.status(200).json({
+                success: true,
+                message: "No new permissions to add (all already exist)",
+            });
+
+
+        const inserted = await Permission.insertMany(newPermissions);
+
+
+        res.status(201).json({
+            success: true,
+            message: "New permissions added successfully",
+            data: inserted,
+            });
+
+
+
+    } catch (error) {
+        console.error("Error deleting group:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+}
+
+
+
+const fetchPermissions =async(req,res)=>{
+    try {
+        const permissions = await  Permission.find();
+        return res.status(200).json({success : true , permissions})
+    } catch (error) {
+        console.error("Error fetching permissions:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+    
+}
+
+const addPermissionsToRole = async(req,res) =>{
+    try {
+        const {permissionsIds , roleId} = req.body;
+
+        if (!Array.isArray(permissionsIds) || !roleId) {
+            return res.status(400).json({
+                success: false,
+                message: "Missing or invalid 'permissionsIds' array or 'roleId'",
+            });
+            }
+
+        const role = await Role.findById(roleId).populate('permissions');
+        if(!role) return res.status(404).json({success : false , message :"role not found :("})
+        
+        const validPermissions = await Permission.find({
+            _id: { $in: permissionsIds },
+        });
+
+        if (validPermissions.length !== permissionsIds.length) 
+            return res.status(400).json({
+                success: false,
+                message: "One or more permission IDs are invalid",
+            });
+
+        const updatedRole = await Role.findByIdAndUpdate(roleId ,
+            {permissions : permissionsIds},
+            {new : true}
+        ).populate("permissions");
+        
+        res.status(200).json({
+            success: true,
+            message: "Permissions Added Successfully",
+            data: updatedRole,
+        });
+    } catch (error) {
+        console.error("Error adding permissions to Role:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+}
+
+module.exports = {addNewRole , getRoles , addPermissions , fetchPermissions , addPermissionsToRole , getRoleById}

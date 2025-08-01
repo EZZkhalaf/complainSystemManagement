@@ -54,3 +54,69 @@ export const addnewRoleHook = async(newRole) => {
         throw new Error(error)   
     }
 }
+
+
+export const fetchPermissionsHook = async() =>{
+    try {
+        const response = await fetch(`http://localhost:5000/api/role/getPermissions` , {
+            method : "GET",
+            headers : {
+                "Authorization": `Bearer ${localStorage.getItem('token')}` 
+            }
+        })
+
+        const data = await response.json();
+        
+        if(data.success){
+            return data.permissions;
+        }else{
+            toast.error("error fetching the permissions ")
+            return 
+        }
+
+    } catch (error) {
+        console.log(error)
+        throw new Error(error)   
+    }
+}
+
+
+export const addPErmissionsToRoleHook = async(roleId , permissionsIds) =>{
+    try {
+        const response = await fetch(`http://localhost:5000/api/role/addPermissionsToRole` , {
+            method : "POST",
+            headers : {
+                "Authorization": `Bearer ${localStorage.getItem('token')}` ,
+                'Content-Type' : 'application/json'
+            },
+            body : JSON.stringify({
+                roleId , 
+                permissionsIds
+            })
+        })
+
+        const data = await response.json();
+        
+        return data;
+
+    } catch (error) {
+        console.log(error)
+        throw new Error(error)   
+    }
+}
+
+export const getRoleByIdHook = async(id) => {
+    try {
+        const response = await fetch(`http://localhost:5000/api/role/${id}` , {
+            headers : {
+                'Authorization' : `Bearer ${localStorage.getItem("token")}`
+            }
+        })
+
+        const data = await response.json();
+        return data
+    } catch (error) {
+        console.log(error)
+        throw new Error(error)   
+    }
+}

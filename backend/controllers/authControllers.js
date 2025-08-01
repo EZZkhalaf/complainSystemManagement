@@ -246,7 +246,7 @@ const login = async(req,res) => {
         if(!isPasswordValid)return res.status(400).json({success: false, message: 'wrong password' });
         
         let tempRole
-        tempRole = await Role.findOne({user:user._id})
+        tempRole = await Role.findOne({user:user._id}).select("-user").populate("permissions" , "-description")
         // if(!tempRole){
         //   tempRole = new Role({
         //     user : user._id ,
@@ -270,7 +270,7 @@ const login = async(req,res) => {
                 email: user.email,
                 role: tempRole.role ,
                 profilePicture : user.profilePicture ,
-                // permissions : tempRole.permissions
+                permissions : tempRole.permissions
             }
         })
         
