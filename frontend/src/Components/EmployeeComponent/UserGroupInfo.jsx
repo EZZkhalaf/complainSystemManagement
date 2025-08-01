@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom';
 import { getGroupInfoHook } from '../../utils/GroupsHelper';
+import { hasPermission } from '../../utils/AuthHooks';
+import { useAuthContext } from '../../Context/authContext';
 
 const UserGroupInfo = () => {
     const [group, setGroup] = useState(null);
@@ -19,7 +21,7 @@ const UserGroupInfo = () => {
   
     const navigate = useNavigate();
     const { id } = useParams();
-  
+    const { user} =useAuthContext();
     const fetchGroup = async () => {
       setLoading(true);
       try {
@@ -59,12 +61,15 @@ const UserGroupInfo = () => {
             Created at: {new Date(group.group?.createdAt).toLocaleDateString()}
           </p>
         </div>
-        {/* <button
-          onClick={() => navigate(`/adminPage/add-employee/${id}`)}
-          className="bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2 rounded-lg shadow transition-all"
-        >
-          + Add Employee
-        </button> */}
+
+        {hasPermission(user,"add_employee_to_group") && 
+          <button
+            onClick={() => navigate(`/userPage/add-employee/${id}`)}
+            className="bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2 rounded-lg shadow transition-all"
+          >
+            + Add Employee
+          </button>
+        }
       </div>
 
       {/* Group Users Header */}
@@ -86,13 +91,16 @@ const UserGroupInfo = () => {
                   <h3 className="text-lg font-semibold text-gray-800">{user.name}</h3>
                   <p className="text-gray-600 text-sm">{user.email}</p>
                 </div>
-                {/* <button 
-                  onClick={(e) => {
-                    removeUserFromGroup(e , user._id)
-                  }}
-                  className="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-md shadow-sm transition-colors">
-                  Remove
-                </button> */}
+
+                {hasPermission(user,"remove_employee_from_group") &&
+                    <button 
+                      onClick={(e) => {
+                        removeUserFromGroup(e , user._id)
+                      }}
+                      className="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-md shadow-sm transition-colors">
+                      Remove
+                    </button>
+                }
               </div>
             ))}
           </div>

@@ -70,10 +70,10 @@ const changeComplaintStatus = async (req, res) => {
     }
 
     // Check admin privileges
-    const isAdmin = await Role.findOne({ user: userId });
-    if (!isAdmin || isAdmin.role !== 'admin') {
-      return res.status(403).json({ success: false, message: 'Only admins can change complaint status' });
-    }
+    // const isAdmin = await Role.findOne({ user: userId });
+    // if (!isAdmin || isAdmin.role !== 'admin') {
+    //   return res.status(403).json({ success: false, message: 'Only admins can change complaint status' });
+    // }
 
     // Get complaint with user data
     const complaint = await Complaint.findById(complaintId).populate('userId');

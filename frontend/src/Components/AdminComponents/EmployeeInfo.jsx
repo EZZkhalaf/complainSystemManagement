@@ -6,6 +6,7 @@ import { adminUpdateUserInfoHook, changeUserRoleHook, getUserByIdHook } from '..
 import { toast } from 'react-toastify';
 import { useAuthContext } from '../../Context/authContext';
 import { fetchRolesHook } from '../../utils/RolesHelper';
+import { hasPermission } from '../../utils/AuthHooks';
 
 
 
@@ -59,25 +60,16 @@ const EmployeeInfo = () => {
     const navigate = useNavigate();
 
 
-
-
     const [editing, setEditing] = useState(false);
     const [selectedRole, setSelectedRole] = useState(employee?.role || 'User');
     const [editableName, setEditableName] = useState('');
     const [editableEmail, setEditableEmail] = useState('');
     const [newPassword, setNewPassword] = useState('');
 
-    const [editablePermissions, setEditablePermissions] = useState(employee?.permissions || []);
-
-
-    console.log(employee)
 
     const handleSaveChanges = async (e) => {
         e.preventDefault();
-        //  const mappedPermissions = {};
-        // allPermissions.forEach((perm) => {
-        //   mappedPermissions[perm] = editablePermissions.includes(perm);
-        // });
+        
 
 
         const userId = id;
@@ -96,9 +88,8 @@ const EmployeeInfo = () => {
         if (
           editableEmail !== employee.email ||
           editableName !== employee.name ||
-          newPassword.trim() !== "" || 
-          JSON.stringify(mappedPermissions) !== JSON.stringify(employee?.permissions)
-        ) {
+          newPassword.trim() !== "" 
+          ) {
           const newName = editableName;
           const newEmail = editableEmail;
           const adminId = user._id;
@@ -109,7 +100,7 @@ const EmployeeInfo = () => {
             newName,
             newEmail,
             newPassword,
-            mappedPermissions
+            
           );
 
           if (data.success) {
@@ -129,11 +120,6 @@ const EmployeeInfo = () => {
 
         setEditing(false);
     };
-
-
-
-
-
 
 
     const getUserData = async()=>{
@@ -164,20 +150,14 @@ const EmployeeInfo = () => {
       if (employee?.role) {
         setSelectedRole(selectedRole); // sync role after data is fetched
       }
-      if (employee?.permissions) {
-        const enabledPermissions = Object.keys(employee.permissions).filter(
-          (key) => employee.permissions[key] === true
-        );
-        setEditablePermissions(enabledPermissions);
-      }
+      
     }, [employee]);
-
 
   return (
     <div className="max-w-full mx-auto p-6 sm:p-10 bg-white rounded-3xl shadow-xl  border border-gray-200">
       <div className="flex justify-end mb-4">
 
-        {user.role === 'admin' && (
+        {(hasPermission(user,"edit_employee") && selectedRole !== "admin")&& (
           <div>
               {/* {user.permissions.editUsers && ( */}
                 <button

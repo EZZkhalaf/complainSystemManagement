@@ -32,6 +32,7 @@ import { useAuthContext } from './Context/authContext'
 import ManageRoles from './Components/RoleManagement/ManageRoles'
 import AssignUsersToRole from './Components/RoleManagement/AssignUsersToRole'
 import AddPermissionsToRole from './Components/RoleManagement/AddPermissionsToRole'
+import { hasPermission } from './utils/AuthHooks'
 
 const App = ()=> {
   const {user} = useAuthContext()
@@ -47,28 +48,30 @@ const App = ()=> {
 
         <Route path='/adminPage' element={
           <PrivateRoutes>
-            <RoleBasedRoutes requiredRole={[ 'admin']}>
+            <RoleBasedRoutes requiredRole={[ 'admin , supervisor']}>
               <AdminPage />
             </RoleBasedRoutes>
             </PrivateRoutes>
         }>
           <Route index element = {<AdminHero />}></Route>
           <Route path="/adminPage/complaints" element = {<ListComplaints />}></Route>
-          <Route path="/adminPage/groups" element = {<ListGroups />}></Route>
+          {hasPermission(user,"view_groups") && <Route path="/adminPage/groups" element = {<ListGroups />}></Route>}
+          
           <Route path="/adminPage/add-group" element = {<AddGroup />}></Route>        
           <Route path="/adminPage/current-group/:id" element = {<AdminGroupInfo />}></Route>        
           <Route path="/adminPage/add-employee/:id" element = {<AddEmployeeToGroup />}></Route>   
 
-          <Route path="/adminPage/complaint/:id" element = {<AdminComplainInfo />}></Route>     
+          {hasPermission(user,"view_complaints") && <Route path="/adminPage/complaint/:id" element = {<AdminComplainInfo />}></Route>  }
+             
+
 
           <Route path="/adminPage/settings" element = {<EditEmployeeProfile />}></Route>   
-
-          {/* {user?.permissions?.viewUsers && ( */}
+          {hasPermission(user,"view_employees") && (
             <>
               <Route path="/adminPage/listEmployees" element = {<ManageEmployees />}></Route> 
               <Route path="/adminPage/listEmployees/employee/:id" element = {<EmployeeInfo />}></Route>        
             </>
-          {/* )} */}
+          )}user,
 
 
           <Route path='/adminPage/manageRoles' element={<ManageRoles />}/>
@@ -84,29 +87,35 @@ const App = ()=> {
             </PrivateRoutes>
         }>
           <Route index element = {<UserHero />}></Route>
-          <Route path="/userPage/add-complaint" element = {<AddComplaint />}></Route>        
+               
+
+
+                  
+          {hasPermission(user,"add_complaint") && <Route path="/userPage/add-complaint" element = {<AddComplaint />}></Route>   }
           <Route path="/userPage/list-complaints/:id" element = {<ListUserComplaints />}></Route>        
           <Route path="/userPage/complaint/:id" element = {<UserComplaintInfo />}></Route>        
-          <Route path="/userPage/current-groups" element = {<ListUserGroups />}></Route>        
-          <Route path="/userPage/current-group/:id" element = {<UserGroupInfo />}></Route> 
-
-          
-          {/* {(user?.permissions?.deleteComplaints || user?.permissions?.changeComplaintStatus) && ( */}
+          {hasPermission(user,"view_complaints") && (
             <>
               <Route path="/userPage/complaints" element = {<ListComplaints />}></Route>
               <Route path="/userPage/otherComplaint/:id" element = {<AdminComplainInfo />}></Route>     
             </>
+          )}
+          
             
-          {/* )} */}
 
-          {/* {user?.permissions?.viewUsers && ( */}
-            <>
-              <Route path="/userPage/listEmployees" element = {<ManageEmployees />}></Route> 
-              <Route path="/userPage/listEmployees/employee/:id" element = {<EmployeeInfo />}></Route>        
-            </>
-          {/* )} */}
+
+          {hasPermission(user,"view_employees") &&<Route path="/userPage/listEmployees" element = {<ManageEmployees />}></Route>} 
+          {hasPermission(user,"view_employees") &&<Route path="/userPage/listEmployees/employee/:id" element = {<EmployeeInfo />}></Route>}        
 
           <Route path="/userPage/settings" element = {<EditEmployeeProfile />}></Route>  
+
+
+          <Route path="/userPage/current-groups" element = {<ListUserGroups />}></Route>      
+          <Route path="/userPage/current-group/:id" element = {<UserGroupInfo />}></Route> 
+          {hasPermission(user,"add_group") && <Route path="/userPage/add-group" element = {<AddGroup />}></Route>}
+          {hasPermission(user,"view_groups") && <Route path="/userPage/groups" element = {<ListGroups />}></Route>}  
+          {hasPermission(user,"add_employee_to_group") && <Route path="/userPage/add-employee/:id" element = {<AddEmployeeToGroup />}></Route>  }
+  
 
          
       

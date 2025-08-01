@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
     if (loading) return <div>Loading...</div>;
 
     return (
-        <UserContext.Provider value={{ user, login, logout ,setUserNewData , setUserNewData}}>
+        <UserContext.Provider value={{ user, login, logout ,setUserNewData }}>
             {children}
         </UserContext.Provider>
     );

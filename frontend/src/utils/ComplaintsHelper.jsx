@@ -78,6 +78,7 @@ export const getComaplintInfoHook = async(id) =>{
 
 export const changeComplaintStatusHook = async(complaintId, status ,userId) =>{
     try {
+        console.log("testing")
          const response = await fetch(`http://localhost:5000/api/complaints/` , {
             method : 'PUT',
             headers: {

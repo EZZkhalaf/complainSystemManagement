@@ -1,6 +1,7 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
 import { useAuthContext } from '../../Context/authContext';
+import { hasPermission } from '../../utils/AuthHooks';
 
 const AdminSideBar = () => {
   const navLinkStyles =
@@ -31,7 +32,7 @@ const AdminSideBar = () => {
         <span>List Complaints</span>
       </NavLink>
 
-        {/* {user.permissions.viewGroups &&( */}
+        {hasPermission(user,"view_groups") &&(
           <NavLink
             to="/adminPage/groups"
             className={({ isActive }) =>
@@ -40,9 +41,9 @@ const AdminSideBar = () => {
           >
             <span>List Groups</span>
           </NavLink>
-        {/* )} */}
+         )} 
       
-      {/* {user?.permissions?.viewUsers &&( */}
+      {hasPermission(user,"view_groups") &&(
         <NavLink
           to="/adminPage/listEmployees"
           className={({ isActive }) =>
@@ -51,16 +52,17 @@ const AdminSideBar = () => {
         >
           <span>Manage Employees</span>
         </NavLink>
-      {/* )} */}
-
-      <NavLink
-          to="/adminPage/manageRoles"
-          className={({ isActive }) =>
-            `${navLinkStyles} ${isActive ? activeLinkStyles : ''}`
-          }
-        >
-          <span>Manage Roles</span>
-        </NavLink>
+       )}
+      {hasPermission(user,"view_roles") &&
+        <NavLink
+            to="/adminPage/manageRoles"
+            className={({ isActive }) =>
+              `${navLinkStyles} ${isActive ? activeLinkStyles : ''}`
+            }
+          >
+            <span>Manage Roles</span>
+          </NavLink>
+        }
     </div>
   );
 };

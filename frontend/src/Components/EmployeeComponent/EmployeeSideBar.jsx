@@ -2,6 +2,7 @@ import React from 'react'
 import { NavLink } from 'react-router-dom';
 import { useAuthContext } from '../../Context/authContext';
 import { CiSettings } from "react-icons/ci";
+import { hasPermission } from '../../utils/AuthHooks';
 
 const EmployeeSideBar = () => {
     const {user} = useAuthContext();
@@ -24,18 +25,19 @@ const EmployeeSideBar = () => {
                 Home
             </span>
         </NavLink>
-        
-        <NavLink 
-            to={"/userPage/add-complaint"}
-            className={({ isActive }) =>
-            `${navLinkStyles} ${isActive ? activeLinkStyles : ''}`
-            }
-        >
-            <span>
-                Add Complaint
-            </span>
-        </NavLink>
-
+            
+        {hasPermission(user,"add_complaint") && 
+            <NavLink 
+                to={"/userPage/add-complaint"}
+                className={({ isActive }) =>
+                `${navLinkStyles} ${isActive ? activeLinkStyles : ''}`
+                }
+            >
+                <span>
+                    Add Complaint
+                </span>
+            </NavLink>
+        }
         <NavLink 
             to={`/userPage/list-complaints/${user._id}`}
             className={({ isActive }) =>
@@ -48,20 +50,18 @@ const EmployeeSideBar = () => {
         </NavLink>
 
 
-        {/* {(user?.permissions?.deleteComplaints || user?.permissions?.changeComplaintStatus )&& ( */}
-
+            {hasPermission(user,"view_complaints") && 
                 <NavLink 
                 to={"/userPage/complaints"}
                 className={({ isActive }) =>
                 `${navLinkStyles} ${isActive ? activeLinkStyles : ''}`
+                }
+                >
+                    <span>
+                        View Other's Complaints
+                    </span>
+                </NavLink>
             }
-            >
-                <span>
-                    View Other's Complaints
-                </span>
-            </NavLink>
-
-        {/* )} */}
         <NavLink 
             to={"/userPage/current-groups"}
             className={({ isActive }) =>
@@ -69,23 +69,45 @@ const EmployeeSideBar = () => {
             }
         >
             <span>
-                List Groups
+                View Joined Groups
             </span>
         </NavLink>
 
+        {hasPermission(user,"view_groups") &&
+            <NavLink 
+                to={"/userPage/groups"}
+                className={({ isActive }) =>
+                `${navLinkStyles} ${isActive ? activeLinkStyles : ''}`
+                }
+            >
+                <span>
+                    Manage Groups
+                </span>
+            </NavLink>
+        }
 
-        {/* {user.permissions.viewUsers &&( */}
+
+        {hasPermission(user,"view_employees") &&(
             <NavLink
             to="/userPage/listEmployees"
             className={({ isActive }) =>
                 `${navLinkStyles} ${isActive ? activeLinkStyles : ''}`
             }
             >
-            <span>View Employees</span>
+            <span>Manage Employees</span>
             </NavLink>
-        {/* )} */}
+        )}
 
-
+        {/* {hasPermission("view_roles") &&
+        <NavLink
+            to="/userPage/manageRoles"
+            className={({ isActive }) =>
+                `${navLinkStyles} ${isActive ? activeLinkStyles : ''}`
+            }
+            >
+            <span>Manage Roles</span>
+            </NavLink>
+        } */}
 
 
     </div>

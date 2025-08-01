@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAuthContext } from '../../Context/authContext';
 import { OrbitProgress } from 'react-loading-indicators';
 import { toast } from 'react-toastify';
+import { hasPermission } from '../../utils/AuthHooks';
 
 const AdminComplainInfo = () => {
   const [complaint, setComplaints] = useState([]);
@@ -32,12 +33,11 @@ const changeComaplaintStatus = async(e , value) =>{
     
     let status = value
 
-    if(!user.permissions.changeComplaintStatus){
+    if(!hasPermission(user,"edit_complaint")){
       toast.error("permission denied .")
       return null;
     }
     
-
     const data = await changeComplaintStatusHook(complaintId , status , userId)
     setComplaints(data);
 }
@@ -67,6 +67,8 @@ useEffect(() => {
       default: return '';
     }
   };
+
+  console.log(complaint)
 return (
   <div className="max-w-4xl mx-auto p-6">
     <div className="flex justify-between items-center mb-6">
@@ -97,23 +99,23 @@ return (
         <span className="block font-medium text-gray-700">User:</span>
           
 
-          {/* {user.permissions.viewUsers ? (
+          {hasPermission(user,"view_employees") ? (
             <div>
               <div 
                   onClick={()=>navigate(`/${user.role === 'admin' ? "adminPage" : "userPage" }/listEmployees/employee/${complaint?.userId?._id}`)}>
-                  <span className="text-gray-900 bg-gray-400 p-1 rounded-full hover:bg-gray-600 hover:text-white ">{complaint.userId?.name || 'Unknown'}</span>
+                  <span className="text-gray-900 bg-gray-400 p-1 rounded-full hover:bg-gray-600 hover:text-white ">{complaint?.userId?.name || 'Unknown'}</span>
                 </div>
             </div>
           ):(
             <div>
-                <span className="text-gray-900 bg-gray-400 p-1 rounded-full hover:bg-gray-600 hover:text-white ">{complaint.userId?.name || 'Unknown'}</span>
+                <span className="text-gray-900 bg-gray-400 p-1 rounded-full hover:bg-gray-600 hover:text-white ">{complaint?.userId?.name || 'Unknown'}</span>
             </div>
-          )} */}
+          )}
           <div>
-              <div 
+              {/* <div 
                   onClick={()=>navigate(`/${user.role === 'admin' ? "adminPage" : "userPage" }/listEmployees/employee/${complaint?.userId?._id}`)}>
                   <span className="text-gray-900 bg-gray-400 p-1 rounded-full hover:bg-gray-600 hover:text-white ">{complaint.userId?.name || 'Unknown'}</span>
-                </div>
+                </div> */}
             </div>
       </div>
 
@@ -134,7 +136,8 @@ return (
 
       <div>
         <span className="block font-medium text-gray-700">Status:</span>
-        {complaint.status === "pending" ? (
+        {(complaint.status === "pending" && hasPermission(user,"edit_complaint")) ? (
+          <div>
           <select
             className="mt-1 px-3 py-2 border rounded-md text-sm text-gray-800 bg-white"
             defaultValue={complaint.status}
@@ -148,6 +151,7 @@ return (
             <option value="resolved">Resolved</option>
             <option value="rejected">Rejected</option>
           </select>
+          </div>
         ) : (
           <span
             className={`inline-block mt-1 px-3 py-1 rounded-full text-sm font-medium ${getStatusStyle(

@@ -1,4 +1,5 @@
 import { toast } from "react-toastify"
+import { useAuthContext } from "../Context/authContext";
 
 export const loginHook = async(email,password,navigate,login) =>{
     try {
@@ -72,5 +73,12 @@ export const registerHook = async(name , email , password , navigate) =>{
     }
 }
 
+
+export const hasPermission = (user ,name) =>{
+    // const {user} = useAuthContext();
+    const permissions = user?.permissions || []
+
+    return permissions.some( p=> p.name === name);
+}
 
 

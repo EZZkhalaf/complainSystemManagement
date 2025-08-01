@@ -3,6 +3,7 @@ import { useAuthContext } from '../../Context/authContext';
 import { listGroupsHook } from '../../utils/GroupsHelper';
 import { useNavigate } from 'react-router-dom';
 import { OrbitProgress } from 'react-loading-indicators';
+import { hasPermission } from '../../utils/AuthHooks';
 
 const ListGroups = () => {
   const { user } = useAuthContext();
@@ -17,6 +18,7 @@ const ListGroups = () => {
 
   };
 
+  
 
   useEffect(() => {
     if (user?._id) {
@@ -33,15 +35,17 @@ const ListGroups = () => {
         <h1 className="text-3xl font-semibold text-gray-800 mb-8 text-center">All The Groups</h1>
 
         <div className="mb-6 flex justify-end">
-          <button 
-          onClick={()=> navigate('/adminPage/add-group')}
-            className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors">
-            Create Group
-          </button>
+          {hasPermission(user,"add_group") && (
+            <button 
+            onClick={()=> navigate(`/${user.role === 'admin' ? "adminPage" : 'userPage'}/add-group`)}
+              className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors">
+              Create Group
+            </button>
+          )}
         </div>
 
         {groups.length === 0 ? (
-          <p className="text-center text-gray-500">You are not part of any groups yet.</p>
+          <p className="text-center text-gray-500">No groups yet.</p>
         ) : (
           <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
             <table className="min-w-full divide-y divide-gray-100 text-sm">
@@ -56,7 +60,7 @@ const ListGroups = () => {
                 {groups.map(group => (
                   <tr
                     key={group._id}
-                    onClick={() => navigate(`/adminPage/current-group/${group._id}`)}
+                    onClick={() => navigate(`/${user.role === 'admin' ? "adminPage" : "userPage"}/current-group/${group._id}`)}
                     className="hover:bg-gray-50 transition-colors cursor-pointer"
                   >
                     <td className="p-4 text-gray-800 font-medium">{group.name}</td>

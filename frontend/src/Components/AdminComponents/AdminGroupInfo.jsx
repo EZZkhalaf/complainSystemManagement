@@ -4,6 +4,7 @@ import { getGroupInfoHook } from '../../utils/GroupsHelper';
 import { removeUserFromGroupHook } from '../../utils/UserHelper';
 import { OrbitProgress } from 'react-loading-indicators';
 import { useAuthContext } from '../../Context/authContext';
+import { hasPermission } from '../../utils/AuthHooks';
 
 const AdminGroupInfo = () => {
   const [group, setGroup] = useState(null);
@@ -76,7 +77,6 @@ const AdminGroupInfo = () => {
     fetchGroup();
     
   }, [id ]);
-  console.log(group)
 
   if(loading) return(
             <div className="max-w-md mx-auto p-8 bg-gradient-to-br space-y-6 flex justify-center items-center">
@@ -102,13 +102,14 @@ const AdminGroupInfo = () => {
           </p>
         </div>
 
-        
-        <button
-          onClick={() => navigate(`/adminPage/add-employee/${id}`)}
-          className="bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2 rounded-lg shadow transition-all"
-        >
-          + Add Employee
-        </button>
+        {hasPermission(user,"add_employee_to_group") && 
+          <button
+            onClick={() => navigate(`/adminPage/add-employee/${id}`)}
+            className="bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2 rounded-lg shadow transition-all"
+          >
+            + Add Employee
+          </button>
+        }
       </div>
 
       {/* Group Users Header */}
@@ -132,7 +133,7 @@ const AdminGroupInfo = () => {
                   <p className="text-gray-600 text-sm">{user1.email}</p>
                 </div>
 
-                {user?.permissions?.removeUsersFromGroups && (
+                {hasPermission(user,"remove_employee_from_group") && (
                   <button 
                     onClick={(e) => {
                       removeUserFromGroup(e , user._id)

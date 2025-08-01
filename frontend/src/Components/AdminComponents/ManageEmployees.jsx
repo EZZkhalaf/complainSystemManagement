@@ -13,11 +13,11 @@ const navigate = useNavigate();
     <div>
       <div
         // onClick={() => navigate(`/adminPage/listEmployees/employee/${emp.user._id}`)}
-        onClick={() => navigate(`/${user.role === 'admin' ? "adminPage" : "userPage"}/listEmployees/employee/${emp.user._id}`)}
+        onClick={() => navigate(`/${user.role === 'admin' ? "adminPage" : "userPage"}/listEmployees/employee/${emp?.user?._id}`)}
         className="bg-white rounded-3xl shadow-md p-6 border border-gray-100 hover:shadow-xl hover:border-blue-200 transition duration-200 flex flex-col justify-between items-center cursor-pointer group"
       >
         <img
-          src={emp.user.profilePicture ? `http://localhost:5000${emp.user.profilePicture}` : defaultPhoto}
+          src={emp.user.profilePicture ? `http://localhost:5000${emp?.user?.profilePicture}` : defaultPhoto}
           alt="Profile"
           className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-lg group-hover:scale-105 transition-transform duration-300"
         />

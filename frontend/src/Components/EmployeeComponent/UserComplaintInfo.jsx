@@ -2,6 +2,7 @@ import { changeComplaintStatusHook, deleteComplaintHook, getComaplintInfoHook } 
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuthContext } from '../../Context/authContext';
 import { useState,useEffect } from 'react';
+import { hasPermission } from '../../utils/AuthHooks';
 
 
 const UserComplaintInfo = () => {
@@ -64,14 +65,15 @@ const UserComplaintInfo = () => {
               Back to Complaints
             </button>
 
+          {hasPermission(user,"delete_complaint") && 
             <button
-              onClick={handleDeleteComplaint}
-              className="px-5 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition"
-            >
-              Delete Complaints
-            </button>
+                onClick={handleDeleteComplaint}
+                className="px-5 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition"
+              >
+                Delete Complaints
+              </button>
+          }
           </div>
-  
         <h1 className="text-3xl font-bold text-blue-800 mb-6">Complaint Details</h1>
   
         <div className="bg-white p-6 rounded-xl shadow-md space-y-4">
@@ -90,15 +92,12 @@ const UserComplaintInfo = () => {
             <p className="text-gray-800 mt-1 text-sm">{complaint.description}</p>
           </div>
   
-          <div>
-            <span className="block font-medium text-gray-700">Assigned Admin:</span>
-            <span className="text-gray-700">{complaint.complaintAdmin?.name || 'Not Assigned'}</span>
-          </div>
+          
   
           <div>
               <span className="block font-medium text-gray-700">Status:</span>
-              {/* {complaint.status === "pending" ? (
-                  <select
+              {/* {hasPermission("edit_complaint") ? ( */}
+                  {/* <select
                   className="mt-1 px-3 py-2 border rounded-md text-sm text-gray-800 bg-white"
                   defaultValue={complaint.status}
                   onChange={(e) =>{
@@ -110,8 +109,8 @@ const UserComplaintInfo = () => {
                   <option value="in-progress">In Progress</option>
                   <option value="resolved">Resolved</option>
                   <option value="rejected">Rejected</option>
-                  </select>
-              ) : ( */}
+                  </select> */}
+              {/* ) : (  */}
                   <span
                   className={`inline-block mt-1 px-3 py-1 rounded-full text-sm font-medium ${getStatusStyle(
                       complaint.status
@@ -119,7 +118,7 @@ const UserComplaintInfo = () => {
                   >
                   {complaint.status}
                   </span>
-              {/* )} */}
+               {/* )} */}
               </div>
         </div>
       </div>

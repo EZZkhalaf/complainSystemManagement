@@ -7,6 +7,10 @@ import { useNavigate } from 'react-router-dom';
 const RoleComponent = ({roles , setAddEmployee}) => {
      const navigate = useNavigate();
 
+     const deleteRole = async(roleId) => {
+        console.log(roleId)
+     }
+
   return (
     <div className="p-6 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-6">
       {roles.map((role, index) => (
@@ -63,6 +67,19 @@ const RoleComponent = ({roles , setAddEmployee}) => {
                         }`}
                       >
                         Assign Permission
+                      </button>
+                    )}
+                  </Menu.Item>
+
+                  <Menu.Item>
+                    {({ active }) => (
+                      <button
+                        onClick={() => deleteRole(role._id)}
+                        className={`w-full text-left px-4 py-2 text-sm ${
+                          active ? 'bg-blue-100 text-blue-800' : 'text-gray-800'
+                        }`}
+                      >
+                        Delete Role
                       </button>
                     )}
                   </Menu.Item>
