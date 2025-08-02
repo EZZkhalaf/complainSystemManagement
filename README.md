@@ -1,167 +1,162 @@
-📢 Complaint Management System – MERN Stack
-A full-featured Complaint Management System built with the MERN stack, secured with a robust role-based access control system, featuring permission management, real-time email notifications, and a user-friendly Tailwind CSS interface.
+# 📢 Complaint Management System – MERN Stack
 
-🚀 Features
+A powerful, secure, and user-friendly system for submitting, tracking, and managing complaints. Built with the MERN stack and Tailwind CSS, featuring robust role-based access control, permission management, real-time email notifications, and comprehensive API documentation via Swagger.
 
-🧾 Complaint Handling
-Users can submit complaints via a user-friendly interface.
+---
 
-Admins and Moderators can manage, update, and resolve complaints.
+## 🚀 Features
 
-Complaints are tracked with timestamps and status updates.
+### 🧾 Complaint Handling
 
-🔐 Role-Based Access Control (RBAC)
-Admins can create, update, and delete roles (e.g., moderator, support agent).
+* **Submit Complaints:** Users can file new complaints through an intuitive UI.
+* **Track Status:** Complaints are timestamped and tracked through stages (e.g., Pending, In Progress, Resolved).
+* **Manage Complaints:** Admins and Moderators can review, update statuses, and resolve complaints.
 
-Each role can have its own customizable set of permissions (e.g., view_complaint, delete_user).
+### 🔐 Role-Based Access Control (RBAC)
 
-Permissions are securely checked at the backend before executing any sensitive action.
+* **Dynamic Roles:** Admins can create, update, and delete roles (e.g., `moderator`, `support_agent`).
+* **Custom Permissions:** Assign granular permissions (e.g., `view_complaint`, `delete_user`) to each role.
+* **Secure Enforcement:** All protected endpoints verify permissions server-side.
 
-📩 Email Notifications
-Users receive email alerts when:
+### 📩 Email Notifications
 
-They register and need to verify their account.
+* **Account Verification:** Users receive a verification email upon registration.
+* **Status Updates:** Automatic notifications when complaint status changes.
+* **Transactional Emails:** Powered by Nodemailer with configurable SMTP settings.
 
-The status of their complaint changes (e.g., from "pending" to "resolved").
+### 📘 Swagger API Documentation
 
-Implemented using nodemailer for reliable transactional email delivery.
+* **Interactive Docs:** Explore and test endpoints via Swagger UI.
+* **Endpoint Coverage:** Full documentation for user auth, complaints, roles, permissions, and admin summary.
+* **Access URL:** `/api-docs` (e.g., `http://localhost:5000/api-docs`).
 
-📘 Swagger API Documentation
-Full backend API documented using Swagger (OpenAPI).
+### 🖥️ Admin Dashboard
 
-Developers can test endpoints directly from the Swagger UI.
+* **Overview:** Real-time system summary (total users, complaints, roles).
+* **Role Management:** Create, edit, and delete roles and their permissions.
+* **User Assignments:** Add or remove users from roles.
 
-Available at: /api-docs
+### 📦 Frontend
 
-🖥️ Admin Dashboard
-Admins have access to a panel where they can:
+* **Tech:** React.js, Tailwind CSS, React Router DOM.
+* **Responsive:** Mobile-first design with a clean, reusable component library.
+* **Secure Routes:** Client-side protection based on user roles.
 
-View system summaries (e.g., total users, complaints).
+---
 
-Manage user roles and permissions.
+## 🛠️ Tech Stack
 
-Add or remove users from roles/groups.
+| Layer        | Technologies                                    |
+| ------------ | ----------------------------------------------- |
+| **Frontend** | React.js, Tailwind CSS, React Router DOM        |
+| **Backend**  | Node.js, Express.js                             |
+| **Database** | MongoDB (Mongoose ODM)                          |
+| **Auth**     | JWT-based authentication                        |
+| **Email**    | Nodemailer                                      |
+| **Docs**     | Swagger (`swagger-jsdoc`, `swagger-ui-express`) |
+| **Other**    | RESTful APIs, Custom Middleware, Role Guards    |
 
-📦 Frontend
-Built with React.js and Tailwind CSS for fast, responsive UI.
+---
 
-Includes:
+## ⚙️ Setup Instructions
 
-Authenticated pages for admins, moderators, and users.
+### 🧪 Prerequisites
 
-Mobile-friendly layout.
+* Node.js (v14+)
+* npm or yarn
+* MongoDB instance (local or Atlas)
 
-Reusable, clean UI components.
+### 🖥️ Local Installation
 
-🛠️ Tech Stack
+1. **Clone the repository**
 
-| Layer        | Tools Used                                             |
-| ------------ | ------------------------------------------------------ |
-| **Frontend** | React.js, Tailwind CSS, React Router DOM               |
-| **Backend**  | Node.js, Express.js                                    |
-| **Database** | MongoDB (via Mongoose ODM)                             |
-| **Auth**     | JWT-based authentication                               |
-| **Email**    | Nodemailer                                             |
-| **Docs**     | Swagger (via `swagger-jsdoc` and `swagger-ui-express`) |
-| **Other**    | RESTful APIs, Middleware, Role Guards                  |
+   ```bash
+   git clone https://github.com/EZZkhalaf/complainSystemManagement.git
+   cd complainSystemManagement
+   ```
 
+2. **Backend setup**
 
-⚙️ Setup Instructions
-🧪 Prerequisites
-Node.js & npm
+   ```bash
+   cd backend
+   npm install
+   ```
 
-MongoDB instance (local or cloud like MongoDB Atlas)
+   Create a `.env` file in `backend/` with:
 
-🖥️ Local Installation
-1. Clone the Repo
+   ```env
+   PORT=5000
+   CONNECTION_STRING=<Your MongoDB URI>
+   JWT_SECRET=<Your JWT Secret>
 
+   EMAIL_USER=<Your SMTP Email>
+   EMAIL_PASS=<Your SMTP Password>
+   EMAIL_HOST=smtp.gmail.com
+   EMAIL_PORT=587
+   ```
 
-git clone https://github.com/EZZkhalaf/complainSystemManagement.git
-cd complainSystemManagement
+   **Run the backend**
 
-2. Backend Setup
-    cd backend
-    npm install
+   ```bash
+   npm start
+   ```
 
-Create a .env file in backend/:
-    
+3. **Frontend setup**
 
-    PORT=5000
-    # CONNECTION_STRING=YOURCONNECTIONSTRING
+   ```bash
+   cd ../frontend
+   npm install
+   npm start
+   ```
 
-    CONNECTION_STRING=YOURCONNECTIONSTRING
-    JWT_SECRET="YOUJSONWEBTOKENSTRING"
+Your app should now be running:
 
+* Frontend: `http://localhost:3000`
+* Backend API: `http://localhost:5000`
+* Swagger UI: `http://localhost:5000/api-docs`
 
-    EMAIL_USER=youEmail@gmail.com
-    EMAIL_PASS="You String Password"
+---
 
-    EMAIL_HOST=smtp.gmail.com
-    EMAIL_PORT=587
+## 🔑 Admin Access
 
-    Run The Backend
-    npm start
-3. Frontend Setup
-    cd ../frontend
-    npm install
-    npm start
+To access the admin dashboard, ensure you have a user with the `admin` role. You can seed an admin account or insert one manually via MongoDB.
 
-🔑 Admin Access
-To access the admin panel, use an account with the admin role and the correct permissions. If none exists, you can insert one manually into the database or set a default in the seed script.
+---
 
-📚 API Documentation
-Swagger UI is available at:
-http://localhost:5000/api-docs
+## 🛡️ Security
 
-Generated using swagger-jsdoc and includes routes for:
+* **JWT Authentication:** Protects all API routes.
+* **Role & Permission Middleware:** Server-side checks before sensitive operations.
+* **Environment Variables:** Secure credentials in `.env` files.
 
-User registration/login
+---
 
-Complaint CRUD
+## 🧪 Sample Roles & Permissions
 
-Role and permission management
+| Role          | Permissions                                             |
+| ------------- | ------------------------------------------------------- |
+| **admin**     | `add_user`, `delete_complaint`, `edit_role`, `view_all` |
+| **moderator** | `view_complaint`, `update_status`                       |
+| **user**      | `create_complaint`, `view_own_complaint`                |
 
-Admin dashboard summary
+---
 
+## 📌 Future Improvements
 
-📬 Email Service
-Transactional emails are powered by Nodemailer.
+* Audit logs for user actions and permission changes
+* File attachments for complaints
+* Real-time updates via WebSockets
+* Multi-language support
+* Automated tests and CI/CD pipeline
 
-Used for:
+---
 
-Registration verification
+## 👨‍💻 Author
 
-Complaint status updates
+Built and maintained by **Ezzeldeen Khalaf**. Contributions and feedback are welcome.
 
-Password resets (optional)
+---
 
-🔐 Security
-JWT-based authentication
+## 📄 License
 
-Middleware to check user roles and specific permissions
-
-Backend-only access control (not just UI hiding)
-
-
-🧪 Sample Roles and Permissions
-| Role        | Permissions                                             |
-| ----------- | ------------------------------------------------------- |
-| `admin`     | `add_user`, `delete_complaint`, `edit_role`, `view_all` |
-| `moderator` | `view_complaint`, `update_status`                       |
-| `user`      | `create_complaint`, `view_own_complaint`                |
-
-
-📌 To Do (Future Ideas)
-User activity logs
-
-File attachments in complaints
-
-Live notifications using WebSockets
-
-Multi-language support
-
-Audit trail for permission changes
-
-👨‍💻 Author
-Built by Ezzeldeen Khalaf
-Open for contributions and suggestions.
+This project is licensed under the **MIT License**. Feel free to use and modify.
