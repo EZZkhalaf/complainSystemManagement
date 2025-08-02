@@ -51,7 +51,38 @@ const router = express.Router();
  */
 router.post('/:userId' , userMiddleware, checkPermission("add_group"),createGroup);
 
-
+/**
+ * @swagger
+ * /api/groups/{groupId}:
+ *   delete:
+ *     summary: Delete a group by its ID
+ *     tags: [Groups]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the group to delete
+ *     responses:
+ *       200:
+ *         description: Group deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Group not found
+ *       500:
+ *         description: Server error
+ */
 router.delete("/:groupId" , userMiddleware , checkPermission("delete_group"),deleteGroup);
 
 /**

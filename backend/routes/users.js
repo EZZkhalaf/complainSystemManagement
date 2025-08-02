@@ -85,7 +85,20 @@ router.post("/changeRole" , userMiddleware,checkPermission("change_user_role"),c
  */
 router.get("/" , userMiddleware,checkPermission("view_employees"),fetchUsers);
 
-
+/**
+ * @swagger
+ * /api/user/getUsersRoleEdition:
+ *   get:
+ *     summary: Get all users with roles for editing roles
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of users with roles
+ *       500:
+ *         description: Server error
+ */
 router.get("/getUsersRoleEdition" , userMiddleware,fetchUsersRoleEdition);
 
 
@@ -184,13 +197,157 @@ router.post("/add" , userMiddleware,checkPermission("add_employee_to_group") ,ad
 router.get("/getSummary/:id", userMiddleware, checkPermission("view_dashboard_summary"),getAdminSummary);
 
 
-
+/**
+ * @swagger
+ * /api/user/editInfo/{id}:
+ *   put:
+ *     summary: Edit own user information (with email verification if changed)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: User ID
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               newName:
+ *                 type: string
+ *               newEmail:
+ *                 type: string
+ *               oldPassword:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *               profilePicture:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: User info updated or verification sent
+ *       400:
+ *         description: Email already in use
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error
+ */
 router.put('/editInfo/:id' ,userMiddleware, upload.single("profilePicture"),editUserInfo)
 
 
+/**
+ * @swagger
+ * /api/user/editInfo/admin/{id}:
+ *   put:
+ *     summary: Admin edits another user's information
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID of admin performing the operation
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userId
+ *               - newName
+ *               - newEmail
+ *             properties:
+ *               userId:
+ *                 type: string
+ *               newName:
+ *                 type: string
+ *               newEmail:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: User updated successfully
+ *       401:
+ *         description: Only admin can edit user info
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error
+ */
 router.put('/editInfo/admin/:id' ,userMiddleware  , checkPermission("edit_employee"),adminEditUserInfo)
 
+
+/**
+ * @swagger
+ * /api/user/getUser/{id}:
+ *   get:
+ *     summary: Get user by ID including groups and complaints
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User details retrieved
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @swagger
+ * /api/user/verify-email:
+ *   get:
+ *     summary: Verify email change using token
+ *     tags: [Users]
+ *     parameters:
+ *       - in: query
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       302:
+ *         description: Redirects to frontend confirmation page
+ *       400:
+ *         description: Invalid or expired token
+ */
 router.get('/getUser/:id' ,userMiddleware, getUserById)
 
+/**
+   * @swagger
+   * /api/user/getUsersRoleEdition:
+   *   get:
+   *     summary: Get all users with roles for editing roles
+   *     tags: [Users]
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: List of users with roles
+   *       500:
+   *         description: Server error
+   */
 router.get('/verify-email' , verifyEmailUpdate)
 module.exports = router;
