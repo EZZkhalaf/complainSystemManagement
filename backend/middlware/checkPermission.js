@@ -3,21 +3,19 @@ const Role = require('../model/Role');
 const checkPermission = (permissionName) => {
   return async (req, res, next) => {
     try {
-      const userId = req.user?._id;
-        console.log("testing")
-      if (!userId) {
+      const user = req.user;
+      if (!user) {
         return res.status(401).json({
           success: false,
-          message: "No user ID found in request. Ensure userMiddleware is used.",
+          message: "No user  found in request. Ensure userMiddleware is used.",
         });
       }
 
-      const roleDoc = await Role.findOne({ user: userId });
-
-      if (!roleDoc || !roleDoc.permissions?.[permissionName]) {
+      const hasPermission = user.permissions.some((perm) => perm.name === permissionName)
+      if (!hasPermission) {
         return res.status(403).json({
           success: false,
-          message: "Permission denied",
+          message: 'Permission denied',
         });
       }
 

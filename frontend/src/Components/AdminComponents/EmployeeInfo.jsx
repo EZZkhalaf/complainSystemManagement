@@ -49,7 +49,7 @@ const getStatusStyles = (status) => {
 const EmployeeInfo = () => {
     const {id} = useParams();
     
-    const{user} = useAuthContext();
+    const {user} = useAuthContext();
     const [employee , setEmployee] = useState(null)
     const [groups , setGroups] = useState([])
     const [complaints , setComplaints] = useState([])
@@ -131,15 +131,15 @@ const EmployeeInfo = () => {
 
         if (!data || !data.user || data.user.length === 0) return;
 
-        const user = data.user[0]; 
+        const user1 = data.user[0]; 
 
-        setEmployee(user);
+        setEmployee(user1);
         setGroups(data.groups);
         setComplaints(data.complaints);
         setSelectedRole(data.role); // You already have role in response
 
-        setEditableName(user.name);
-        setEditableEmail(user.email);
+        setEditableName(user1.name);
+        setEditableEmail(user1.email);
               
     }
     useEffect(()=>{
@@ -153,6 +153,7 @@ const EmployeeInfo = () => {
       
     }, [employee]);
 
+    console.log(employee)
   return (
     <div className="max-w-full mx-auto p-6 sm:p-10 bg-white rounded-3xl shadow-xl  border border-gray-200">
       <div className="flex justify-end mb-4">

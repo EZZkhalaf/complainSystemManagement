@@ -68,7 +68,6 @@ export const addGroupHook = async(userId , name , description , navigate) =>{
 
 export const getGroupInfoHook = async(groupId)=>{
         try {
-            console.log(groupId)
       const res = await fetch(`http://localhost:5000/api/group/${groupId}`, {
         method : "GET",
         headers: {
@@ -86,4 +85,25 @@ export const getGroupInfoHook = async(groupId)=>{
     } catch (error) {
       console.error("Failed to fetch groups:", error);
     } 
+}
+
+export const deleteGroupHook = async(groupId , navigate) =>{
+  try {
+      const res = await fetch(`http://localhost:5000/api/group/${groupId}`, {
+        method : "Delete",
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        } 
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(data.message)
+        navigate(-1)
+      } else {
+        toast.error(data.message || "something wrong with the server ")
+        return 
+      }
+  }catch (error) {
+      console.error("Failed to fetch groups:", error);
+  } 
 }

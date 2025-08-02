@@ -48,7 +48,39 @@ const getRoleById = async(req,res)=>{
     }
 }
 
-// const getRoleEmployees
+
+const deleteRole = async (req, res) => {
+  try {
+    const { roleId } = req.params;
+
+
+    const roleToDelete = await Role.findById(roleId);
+    if (!roleToDelete) {
+      return res.status(404).json({ success: false, message: "Role not found" });
+    }
+
+    const usersToReassign = roleToDelete.user;
+
+    let userRole = await Role.findOne({ role: "user" });
+
+    if (!userRole) {
+      userRole = new Role({ role: "user", user: [] });
+    }
+
+    userRole.user = Array.from(new Set([...userRole.user, ...usersToReassign]));
+    await userRole.save();
+
+    await Role.findByIdAndDelete(roleId);
+    const roles = await Role.find().populate("permissions");
+
+    return res.status(200).json({ success: true, message: "Role deleted and users reassigned." ,roles });
+  } catch (error) {
+    console.error("Error deleting Role:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+
 
 const addPermissions = async(req,res) =>{
     try {
@@ -149,4 +181,4 @@ const addPermissionsToRole = async(req,res) =>{
     }
 }
 
-module.exports = {addNewRole , getRoles , addPermissions , fetchPermissions , addPermissionsToRole , getRoleById}
+module.exports = {addNewRole , getRoles , addPermissions , fetchPermissions , addPermissionsToRole , getRoleById , deleteRole}

@@ -1,14 +1,19 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import { BsThreeDotsVertical } from 'react-icons/bs';
-import { fetchRolesHook } from '../../utils/RolesHelper';
+import { deleteRoleHook, fetchRolesHook } from '../../utils/RolesHelper';
 import { useNavigate } from 'react-router-dom';
 
-const RoleComponent = ({roles , setAddEmployee}) => {
+const RoleComponent = ({roles , setAddEmployee , setRoles}) => {
      const navigate = useNavigate();
 
      const deleteRole = async(roleId) => {
         console.log(roleId)
+
+        const data = await deleteRoleHook(roleId);
+        if(data.success){
+          setRoles(data.roles)
+        }
      }
 
   return (
@@ -33,7 +38,7 @@ const RoleComponent = ({roles , setAddEmployee}) => {
               leaveFrom="transform opacity-100 scale-100"
               leaveTo="transform opacity-0 scale-95"
             >
-              <Menu.Items className="absolute right-0 mt-2 w-44 origin-top-right bg-white border border-gray-200 divide-y divide-gray-100 rounded-md shadow-lg focus:outline-none">
+              <Menu.Items className=" absolute right-0 mt-2 w-44 origin-top-right bg-white border border-gray-200 divide-y divide-gray-100 rounded-md shadow-lg focus:outline-none">
                 <div className="py-1">
                   <Menu.Item>
                     {({ active }) => (

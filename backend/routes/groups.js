@@ -1,6 +1,6 @@
 const express = require('express');
 const  userMiddleware  = require('../middlware/userMiddlware');
-const { createGroup , addUserToGroup, removeUserFromGroup, groupInfoAndUsers, listGroups, getUserGroups } = require('../controllers/groupsControllers');
+const { createGroup , addUserToGroup, removeUserFromGroup, groupInfoAndUsers, listGroups, getUserGroups, deleteGroup } = require('../controllers/groupsControllers');
 const { model } = require('mongoose');
 const checkPermission = require('../middlware/checkPermission');
 
@@ -49,8 +49,10 @@ const router = express.Router();
  *       400:
  *         description: Invalid request data
  */
-router.post('/:userId' , userMiddleware, createGroup);
+router.post('/:userId' , userMiddleware, checkPermission("add_group"),createGroup);
 
+
+router.delete("/:groupId" , userMiddleware , checkPermission("delete_group"),deleteGroup);
 
 /**
  * @swagger
@@ -82,7 +84,7 @@ router.post('/:userId' , userMiddleware, createGroup);
  *         description: Invalid request
  */
 
-router.delete('/removeUser' , userMiddleware, removeUserFromGroup)
+router.delete('/removeUser' , userMiddleware, checkPermission("remove_employee_from_group"),removeUserFromGroup)
 
 
 /**
@@ -150,7 +152,7 @@ router.get('/user/:id' , userMiddleware , getUserGroups);
  *       200:
  *         description: Groups list retrieved successfully
  */
-router.get('/admin/:id' , userMiddleware , listGroups);
+router.get('/admin/:id' , userMiddleware,checkPermission("view_groups") , listGroups);
 
 
 module.exports = router;

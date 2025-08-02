@@ -105,13 +105,13 @@ const App = ()=> {
 
 
           {hasPermission(user,"view_employees") &&<Route path="/userPage/listEmployees" element = {<ManageEmployees />}></Route>} 
-          {hasPermission(user,"view_employees") &&<Route path="/userPage/listEmployees/employee/:id" element = {<EmployeeInfo />}></Route>}        
+          <Route path="/userPage/listEmployees/employee/:id" element = {<EmployeeInfo />}></Route>       
 
           <Route path="/userPage/settings" element = {<EditEmployeeProfile />}></Route>  
 
 
           <Route path="/userPage/current-groups" element = {<ListUserGroups />}></Route>      
-          <Route path="/userPage/current-group/:id" element = {<UserGroupInfo />}></Route> 
+          <Route path="/userPage/current-group/:id" element = {<AdminGroupInfo />}></Route>
           {hasPermission(user,"add_group") && <Route path="/userPage/add-group" element = {<AddGroup />}></Route>}
           {hasPermission(user,"view_groups") && <Route path="/userPage/groups" element = {<ListGroups />}></Route>}  
           {hasPermission(user,"add_employee_to_group") && <Route path="/userPage/add-employee/:id" element = {<AddEmployeeToGroup />}></Route>  }

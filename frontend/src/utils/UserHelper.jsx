@@ -98,7 +98,7 @@ export const fetchAdminSummaryHook = async(id) =>{
         if(data.success){
             return data
         }else {
-            toast.error(data.message || "error fetching the summary ")
+            
             return
         }
     } catch (error) {
@@ -144,6 +144,7 @@ export const getUserByIdHook = async(id) =>{
         })
 
         const data =await response.json();
+        console.log(data)
         if(data.success){
             return data
         }else{

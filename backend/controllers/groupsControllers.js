@@ -157,20 +157,20 @@ const listGroups = async(req,res)=>{
 }
 
 // this controller not completed yet
-// const deleteGroup = async(req,res) => {
-//     try {
-//         const {id} = req.params;
-//         const {groupId} = req.body;
+const deleteGroup = async(req,res) => {
+    try {
+        const {groupId} = req.params;
 
-//         const group = await Group.findById(groupId);
-//         if(!group) return res.status.json({success : false , message : "group not found"})
+        const group = await Group.findById(groupId);
+        if(!group) return res.status.json({success : false , message : "group not found"})
         
-
+         await Group.findByIdAndDelete(groupId)
+         return res.status(200).json({ success: true, message: "Group deleted successfully" });   
         
-    // } catch (error) {
-    //     console.error("Error deleting group:", error);
-    //     res.status(500).json({ success: false, message: "Server error" });
-    // }
-// }
+    } catch (error) {
+        console.error("Error deleting group:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+}
 
-module.exports = {createGroup , addUserToGroup , removeUserFromGroup , groupInfoAndUsers , getUserGroups , listGroups}
+module.exports = {createGroup , addUserToGroup , removeUserFromGroup , groupInfoAndUsers , getUserGroups , listGroups , deleteGroup}

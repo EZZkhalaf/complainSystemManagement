@@ -76,7 +76,7 @@ const ManageRoles = () => {
       
 
       {/* Role Cards */}
-      <RoleComponent roles = {roles} setAddEmployee = {setAddEmployee} setSelectedRoleToAddEmployee = {setSelectedRoleToAddEmployee}/>
+      <RoleComponent roles = {roles} setAddEmployee = {setAddEmployee} setRoles = {setRoles} setSelectedRoleToAddEmployee = {setSelectedRoleToAddEmployee}/>
     </div>
   );
 };

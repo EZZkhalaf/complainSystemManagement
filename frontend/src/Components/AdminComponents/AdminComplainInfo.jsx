@@ -68,7 +68,6 @@ useEffect(() => {
     }
   };
 
-  console.log(complaint)
 return (
   <div className="max-w-4xl mx-auto p-6">
     <div className="flex justify-between items-center mb-6">
@@ -80,7 +79,7 @@ return (
       </button>
 
 
-      {user.permissions.deleteComplaints && (
+      {(hasPermission("delete_complaint") || user.role === 'admin') && (
         <button
           onClick={handleDeleteComplaint}
           className="px-5 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition"

@@ -41,7 +41,7 @@ const router = express.Router();
  *       400:
  *         description: Missing fields or invalid data
  */
-router.post('/:id', userMiddleware,addComplaint);
+router.post('/:id', userMiddleware,checkPermission("add_complaint"),addComplaint);
 
 
 
@@ -72,7 +72,7 @@ router.post('/:id', userMiddleware,addComplaint);
  *       404:
  *         description: Complaint not found
  */
-router.put('/', userMiddleware, changeComplaintStatus);
+router.put('/', userMiddleware,checkPermission("edit_complaint"), changeComplaintStatus);
 
 
 /**
@@ -92,7 +92,7 @@ router.put('/', userMiddleware, changeComplaintStatus);
  *       200:
  *         description: Complaints retrieved
  */
-router.get('/:id' , userMiddleware,listComplaints)
+router.get('/:id' , userMiddleware,checkPermission("view_complaints"),listComplaints)
 
 
 
@@ -184,7 +184,7 @@ router.get('/user/:id' , userMiddleware,listUserComplaints)
  *         description: Internal server error
  */
 
-router.delete("/delete/:userId" , userMiddleware,deleteComplaint);
+router.delete("/delete/:userId" , userMiddleware,checkPermission("delete_complaint"),deleteComplaint);
 
 
 module.exports = router;

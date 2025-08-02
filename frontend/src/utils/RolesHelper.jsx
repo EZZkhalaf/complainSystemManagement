@@ -120,3 +120,27 @@ export const getRoleByIdHook = async(id) => {
         throw new Error(error)   
     }
 }
+
+export const deleteRoleHook = async(roleId)=>{
+    try {
+        const response = await fetch(`http://localhost:5000/api/role/${roleId}` , {
+            method : "DELETE",
+            headers : {
+                'Authorization' : `Bearer ${localStorage.getItem("token")}`
+            }
+        })
+
+        const data = await response.json();
+        console.log(data)
+        if(data.success){
+            toast.success(data.message)
+            return data
+        }else{
+            toast.error(data.message)
+            return 
+        }
+    } catch (error) {
+        console.log(error)
+        throw new Error(error)   
+    }
+}

@@ -46,7 +46,7 @@ const router = express.Router();
  *       500:
  *         description: Server error
  */
-router.post("/changeRole" , userMiddleware,changeUserRole);
+router.post("/changeRole" , userMiddleware,checkPermission("change_user_role"),changeUserRole);
 
 
 /**
@@ -83,7 +83,9 @@ router.post("/changeRole" , userMiddleware,changeUserRole);
  *       500:
  *         description: Server error
  */
-router.get("/" , userMiddleware,fetchUsers);
+router.get("/" , userMiddleware,checkPermission("view_employees"),fetchUsers);
+
+
 router.get("/getUsersRoleEdition" , userMiddleware,fetchUsersRoleEdition);
 
 
@@ -135,7 +137,7 @@ router.get("/getUsersRoleEdition" , userMiddleware,fetchUsersRoleEdition);
  *       500:
  *         description: Server error
  */
-router.post("/add" , userMiddleware ,addUserToGroup);
+router.post("/add" , userMiddleware,checkPermission("add_employee_to_group") ,addUserToGroup);
 
 
 
@@ -179,16 +181,16 @@ router.post("/add" , userMiddleware ,addUserToGroup);
  *       500:
  *         description: Server error
  */
-router.get("/getSummary/:id", userMiddleware, getAdminSummary);
+router.get("/getSummary/:id", userMiddleware, checkPermission("view_dashboard_summary"),getAdminSummary);
 
 
 
-router.put('/editInfo/:id' , upload.single("profilePicture"),editUserInfo)
+router.put('/editInfo/:id' ,userMiddleware, upload.single("profilePicture"),editUserInfo)
 
 
-router.put('/editInfo/admin/:id' ,userMiddleware  , adminEditUserInfo)
+router.put('/editInfo/admin/:id' ,userMiddleware  , checkPermission("edit_employee"),adminEditUserInfo)
 
-router.get('/getUser/:id' , getUserById)
+router.get('/getUser/:id' ,userMiddleware, getUserById)
 
 router.get('/verify-email' , verifyEmailUpdate)
 module.exports = router;
