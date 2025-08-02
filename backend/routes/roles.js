@@ -6,14 +6,14 @@ const router = express.Router();
 /**
  * @swagger
  * tags:
- *   name: Roles
+ *   name: Role
  *   description: Role and Permission management
  */
 
 
 /**
  * @swagger
- * /api/roles:
+ * /api/role:
  *   post:
  *     summary: Create a new role
  *     tags: [Roles]
@@ -42,7 +42,7 @@ router.post("/" , userMiddleware,checkPermission("manage_permissions") , addNewR
 
 /**
  * @swagger
- * /api/roles:
+ * /api/role:
  *   get:
  *     summary: Get all roles with permissions
  *     tags: [Roles]
@@ -58,7 +58,7 @@ router.get("/" , userMiddleware , getRoles);
 
 /**
  * @swagger
- * /api/roles/addPermissions:
+ * /api/role/addPermissions:
  *   post:
  *     summary: Add new permissions to the system
  *     tags: [Roles]
@@ -89,7 +89,7 @@ router.post("/addPermissions"  ,userMiddleware,checkPermission("manage_permissio
 
 /**
  * @swagger
- * /api/roles/getPermissions:
+ * /api/role/getPermissions:
  *   get:
  *     summary: Fetch all permissions
  *     tags: [Roles]
@@ -105,7 +105,7 @@ router.get("/getPermissions"  , userMiddleware,checkPermission("manage_permissio
 
 /**
  * @swagger
- * /api/roles/addPermissionsToRole:
+ * /api/role/addPermissionsToRole:
  *   post:
  *     summary: Add permissions to a role
  *     tags: [Roles]
@@ -141,7 +141,7 @@ router.post("/addPermissionsToRole"  , userMiddleware,checkPermission("manage_pe
 
 /**
  * @swagger
- * /api/roles/{id}:
+ * /api/role/{id}:
  *   get:
  *     summary: Get a role by ID
  *     tags: [Roles]
@@ -166,7 +166,7 @@ router.get("/:id"  , userMiddleware, getRoleById);
 
 /**
  * @swagger
- * /api/roles/{roleId}:
+ * /api/role/{roleId}:
  *   delete:
  *     summary: Delete a role and reassign its users
  *     tags: [Roles]
