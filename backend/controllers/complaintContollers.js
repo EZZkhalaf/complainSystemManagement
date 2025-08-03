@@ -181,7 +181,7 @@ const deleteComplaint = async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    const isOwner = complaint.userId.toString() === user.user._id.toString();
+    const isOwner = complaint.userId === user.user._id
     const isAdmin = user.role === "admin";
 
     if (!isOwner && !isAdmin) {

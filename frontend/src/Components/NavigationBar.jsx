@@ -1,124 +1,114 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuthContext } from '../Context/authContext';
-import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { CiSettings } from 'react-icons/ci';
-import defaultPhoto from '../assets/defaultPhoto.png'
+import defaultPhoto from '../assets/defaultPhoto.png';
+
 const NavigationBar = () => {
-    const { user, logout } = useAuthContext();
-    const [menuOpen, setMenuOpen] = useState(false);
-    const navigate = useNavigate();
+  const { user, logout } = useAuthContext();
+  const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
 
-    const [preview , setPreview] = useState(user.profilePicture);
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
-// console.log(user)
-    const handleLogout = () => {
-        logout();
-        navigate("/login");
-    };
-    console.log(user)
+  const profilePicture = user.profilePicture
+    ? `http://localhost:5000${user.profilePicture}`
+    : defaultPhoto;
 
-    return (
-        <nav className="bg-blue-800 text-white px-6 py-4 relative">
-            <div className="flex items-center justify-between">
+  return (
+    <nav className="bg-slate-900 text-slate-300 px-6 py-3 shadow-md sticky top-0 z-30">
+      <div className="max-w-7xl mx-auto flex items-center justify-between">
+        {/* Left side: Profile */}
+        <div className="flex items-center gap-4">
+          <img
+            src={profilePicture}
+            alt="Profile"
+            className="w-12 h-12 rounded-full object-cover border-2 border-slate-700 shadow-sm"
+          />
+          <div className=" sm:block">
+            <p className="font-semibold text-white">{user?.name}</p>
+            <p className="text-sm text-blue-400 capitalize">{user?.role}</p>
+          </div>
+        </div>
 
-                <div className='flex items-center'>
-                        <img
-                            src={(user.profilePicture ? `http://localhost:5000${user.profilePicture}` : defaultPhoto)}
-                            alt="Profile"
-                            className="rounded-full object-cover border-2 border-gray-300 shadow-md"
-                            style={{ width: "10vw", height: "10vw", maxWidth: "90px", maxHeight: "90px" }}
-                        />
-                        <div className="text-xl sm:text-2xl font-semibold tracking-wide ml-3">
-                            <div>
-                            <div>
-                                <span className="text-white">Role: </span>
-                                <span className="text-yellow-400 capitalize">{user?.role}</span>
-                            </div>
+        {/* Right side: desktop menu */}
+        <div className=" md:flex items-center gap-6">
+          <NavLink
+            to={user.role === 'admin' ? '/adminPage/settings' : '/userPage/settings'}
+            className={({ isActive }) =>
+              `flex items-center gap-1 px-3 py-2 rounded-md transition ${
+                isActive
+                  ? 'bg-blue-800 text-white'
+                  : 'text-slate-300 hover:bg-blue-700 hover:text-white'
+              }`
+            }
+            title="Settings"
+          >
+            <CiSettings className="w-6 h-6" />
+            <span className="hidden lg:inline">Settings</span>
+          </NavLink>
 
-                            <span className="text-lg font-medium">
-                                Name: <span className="font-semibold">{user?.name}</span>
-                            </span>
-                            </div>
-                        </div>
-                </div>
-                <div className="md:flex items-center gap-6">
+          <button
+            onClick={handleLogout}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md font-semibold transition"
+          >
+            Logout
+          </button>
+        </div>
 
-                    <NavLink 
-                        // to={"/userPage/settings"}
-                        to = {user.role === 'admin' ? "/adminPage/settings" : "/userPage/settings"}
-                        className={" flex justify-center items-center hover:bg-blue-900 rounded-full"}
-                    >
-                        <span>
-                            <CiSettings className='size-7' />
-                        </span>
-                    </NavLink>
-
-                    <button
-                        onClick={handleLogout}
-                        className="bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-2 rounded-lg transition-all duration-200"
-                    >
-                        Logout
-                    </button>
-                </div>
-
-                <div className="md:hidden">
-                    <button onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle Menu">
-                        <svg
-                            className="w-7 h-7 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            {menuOpen ? (
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M6 18L18 6M6 6l12 12"
-                                />
-                            ) : (
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M4 6h16M4 12h16M4 18h16"
-                                />
-                            )}
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            {/* Mobile Dropdown */}
-            <div
-                className={`md:hidden transition-all duration-300 ease-in-out ${
-                    menuOpen ? 'max-h-40 opacity-100 pt-4' : 'max-h-0 opacity-0 overflow-hidden'
-                }`}
+        {/* Mobile menu toggle */}
+        <button
+          className="md:hidden text-slate-300 focus:outline-none"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle menu"
+        >
+          {menuOpen ? (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-8 w-8"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
             >
-                <div className="flex flex-col gap-4 bg-blue-700 px-6 py-4 rounded-md mt-2 shadow-md z-20">
-                    {user && (
-                        <span className="text-white text-lg font-medium">
-                            Hello, <span className="font-semibold">{user.name}</span>
-                        </span>
-                    )}
-                    <button
-                        onClick={handleLogout}
-                        className="bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-2 rounded-lg"
-                    >
-                        Logout
-                    </button>
-                    <button
-                        onClick={() => setMenuOpen(false)}
-                        className="text-white text-lg font-medium"
-                    >
-                        Close
-                    </button>
-                </div>
-            </div>
-        </nav>
-    );
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-8 w-8"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          )}
+        </button>
+      </div>
+
+      {/* Mobile dropdown */}
+      {menuOpen && (
+        <div className="md:hidden mt-2 bg-slate-800 rounded-md shadow-lg p-4 space-y-4">
+          <NavLink
+            to={user.role === 'admin' ? '/adminPage/settings' : '/userPage/settings'}
+            onClick={() => setMenuOpen(false)}
+            className="block px-4 py-2 rounded-md text-slate-300 hover:bg-blue-700 hover:text-white transition"
+          >
+            Settings
+          </NavLink>
+          <button
+            onClick={handleLogout}
+            className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-md font-semibold transition"
+          >
+            Logout
+          </button>
+        </div>
+      )}
+    </nav>
+  );
 };
 
 export default NavigationBar;
