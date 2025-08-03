@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuthContext } from '../Context/authContext';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { CiSettings } from 'react-icons/ci';
 import defaultPhoto from '../assets/defaultPhoto.png';
+
+
+
 
 const NavigationBar = () => {
   const { user, logout } = useAuthContext();
@@ -35,7 +38,7 @@ const NavigationBar = () => {
         </div>
 
         {/* Right side: desktop menu */}
-        <div className=" md:flex items-center gap-6">
+        <div className="sm:hidden  md:flex items-center gap-6">
           <NavLink
             to={user.role === 'admin' ? '/adminPage/settings' : '/userPage/settings'}
             className={({ isActive }) =>

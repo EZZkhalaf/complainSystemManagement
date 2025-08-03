@@ -36,6 +36,8 @@ const ManageRoles = () => {
   return (
     <div className="p-6 space-y-6">
       {/* Header and description */}
+      <div className='flex justify-between'>
+
       <div>
         <h1 className="text-2xl font-bold mb-2">Manage Roles</h1>
         <p className="text-gray-600 max-w-xl">
@@ -81,6 +83,9 @@ const ManageRoles = () => {
             </button>
           </form>
         )}
+      </div>
+
+
       </div>
 
       {/* Loading indicator */}

@@ -33,6 +33,7 @@ import ManageRoles from './Components/RoleManagement/ManageRoles'
 import AssignUsersToRole from './Components/RoleManagement/AssignUsersToRole'
 import AddPermissionsToRole from './Components/RoleManagement/AddPermissionsToRole'
 import { hasPermission } from './utils/AuthHooks'
+import UnAuthorized from './Pages/UnAuthorized'
 
 const App = ()=> {
   const {user} = useAuthContext()
@@ -45,6 +46,7 @@ const App = ()=> {
         <Route path='/login' element={<SignIn />}/>
         <Route path='/register' element={<SingUp />}/>
         <Route path='/email-verified' element={<EmailVerified />}/>
+        <Route path='/unauthorized' element={<UnAuthorized />}/>
 
         <Route path='/adminPage' element={
           <PrivateRoutes>

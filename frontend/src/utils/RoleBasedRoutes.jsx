@@ -7,6 +7,7 @@ const RoleBasedRoutes = ({children , requiredRole}) => {
 
     if(!requiredRole.includes(user.role)) <Navigate to = '/unauthorized'/>
     return user ? children : <Navigate to = '/login' />
+    
 }
 
 export default RoleBasedRoutes
