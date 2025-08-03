@@ -8,9 +8,9 @@ const nodemailer = require("nodemailer");
 const Complaint = require('../model/Complaint.js');
 const { v4: uuidv4 } = require('uuid');
 const crypto = require("crypto")
-const { logAction } = require('./Logs.js');
 const { findOne } = require('../model/Logs.js');
 const TempSession = require('../model/TempSession.js');
+const { logAction } = require('../middlware/logHelper.js');
 
 const sendEmail = async(to , subject , text)=>{
   const transporter = nodemailer.createTransport({
@@ -30,70 +30,6 @@ const sendEmail = async(to , subject , text)=>{
 
   await transporter.sendMail(mailOptions)
 }
-
-const defaultPermissions = {
-            admin: {
-              viewUsers: true,
-              editUsers: true,
-              deleteComplaints: true,
-              viewGroups: true,
-              assignRoles: true,
-              removeUsersFromGroups: true,
-            },
-            moderator: {
-              viewUsers: true,
-              editUsers: true,
-              deleteComplaints: true,
-              viewGroups: true,
-              assignRoles: false,
-              removeUsersFromGroups: true,
-            },
-            user: {
-              viewUsers: false,
-              editUsers: false,
-              deleteComplaints: false,
-              viewGroups: true,
-              assignRoles: false,
-              removeUsersFromGroups: false,
-            }
-          };
-
-
-const defaultPermissions2 = {
-  admin: {
-    viewUsers: true,
-    editUsers: true,
-    deleteUsers: true,
-    viewComplaints: true,
-    manageComplaints: true,
-    assignRoles: true,
-    viewGroups: true,
-    editGroups: true,
-    removeUsersFromGroups: true,
-  },
-  moderator: {
-    viewUsers: true,
-    editUsers: true,
-    deleteUsers: false,  // moderators cannot delete users
-    viewComplaints: true,
-    manageComplaints: true,
-    assignRoles: false, // moderators cannot assign roles
-    viewGroups: true,
-    editGroups: false,  // moderators cannot edit groups
-    removeUsersFromGroups: true,
-  },
-  user: {
-    viewUsers: false,
-    editUsers: false,
-    deleteUsers: false,
-    viewComplaints: true,  // can view own complaints
-    manageComplaints: false,
-    assignRoles: false,
-    viewGroups: true,
-    editGroups: false,
-    removeUsersFromGroups: false,
-  },
-};
 
 
 
@@ -145,37 +81,6 @@ const register = async (req, res) => {
     return res.status(500).json({ success: false, message: 'Server error' });
   }
 };
-
-
-// const verifyEmail = async (req, res) => {
-//   try {
-//     const { token } = req.query;
-//     if (!token) {
-//       return res.status(400).json({ success: false, message: 'No token provided' });
-//     }
-
-//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-//     const { name, email, password, role } = decoded;
-
-//     const existingUser = await User.findOne({ email });
-//     if (existingUser) {
-//       return res.status(400).json({ success: false, message: 'User already verified' });
-//     }
-
-//     const newUser = new User({ name, email, password });
-//     await newUser.save();
-
-//     const newRole = new Role({ user: newUser._id, 
-//       role: role || 'user', 
-//     });
-//     await newRole.save();
-
-//     return res.status(201).json({ success: true, message: 'Account verified and created successfully' });
-//   } catch (error) {
-//     console.error('Verification error:', error);
-//     return res.status(400).json({ success: false, message: 'Invalid or expired token' });
-//   }
-// };
 
 
 const verifyEmail = async (req, res) => {
@@ -266,7 +171,7 @@ const login = async(req,res) => {
         }); 
         
 
-        await logAction(user , "Login" , "User" , user._id , "Logged In")
+        await logAction(user ,"Login" , "User" , user._id , "Logged In")
 
         return res.status(200).json({
             success: true,
@@ -313,6 +218,9 @@ const changeUserRole = async (req, res) => {
             role.user.push(userId)
             await role.save();  
         }
+
+        await logAction(user ,"Role" , "User" , user._id , `Changed The User Role to ${role.role}`)
+
         return res.status(200).json({
           success: true,
           message: 'User role updated successfully',
@@ -341,31 +249,7 @@ const fetchUsers = async(req,res) =>{
 
 
 
-// const fetchUsersRoleEdition = async (req, res) => {
-//   try {
-//     // 1. Users with roles (populated)
-//     const roles = await Role.find().populate('user', '-password');
-//     const usersWithRoles = roles.flatMap(role => role.user);
 
-//     // 2. Get IDs of users who already have a role
-//     const usersWithRoleIds = usersWithRoles.map(user => user._id.toString());
-
-//     // 3. Users without roles
-//     const usersWithoutRoles = await User.find({
-//       _id: { $nin: usersWithRoleIds }
-//     }).select('-password');
-
-//     return res.status(200).json({
-//       success: true,
-//       usersWithRoles,
-//       usersWithoutRoles
-//     });
-
-//   } catch (error) {
-//     console.error('Error fetching users:', error);
-//     res.status(500).json({ success: false, message: 'Server error' });
-//   }
-// };
 const fetchUsersRoleEdition = async (req, res) => {
   try {
     const roles = await Role.find().populate('user', '-password');
@@ -501,6 +385,7 @@ const editUserInfo = async(req,res) =>{
       const newUser = await User.findOne({_id : id});
       const role = await Role.findOne({user : id})
 
+      await logAction(newUser ,"User-Info" , "User" , newUser._id , `Changed His User Info (name / email / password)`)
       return res.status(200).json({success:true ,
          newUser : {
                 _id: newUser._id,
@@ -544,36 +429,16 @@ const adminEditUserInfo = async (req, res) => {
     }
 
     await User.findByIdAndUpdate(userId, updatedFields);
+    const admin = await User.findById(id);
 
-    // Update permissions if provided
-    // if (newPermissions) {
-    //   const roleDoc = await Role.findOne({ user: userId });
-    //   if (roleDoc) {
-    //     // Update only valid permissions
-    //     // const validPermissions = [
-    //     //   "viewUsers",
-    //     //   "editUsers",
-    //     //   "deleteUsers",
-    //     //   "viewComplaints",
-    //     //   "manageComplaints",
-    //     //   "assignRoles",
-    //     //   "viewGroups",
-    //     //   "editGroups",
-    //     //   "removeUsersFromGroups"
-    //     // ];
-
-
-    //     validPermissions.forEach((perm) => {
-    //       if (perm in newPermissions) {
-    //         roleDoc.permissions[perm] = newPermissions[perm];
-    //       }
-    //     });
-
-    //     await roleDoc.save();
-    //   }
-    // }
+    const empUser = await User.findById(userId)
 
     const updatedUser = await User.findById(userId).select('-password');
+
+
+      await logAction(isAdmin , "Change-Info" , "User" , updatedUser._id , `Changed the user ${empUser.name} information`)
+
+
     return res.status(200).json({
       success: true,
       message: "User updated successfully",
@@ -596,10 +461,15 @@ const verifyEmailUpdate = async (req, res) => {
       return res.status(400).json({ success: false, message: 'No token provided' });
     }
 
-    console.log("Verifying token...");
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const { _id, newName, newEmail, newHashPassword, imagePath } = decoded;
+
+    const userBeforeUpdate = await User.findById(_id);
+    if (!userBeforeUpdate) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    const oldEmail = userBeforeUpdate.email;
 
     await User.findByIdAndUpdate(_id, {
       name: newName,
@@ -607,6 +477,11 @@ const verifyEmailUpdate = async (req, res) => {
       password: newHashPassword,
       ...(imagePath && { profilePicture: imagePath })  // only set image if it's provided
     });
+
+    const user = await User.findById(_id)
+
+
+    await logAction(user ,"User-Info" , "User" , user._id , `Changed His User Email from ${oldEmail}  to ${user.email}`)
 
     const redirectUrl = `http://localhost:5173/email-verified?token=${token}`;
     return res.redirect(redirectUrl);
@@ -677,7 +552,7 @@ const verifyOTP = async(req,res)=>{
   await TempSession.create({ email, token: resetToken, expiresAt: new Date(Date.now() + 10 * 60 * 1000) }); // 10 min
 
   await OTP.deleteMany({ email });
-
+  
   res.status(200).json({ success: true, message: "OTP verified" , email , token : resetToken});
 }
 
@@ -703,6 +578,8 @@ const changeOTPPassword = async (req, res) => {
     await user.save();
 
     await TempSession.deleteMany({ email });
+
+    await logAction(user , "Change-Password" , "User" , user._id , "Changed the Password using forget password method ")
 
     return res.status(200).json({ success: true, message: "Password changed successfully" });
   } catch (error) {

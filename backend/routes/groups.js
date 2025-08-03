@@ -51,6 +51,39 @@ const router = express.Router();
  */
 router.post('/:userId' , userMiddleware, checkPermission("add_group"),createGroup);
 
+
+/**
+ * @swagger
+ * /api/group/removeUser:
+ *   delete:
+ *     summary: Remove a user from a group
+ *     tags: [Groups]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       description: User and group info to remove user from group
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userId
+ *               - groupId
+ *             properties:
+ *               userId:
+ *                 type: string
+ *               groupId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: User removed from group successfully
+ *       400:
+ *         description: Invalid request
+ */
+
+router.delete('/removeUser' , userMiddleware, checkPermission("remove_employee_from_group"),removeUserFromGroup)
+
 /**
  * @swagger
  * /api/groups/{groupId}:
@@ -85,37 +118,7 @@ router.post('/:userId' , userMiddleware, checkPermission("add_group"),createGrou
  */
 router.delete("/:groupId" , userMiddleware , checkPermission("delete_group"),deleteGroup);
 
-/**
- * @swagger
- * /api/group/removeUser:
- *   delete:
- *     summary: Remove a user from a group
- *     tags: [Groups]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       description: User and group info to remove user from group
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - userId
- *               - groupId
- *             properties:
- *               userId:
- *                 type: string
- *               groupId:
- *                 type: string
- *     responses:
- *       200:
- *         description: User removed from group successfully
- *       400:
- *         description: Invalid request
- */
 
-router.delete('/removeUser' , userMiddleware, checkPermission("remove_employee_from_group"),removeUserFromGroup)
 
 
 /**

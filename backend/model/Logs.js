@@ -1,12 +1,13 @@
-const mongoose = require('mongoose');
+// models/Logs.js
+const mongoose = require("mongoose");
 
-const auditLogSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+const logSchema = new mongoose.Schema({
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   action: { type: String, required: true },
-  target: { type: String },                       
-  targetId: { type: mongoose.Schema.Types.ObjectId },  
-  details: { type: String },                      
-  timestamp: { type: Date, default: Date.now }
+  resource: { type: String, required: true },       // ✅ must be declared
+  resourceId: { type: mongoose.Schema.Types.ObjectId }, // optional but must be declared
+  message: { type: String },                             // optional but must be declared
+  timestamp: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model('Logs', auditLogSchema);
+module.exports = mongoose.model("Logs", logSchema);

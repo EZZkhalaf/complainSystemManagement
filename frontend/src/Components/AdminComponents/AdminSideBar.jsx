@@ -60,6 +60,15 @@ const AdminSideBar = () => {
           <span>Manage Roles</span>
         </NavLink>
       )}
+
+      {hasPermission(user, 'view logs') && (
+        <NavLink
+          to="/adminPage/view-logs"
+          className={({ isActive }) => `${navLinkBase} ${isActive ? activeLinkStyles : ''}`}
+        >
+          <span>View Activity</span>
+        </NavLink>
+      )}
     </>
   );
 

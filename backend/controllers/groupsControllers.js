@@ -3,6 +3,7 @@ const Group = require('../model/Group.js');
 const { find } = require('../model/User.js');
 const User = require('../model/User.js');
 const Role = require('../model/Role.js');
+const { logAction } = require('../middlware/logHelper.js');
 
 
 
@@ -20,11 +21,11 @@ const createGroup = async (req, res) => {
         if(nameExist) return res.status(400).json({success:false , error : "group name already exist"})
 
 
-        // const user = await User.findById({_id : userId});
+        const user = await User.findById({_id : userId});
         const userRole = await Role.findOne({ user: userId });
-        if(userRole.role !== 'admin') {
-            return res.status(403).json({success : false , message: 'Only admins can create groups' });
-        }
+        // if(userRole.role !== 'admin') {
+        //     return res.status(403).json({success : false , message: 'Only admins can create groups' });
+        // }
 
         const newGroup = new Group({
             name: name,
@@ -33,6 +34,7 @@ const createGroup = async (req, res) => {
         });
 
         await newGroup.save();
+        await logAction(user , "Create-Group" , "Group" , newGroup._id , `Created the Group : ${newGroup.name}`)
         res.status(201).json({success : true,  message: 'Group created successfully', group: newGroup });
     } catch (error) {
         console.log(error);
@@ -58,6 +60,7 @@ const addUserToGroup = async (req, res) => {
         }
         group.users.push(userId);
         await group.save();
+        await logAction(user , "Add-User" , "Group" , group._id , `Has Been Added to Group ${group.name}`)
         res.status(200).json({ success : true , message: 'User added to group successfully', group: group });
     
 
@@ -71,11 +74,11 @@ const addUserToGroup = async (req, res) => {
 const removeUserFromGroup = async (req, res) => {
     try {   
         const { groupId, userId } = req.body;
-        const group = await Group.findById({_id: groupId });
+        const group = await Group.findById( groupId );
         if (!group) {
             return res.status(404).json({success : false ,  message: 'Group not found' });
         }
-        const user = await User.findById({_id: userId });
+        const user = await User.findById( userId );
         if (!user) {
             return res.status(404).json({success : false ,  message: 'User not found' });
         }
@@ -84,6 +87,9 @@ const removeUserFromGroup = async (req, res) => {
         }
         group.users = group.users.filter(id => id.toString() !== userId.toString());
         await group.save();
+
+        await logAction(user , "Remove-User" , "Group" , group._id , `Has Been Removed From Group ${group.name}`)
+
         res.status(200).json({ success : true , message: 'User removed from group successfully', group: group });
 
     }catch (error) {
@@ -160,11 +166,13 @@ const listGroups = async(req,res)=>{
 const deleteGroup = async(req,res) => {
     try {
         const {groupId} = req.params;
-
+        
         const group = await Group.findById(groupId);
         if(!group) return res.status.json({success : false , message : "group not found"})
-        
+        const user = req.user;
          await Group.findByIdAndDelete(groupId)
+
+        await logAction(user , "Delete-Group" , "Group" , group._id , `Has Deleted Group : ${group.name}`)
          return res.status(200).json({ success: true, message: "Group deleted successfully" });   
         
     } catch (error) {

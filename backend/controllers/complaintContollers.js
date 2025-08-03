@@ -2,7 +2,8 @@ const express = require('express');
 const User = require('../model/User');
 const Complaint = require('../model/Complaint');
 const Role = require('../model/Role');
-const nodemailer = require('nodemailer')
+const nodemailer = require('nodemailer');
+const { logAction } = require('../middlware/logHelper');
 
 
 const addComplaint = async (req, res) => {
@@ -27,6 +28,7 @@ const addComplaint = async (req, res) => {
         }
 
         await newComplaint.save();
+        await logAction(user , "Add-Complaint" , "User" , newComplaint._id , `added new Complaint with type ${newComplaint.type} `)
         res.status(201).json({ success: true, message: 'Complaint added successfully', complaint: newComplaint });
     } catch (error) {
         console.log(error);
@@ -34,30 +36,7 @@ const addComplaint = async (req, res) => {
     }
 }
 
-// const changeComplaintStatus = async (req, res) => {
-//     try {
-//         const { complaintId, status ,userId} = req.body;
-//         if (!complaintId || !status || !userId) {
-//             return res.status(400).json({success : false , message: 'Complaint ID and status and user are required' });
-//         }
-//         const isAdmin = await Role.findOne({ user: userId });
-//         if (!isAdmin || isAdmin.role !== 'admin') {
-//             return res.status(403).json({success : false , message: 'Only admins can change complaint status' });
-//         }
-//         const complaint = await Complaint.findById(complaintId);
-//         if (!complaint) {
-//             return res.status(404).json({success : false , message: 'Complaint not found' });
-//         }
-//         complaint.status = status;
-//         await complaint.save();
-//         res.status(200).json({ success: true, message: 'Complaint status updated successfully', complaint });
 
-//     } catch (error) {
-//         console.log(error);
-//         res.status(500).json({success : false , message: 'Server error' });
-        
-//     }
-// }
 
 
 
@@ -70,13 +49,14 @@ const changeComplaintStatus = async (req, res) => {
     }
 
     // Check admin privileges
-    // const isAdmin = await Role.findOne({ user: userId });
+    const user = await Role.findOne({ user: userId });
     // if (!isAdmin || isAdmin.role !== 'admin') {
     //   return res.status(403).json({ success: false, message: 'Only admins can change complaint status' });
     // }
 
     // Get complaint with user data
     const complaint = await Complaint.findById(complaintId).populate('userId');
+    const oldStatus = complaint.status;
     if (!complaint) {
       return res.status(404).json({ success: false, message: 'Complaint not found' });
     }
@@ -103,7 +83,8 @@ const changeComplaintStatus = async (req, res) => {
     };
 
     await transporter.sendMail(mailOptions);
-
+    
+    await logAction(user , "Change-Status" , "Complaint" , complaint._id , `Chenged the Complaint ${complaint._id} from ${oldStatus} To ${complaint.status}`)
     res.status(200).json({ success: true, message: 'Complaint status updated and email sent', complaint });
 
   } catch (error) {
@@ -182,18 +163,22 @@ const deleteComplaint = async (req, res) => {
     }
 
     const isOwner = complaint.userId === user.user._id
-    const isAdmin = user.role === "admin";
+    // const isAdmin = user.role === "admin";
 
-    if (!isOwner && !isAdmin) {
-      return res.status(401).json({
-        success: false,
-        message: "User not authorized to delete this complaint",
-      });
-    }
+    // if (!isOwner && !isAdmin) {
+    //   return res.status(401).json({
+    //     success: false,
+    //     message: "User not authorized to delete this complaint",
+    //   });
+    // }
 
     await Complaint.findByIdAndDelete(complaintId);
+
+    await logAction(user , "Delete-Complaint" , "Complaint" , complaint._id , `The User Deleted ${isOwner ? "His " : "The "} Complaint With Id ${complaint._id}`)
+
     return res.status(200).json({ success: true, message: "Complaint deleted successfully" });
 
+    
   } catch (error) {
     console.error("Error deleting complaint:", error);
     return res.status(500).json({ success: false, message: "Internal server error" });

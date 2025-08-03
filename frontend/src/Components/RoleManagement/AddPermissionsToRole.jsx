@@ -79,6 +79,7 @@ const AddPermissionsToRole = () => {
     };
 
 
+    console.log(permissions)
 
     return (
       <div className="p-6">

@@ -1,5 +1,6 @@
 const Role = require("../model/Role");
-const Permission = require('../model/Permission')
+const Permission = require('../model/Permission');
+const { logAction } = require("../middlware/logHelper");
 
 
 const addNewRole = async(req,res)=>{
@@ -15,8 +16,9 @@ const addNewRole = async(req,res)=>{
 
         if(!createdRole) return res.status.json({success : false , message: "error creating the role"})
 
+        const user = req.user;
         createdRole.save();
-
+        await logAction(user , "Add-Role" , "Role" , createdRole._id , `Has Created New Role : ${newRole}`)
         return res.status(200).json({success : true , message : "role created successfully" , createdRole});
         
     } catch (error) {
@@ -63,6 +65,7 @@ const deleteRole = async (req, res) => {
 
     let userRole = await Role.findOne({ role: "user" });
 
+    const roleName = roleToDelete.role
     if (!userRole) {
       userRole = new Role({ role: "user", user: [] });
     }
@@ -72,6 +75,8 @@ const deleteRole = async (req, res) => {
 
     await Role.findByIdAndDelete(roleId);
     const roles = await Role.find().populate("permissions");
+    const user = req.user;
+    await logAction(user , "Delete-Role" , "Role" , roleId , `Has Deleted the Role ${roleName}`)
 
     return res.status(200).json({ success: true, message: "Role deleted and users reassigned." ,roles });
   } catch (error) {
@@ -113,7 +118,9 @@ const addPermissions = async(req,res) =>{
 
         const inserted = await Permission.insertMany(newPermissions);
 
-
+        const user = req.user;
+        const permissionNames = permissions.map(p => p.name).join(', ');
+        await logAction(user , "Add-Permission" , "Permission" , user._id , `Has Added the Permissions : [${permissionNames}]`)
         res.status(201).json({
             success: true,
             message: "New permissions added successfully",
@@ -129,14 +136,20 @@ const addPermissions = async(req,res) =>{
 }
 
 
+
 const deletePermission = async(req,res)=>{
     try {
         const {id} = req.params;
-        const permission = await Permission.findByIdAndDelete(id) ;
+        const p = await Permission.findById(id)
+        await Permission.findByIdAndDelete(id) ;
         await Role.updateMany(
           { permissions: id },
           { $pull: { permissions: id } }
         ); 
+        
+        const user = req.user
+        await logAction(user , "Add-Permission" , "Permission" , user._id , `Has Deleted the Permission : [${p.name}]`)
+
         return res.status(200).json({success : true , message :"permission deleted successfully" })
     } catch (error) {
         console.error("Error deleting permission:", error);
@@ -184,16 +197,20 @@ const addPermissionsToRole = async(req,res) =>{
             {permissions : permissionsIds},
             {new : true}
         ).populate("permissions");
-        
+        const user = req.user;
+        await logAction(user , "Add-Permission" , "Permission" , user._id , `Has Changed the ${role.role} Permissions`)
+
         res.status(200).json({
             success: true,
             message: "Permissions Added Successfully",
             data: updatedRole,
         });
+
+
     } catch (error) {
         console.error("Error adding permissions to Role:", error);
         res.status(500).json({ success: false, message: "Server error" });
     }
 }
 
-module.exports = {deletePermission ,addNewRole , getRoles , addPermissions , fetchPermissions , addPermissionsToRole , getRoleById , deleteRole}
+module.exports = {deletePermission,addNewRole , getRoles , addPermissions , fetchPermissions , addPermissionsToRole , getRoleById , deleteRole}

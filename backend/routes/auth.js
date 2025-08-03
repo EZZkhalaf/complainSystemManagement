@@ -88,6 +88,30 @@ router.get('/verify-email', verifyEmail);
  */
 router.post('/login',login);
 
+
+/**
+ * @swagger
+ * /api/auth/send-otp-to-email:
+ *   post:
+ *     summary: Send Otp To Email 
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               
+ *             properties:
+ *               email:
+ *                 type: string
+ *              
+ *     responses:
+ *       200:
+ *         description: the OTP is sent to the email 
+ */
 router.post("/send-otp-to-email" , sendOtp);
 
 router.post('/verify-otp' , verifyOTP);

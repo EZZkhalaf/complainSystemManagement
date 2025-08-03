@@ -85,18 +85,14 @@ const EmployeeSideBar = () => {
         </NavLink>
       )}
 
-      {/* Uncomment if needed
-      {hasPermission(user, "view_roles") && (
-        <NavLink
-          to="/userPage/manageRoles"
-          className={({ isActive }) =>
-            `${navLinkStyles} ${isActive ? activeLinkStyles : ''}`
-          }
-        >
-          <span>Manage Roles</span>
-        </NavLink>
-      )}
-      */}
+      {hasPermission(user, 'view logs') && (
+          <NavLink
+            to="/userPage/view-logs"
+            className={({ isActive }) => `${navLinkBase} ${isActive ? activeLinkStyles : ''}`}
+          >
+            <span>View Activity</span>
+          </NavLink>
+        )}
     </div>
   );
 };

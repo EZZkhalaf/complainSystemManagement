@@ -37,6 +37,7 @@ import UnAuthorized from './Pages/UnAuthorized'
 import EnterEmail from './Pages/OTPProcess/EnterEmail'
 import EnterOtp from './Pages/OTPProcess/EnterOtp'
 import ChangePassword from './Pages/OTPProcess/ChangePassword'
+import ViewLogs from './Components/AdminComponents/ViewLogs'
 
 const App = ()=> {
   const {user} = useAuthContext()
@@ -86,6 +87,9 @@ const App = ()=> {
           <Route path='/adminPage/manageRoles/role/adduser/:id' element={<AssignUsersToRole />}/>
           <Route path='/adminPage/manageRoles/role/addPermission/:id' element={<AddPermissionsToRole />}/>
 
+
+          {hasPermission(user,"view logs") && <Route path='/adminPage/view-logs' element={<ViewLogs />}/>}
+
           </Route>
         <Route path='/userPage' element={
             <PrivateRoutes>
@@ -124,6 +128,7 @@ const App = ()=> {
           {hasPermission(user,"view_groups") && <Route path="/userPage/groups" element = {<ListGroups />}></Route>}  
           {hasPermission(user,"add_employee_to_group") && <Route path="/userPage/add-employee/:id" element = {<AddEmployeeToGroup />}></Route>  }
   
+          {hasPermission(user,"view logs") && <Route path='/userPage/view-logs' element={<ViewLogs />}/>}
 
          
       
