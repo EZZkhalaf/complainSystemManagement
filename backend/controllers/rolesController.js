@@ -129,6 +129,21 @@ const addPermissions = async(req,res) =>{
 }
 
 
+const deletePermission = async(req,res)=>{
+    try {
+        const {id} = req.params;
+        const permission = await Permission.findByIdAndDelete(id) ;
+        await Role.updateMany(
+          { permissions: id },
+          { $pull: { permissions: id } }
+        ); 
+        return res.status(200).json({success : true , message :"permission deleted successfully" })
+    } catch (error) {
+        console.error("Error deleting permission:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+}
+
 
 const fetchPermissions =async(req,res)=>{
     try {
@@ -181,4 +196,4 @@ const addPermissionsToRole = async(req,res) =>{
     }
 }
 
-module.exports = {addNewRole , getRoles , addPermissions , fetchPermissions , addPermissionsToRole , getRoleById , deleteRole}
+module.exports = {deletePermission ,addNewRole , getRoles , addPermissions , fetchPermissions , addPermissionsToRole , getRoleById , deleteRole}

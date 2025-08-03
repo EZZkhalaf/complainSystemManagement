@@ -34,6 +34,9 @@ import AssignUsersToRole from './Components/RoleManagement/AssignUsersToRole'
 import AddPermissionsToRole from './Components/RoleManagement/AddPermissionsToRole'
 import { hasPermission } from './utils/AuthHooks'
 import UnAuthorized from './Pages/UnAuthorized'
+import EnterEmail from './Pages/OTPProcess/EnterEmail'
+import EnterOtp from './Pages/OTPProcess/EnterOtp'
+import ChangePassword from './Pages/OTPProcess/ChangePassword'
 
 const App = ()=> {
   const {user} = useAuthContext()
@@ -44,10 +47,13 @@ const App = ()=> {
       <Routes>
         <Route path="/" element = {<Navigate to = "adminPage"/>} ></Route>
         <Route path='/login' element={<SignIn />}/>
+        <Route path='/enter-forgotten-email' element={<EnterEmail />}/>
+        <Route path='/otp-confirm' element={<EnterOtp />}/>
+        <Route path='/change-pass-otp' element={<ChangePassword />}/>
         <Route path='/register' element={<SingUp />}/>
         <Route path='/email-verified' element={<EmailVerified />}/>
         <Route path='/unauthorized' element={<UnAuthorized />}/>
-
+        
         <Route path='/adminPage' element={
           <PrivateRoutes>
             <RoleBasedRoutes requiredRole={[ 'admin , supervisor']}>

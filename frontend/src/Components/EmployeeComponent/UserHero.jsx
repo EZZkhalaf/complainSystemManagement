@@ -13,9 +13,9 @@ const UserHero = () => {
     const fetchSummary = async () => {
       try {
         const data = await fetchAdminSummaryHook(user._id);
-        setComplaintCount(data.complaints);
-        setUserCount(data.users);
-        setGroupsCount(data.groups);
+        setComplaintCount(data?.complaints);
+        setUserCount(data?.users);
+        setGroupsCount(data?.groups);
       } catch (error) {
         console.error("Failed to fetch summary:", error);
       }

@@ -206,3 +206,21 @@ export const adminUpdateUserInfoHook = async(adminId , userId , newName , newEma
         throw new Error(error)   
     }
 }
+
+export const deleteUserHook = async(userId) =>{
+    try {
+        const response = await fetch(`http://localhost:5000/api/user/${userId}` , {
+            method : "DELETE",
+            headers : {
+                "Authorization": `Bearer ${localStorage.getItem('token')}` , 
+                'Content-Type' : 'application/json'
+            }
+        })
+
+        const data =await response.json();
+        return data;
+    }catch (error) {
+        console.log(error)
+        throw new Error(error)   
+    }
+}

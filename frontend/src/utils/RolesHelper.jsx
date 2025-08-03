@@ -144,3 +144,48 @@ export const deleteRoleHook = async(roleId)=>{
         throw new Error(error)   
     }
 }
+
+
+export const createPermissionHook = async (permissions) => {
+  try {
+    const response = await fetch('http://localhost:5000/api/role/addPermissions', {
+      method: 'POST',
+      headers: {
+        "Authorization": `Bearer ${localStorage.getItem("token")}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(permissions), 
+    });
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Fetch error:", error);
+    return {
+      success: false,
+      message: 'Network or server error',
+    };
+  }
+};
+
+
+export const deletePermissionHook = async (id) => {
+  try {
+    const response = await fetch(`http://localhost:5000/api/role/deletePermission/${id}`, {
+      method: 'DELETE',
+      headers: {
+        "Authorization": `Bearer ${localStorage.getItem("token")}`,
+        'Content-Type': 'application/json',
+      }
+    });
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Fetch error:", error);
+    return {
+      success: false,
+      message: 'Network or server error',
+    };
+  }
+};

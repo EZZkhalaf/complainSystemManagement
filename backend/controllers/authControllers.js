@@ -1,43 +1,35 @@
 const User = require('../model/User.js');
 const Role = require('../model/Role.js');
 const Group = require("../model/Group.js")
+const OTP = require('../model/OTP.js')
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const Complaint = require('../model/Complaint.js');
-// const register = async (req, res) => {
-//   try {
-//     const { name, email, password, role } = req.body;
+const { v4: uuidv4 } = require('uuid');
+const crypto = require("crypto")
+const { logAction } = require('./Logs.js');
+const { findOne } = require('../model/Logs.js');
+const TempSession = require('../model/TempSession.js');
 
-//     const userExists = await User.findOne({ email });
-//     if (userExists) {
-//       return res.status(400).json({sucess : false ,  message: 'User already exists' });
-//     }
+const sendEmail = async(to , subject , text)=>{
+  const transporter = nodemailer.createTransport({
+    service : 'Gmail' ,
+    auth : {
+      user : process.env.EMAIL_USER,
+      pass : process.env.EMAIL_PASS
+    }
+  })
 
-//     const saltRounds = 10;
-//     const hashedPassword = await bcrypt.hash(password, saltRounds);
+  const mailOptions = {
+    from : process.env.EMAIL_USER ,
+    to ,
+    subject ,
+    text,
+  }
 
-//     const newUser = new User({
-//       name,
-//       email,
-//       password: hashedPassword,
-//     });
-//     await newUser.save();
-
-//     const newRole = new Role({
-//       user: newUser._id, 
-//       role: role || 'user',
-//     });
-//     await newRole.save();
-
-//     return res.status(201).json({sucess : true ,  message: 'User registered successfully' });
-//   } catch (error) {
-//     console.warn('Registration error:', error);
-//     return res.status(500).json({success : false ,  message: 'Internal server error' });
-//   }
-// };
-
-
+  await transporter.sendMail(mailOptions)
+}
 
 const defaultPermissions = {
             admin: {
@@ -222,6 +214,8 @@ const verifyEmail = async (req, res) => {
       await newRole.save();
     }
 
+    await logAction(newUser , "Register" , "User" , newUser._id , "Created A New Account")
+
     return res.status(201).json({ success: true, message: 'Account verified and created successfully' });
 
   } catch (error) {
@@ -229,6 +223,24 @@ const verifyEmail = async (req, res) => {
     return res.status(400).json({ success: false, message: 'Invalid or expired token' });
   }
 };
+
+const deleteUser = async(req,res) =>{
+  try {
+    const {userId} = req.params ;
+    const user = await User.findByIdAndDelete(userId);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    await Complaint.deleteMany({ userId: userId });
+    await Role.updateMany(
+          { user: userId },
+          { $pull: { users: userId } }
+        );  
+    return res.status(200).json({ success: true, message: 'User and associated data deleted successfully.' });
+  } catch (error) {
+      console.error('Verification error:', error);
+      return res.status(400).json({ success: false, message: 'Invalid or expired token' });
+  }
+}
 
 
 
@@ -247,18 +259,14 @@ const login = async(req,res) => {
         
         let tempRole
         tempRole = await Role.findOne({user:user._id}).select("-user").populate("permissions" , "-description")
-        // if(!tempRole){
-        //   tempRole = new Role({
-        //     user : user._id ,
-        //     role :"user"
-        //   })
-        // }
+        
         
         const token = jwt.sign({_id : user._id , role:tempRole.role}  , process.env.JWT_SECRET, {
             expiresIn: '10d'
         }); 
         
 
+        await logAction(user , "Login" , "User" , user._id , "Logged In")
 
         return res.status(200).json({
             success: true,
@@ -644,6 +652,65 @@ const getUserById = async (req, res) => {
 };
 
 
+const sendOtp = async(req,res) =>{
+  const {email} = req.body;
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  //5 minutes
+  const expiresAt = new Date(Date.now() + 5 *60 *1000);
+  await OTP.create({
+    email , 
+    code :otp ,
+    expiresAt
+  });
+
+  await sendEmail(email , `Your OTP is : ${otp}`)
+  return res.status(200).json({success:true , message:"the OTP is sent to the email "})
+}
+
+
+const verifyOTP = async(req,res)=>{
+  const {email , otp} = req.body ;
+  const isCorrect = await OTP.findOne({email , code :otp , expiresAt : { $gt :new Date()}}).sort({createdAt : -1});
+  if(!isCorrect) return res.status(400).json({success:false , message : "invalid or expired OTP"})
+  
+  const resetToken = uuidv4();
+  await TempSession.create({ email, token: resetToken, expiresAt: new Date(Date.now() + 10 * 60 * 1000) }); // 10 min
+
+  await OTP.deleteMany({ email });
+
+  res.status(200).json({ success: true, message: "OTP verified" , email , token : resetToken});
+}
+
+
+
+const changeOTPPassword = async (req, res) => {
+  try {
+    const { email, newPassword , token } = req.body;
+
+    const session = await TempSession.findOne({email , token});
+    if(!session || session.expiresAt < new Date()){
+      return res.status(400).json({ success: false, message: "Session expired or invalid" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    user.password = hashedPassword;
+    await user.save();
+
+    await TempSession.deleteMany({ email });
+
+    return res.status(200).json({ success: true, message: "Password changed successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
 module.exports = {
     register ,
     login ,
@@ -655,5 +722,9 @@ module.exports = {
     getUserById ,
     verifyEmailUpdate ,
     adminEditUserInfo , 
-    fetchUsersRoleEdition
+    fetchUsersRoleEdition ,
+    deleteUser ,
+    sendOtp ,
+    verifyOTP ,
+    changeOTPPassword
 };

@@ -1,5 +1,5 @@
 const express = require('express');
-const { changeUserRole, fetchUsers, getAdminSummary, editUserInfo, getUserById, verifyEmailUpdate, adminEditUserInfo, fetchUsersRoleEdition } = require('../controllers/authControllers');
+const { changeUserRole, fetchUsers, getAdminSummary, editUserInfo, getUserById, verifyEmailUpdate, adminEditUserInfo, fetchUsersRoleEdition, deleteUser } = require('../controllers/authControllers');
 const  userMiddleware  = require('../middlware/userMiddlware');
 const { addUserToGroup } = require('../controllers/groupsControllers');
 const upload = require('../middlware/upload');
@@ -350,4 +350,6 @@ router.get('/getUser/:id' ,userMiddleware, getUserById)
    *         description: Server error
    */
 router.get('/verify-email' , verifyEmailUpdate)
+
+router.delete("/:userId" , deleteUser);
 module.exports = router;

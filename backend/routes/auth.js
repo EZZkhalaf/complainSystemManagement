@@ -1,5 +1,5 @@
 const express = require('express');
-const {register , login, verifyEmail} = require("../controllers/authControllers.js");
+const {register , login, verifyEmail, sendOtp, verifyOTP, changeOTPPassword} = require("../controllers/authControllers.js");
 const { userMiddleware } = require('../middlware/userMiddlware.js');
 const router = express.Router();
 
@@ -87,6 +87,12 @@ router.get('/verify-email', verifyEmail);
  *         description: Login successful
  */
 router.post('/login',login);
+
+router.post("/send-otp-to-email" , sendOtp);
+
+router.post('/verify-otp' , verifyOTP);
+
+router.put('/change-password-otp' , changeOTPPassword);
 
 
 

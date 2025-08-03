@@ -66,6 +66,11 @@ const SignIn = () => {
             Create one
             </Link>
         </p>
+        <p className="mt-2 text-center text-sm text-red-600">
+            <Link to="/enter-forgotten-email" className="text-red-600 font-medium hover:underline">
+                Forgot Password?
+            </Link>
+        </p>
     </AuthLayout>
   )
 }

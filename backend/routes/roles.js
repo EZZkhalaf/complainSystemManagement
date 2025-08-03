@@ -1,6 +1,6 @@
 const express = require('express');
 const userMiddleware = require('../middlware/userMiddlware');
-const { addNewRole, getRoles, addPermissions, fetchPermissions, addPermissionsToRole, getRoleById, deleteRole } = require('../controllers/rolesController');
+const { addNewRole, getRoles, addPermissions, fetchPermissions, addPermissionsToRole, getRoleById, deleteRole, deletePermission } = require('../controllers/rolesController');
 const checkPermission = require('../middlware/checkPermission');
 const router = express.Router();
 /**
@@ -86,6 +86,7 @@ router.get("/" , userMiddleware , getRoles);
  *         description: Server error
  */
 router.post("/addPermissions"  ,userMiddleware,checkPermission("manage_permissions"), addPermissions);
+router.delete("/deletePermission/:id"  ,userMiddleware, deletePermission);
 
 /**
  * @swagger
