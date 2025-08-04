@@ -5,11 +5,13 @@ import { useAuthContext } from '../../Context/authContext';
 import { OrbitProgress } from 'react-loading-indicators';
 import { toast } from 'react-toastify';
 import { hasPermission } from '../../utils/AuthHooks';
+import { listGroupsHook } from '../../utils/GroupsHelper';
 
 const AdminComplainInfo = () => {
   const [complaint, setComplaints] = useState([]);
   const [loading, setLoading] = useState(false);
   const [newStatus , setNewStatus] = useState("");
+  const [groups , setGroups] = useState([])
   const {id} = useParams();
   const {user} = useAuthContext();
   const navigate = useNavigate();
@@ -26,6 +28,11 @@ const AdminComplainInfo = () => {
         setLoading(false);
     }
 };
+// const fetchGroups = async()=>{
+//   const data = await listGroupsHook(user._id)
+//   console.log(data)
+//   setGroups(data)
+// }
 
 const changeComaplaintStatus = async(e , value) =>{
     let complaintId = id 
@@ -135,7 +142,7 @@ return (
 
       <div>
         <span className="block font-medium text-gray-700">Status:</span>
-        {(complaint.status === "pending" && hasPermission(user,"edit_complaint")) ? (
+        {/* {(complaint.status === "pending" && hasPermission(user,"edit_complaint")) ? (
           <div>
           <select
             className="mt-1 px-3 py-2 border rounded-md text-sm text-gray-800 bg-white"
@@ -151,7 +158,7 @@ return (
             <option value="rejected">Rejected</option>
           </select>
           </div>
-        ) : (
+        ) : ( */}
           <span
             className={`inline-block mt-1 px-3 py-1 rounded-full text-sm font-medium ${getStatusStyle(
               complaint.status
@@ -159,7 +166,7 @@ return (
           >
             {complaint.status}
           </span>
-        )}
+        {/* )} */}
       </div>
     </div>
   </div>

@@ -3,6 +3,7 @@ const  userMiddleware  = require('../middlware/userMiddlware');
 const { createGroup , addUserToGroup, removeUserFromGroup, groupInfoAndUsers, listGroups, getUserGroups, deleteGroup } = require('../controllers/groupsControllers');
 const { model } = require('mongoose');
 const checkPermission = require('../middlware/checkPermission');
+const { listGroupComplaints } = require('../controllers/complaintContollers');
 
 const router = express.Router();    
 
@@ -186,7 +187,11 @@ router.get('/user/:id' , userMiddleware , getUserGroups);
  *       200:
  *         description: Groups list retrieved successfully
  */
-router.get('/admin/:id' , userMiddleware,checkPermission("view_groups") , listGroups);
+router.get('/admin/:id' , userMiddleware , listGroups);
+
+
+router.post('/groupcomplaints/:id' , userMiddleware , listGroupComplaints);
+
 
 
 module.exports = router;

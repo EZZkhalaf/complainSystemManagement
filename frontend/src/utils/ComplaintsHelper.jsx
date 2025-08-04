@@ -156,3 +156,36 @@ export const deleteComplaintHook = async(complaintId, userId , navigate) =>{
         throw new Error(error)
     }
 }
+
+
+export const handleComplaintInGroupHook = async(complaintId , userId , groupId ,status) =>{
+    try {
+        console.log(groupId)
+       const response = await fetch(`http://localhost:5000/api/complaints/handleComplaintInGroup/${complaintId}` , {
+           method:"POST" ,
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem('token')}` , 
+                'Content-Type' : 'application/json'
+            } ,
+             body : JSON.stringify({
+                userId : userId ,
+                groupId : groupId ,
+                status : status
+
+             })
+        })
+
+        const data= await response.json();
+        console.log(data)
+        if(data.success){
+            toast.success("complaint status changed successfully")
+            return data
+        }else {
+            toast.error(data.message)
+            return
+        } 
+    }catch (error) {
+        console.log(error)
+        throw new Error(error)
+    }
+}

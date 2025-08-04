@@ -165,6 +165,7 @@ const login = async(req,res) => {
         let tempRole
         tempRole = await Role.findOne({user:user._id}).select("-user").populate("permissions" , "-description")
         
+        const group = await Group.find({users : user._id })
         
         const token = jwt.sign({_id : user._id , role:tempRole.role}  , process.env.JWT_SECRET, {
             expiresIn: '10d'
@@ -182,6 +183,7 @@ const login = async(req,res) => {
                 name: user.name,
                 email: user.email,
                 role: tempRole.role ,
+                group : group ,
                 profilePicture : user.profilePicture ,
                 permissions : tempRole.permissions
             }
@@ -234,13 +236,37 @@ const changeUserRole = async (req, res) => {
 }
 
 
+// const fetchUsers = async(req,res) =>{
+//     try {
+//         const users = await Role.find().populate("user" , '-password');
+//         const notAdmins = await Role.find({user : users._id})
+//                 let roleId = users._id
+//         const roles = await Role.find();
+//         return res.status(200).json({success : true , users , roleId , roles})
+//     } catch (error) {
+//         console.error('Error changing user role:', error);
+//         res.status(500).json({ success : false , message: 'Server error' });
+//     }
+// }
 const fetchUsers = async(req,res) =>{
     try {
-        const users = await Role.find().populate("user" , '-password');
-        const notAdmins = await Role.find({user : users._id})
-                let roleId = users._id
-        const roles = await Role.find();
-        return res.status(200).json({success : true , users , roleId , roles})
+    const rolesWithUsers = await Role.find().populate("user", "-password");
+
+    const nonAdminUsers = rolesWithUsers
+      .filter(role => role.role !== "admin" && role.user)
+      .map(role => ({
+        user: role.user,
+        role: role.role,
+        roleId: role._id
+      }));
+
+    const roles = await Role.find(); 
+
+    return res.status(200).json({
+      success: true,
+      users: nonAdminUsers,
+      roles2: roles
+    });
     } catch (error) {
         console.error('Error changing user role:', error);
         res.status(500).json({ success : false , message: 'Server error' });

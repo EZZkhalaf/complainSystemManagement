@@ -39,6 +39,40 @@ export const listGroupsHook = async(id) =>{
     } 
 }
 
+export const listGroupComplaintsHook = async(groupId , userId,  
+           { type,
+            status,
+            page,
+            limit}
+        )=>{
+    try {
+      const res = await fetch(`http://localhost:5000/api/group/groupcomplaints/${groupId}`, {
+        method : "POST",
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type' : 'application/json'
+        } ,
+        body :JSON.stringify({
+          userId : userId ,
+          type ,
+          status ,
+          page ,
+          limit
+        })
+      });
+      const data = await res.json();
+      console.log(data)
+      if (data.success) {
+        return data
+      } else {
+        toast.error(data.error || "something wrong with the server ")
+        return 
+      }
+    } catch (error) {
+      console.error("Failed to fetch groups:", error);
+    } 
+}
+
 export const addGroupHook = async(userId , name , description , navigate) =>{
     try {
       const res = await fetch(`http://localhost:5000/api/group/${userId}`, {

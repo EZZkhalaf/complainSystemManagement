@@ -42,7 +42,7 @@ const EmployeeSideBar = () => {
       >
         <span>My Complaints</span>
       </NavLink>
-
+{/* 
       {hasPermission(user, 'view_complaints') && (
         <NavLink
           to="/userPage/complaints"
@@ -52,7 +52,7 @@ const EmployeeSideBar = () => {
         >
           <span>View Other's Complaints</span>
         </NavLink>
-      )}
+      )} */}
 
       <NavLink
         to="/userPage/current-groups"
@@ -88,11 +88,22 @@ const EmployeeSideBar = () => {
       {hasPermission(user, 'view logs') && (
           <NavLink
             to="/userPage/view-logs"
-            className={({ isActive }) => `${navLinkBase} ${isActive ? activeLinkStyles : ''}`}
+            className={({ isActive }) =>
+            `${navLinkStyles} ${isActive ? activeLinkStyles : ''}`
+          }
           >
             <span>View Activity</span>
           </NavLink>
         )}
+
+        <NavLink
+          to="/userPage/groupsForComplaints/"
+          className={({ isActive }) =>
+            `${navLinkStyles} ${isActive ? activeLinkStyles : ''}`
+          }
+        >
+          <span>View Groups Complaints</span>
+        </NavLink>
     </div>
   );
 };

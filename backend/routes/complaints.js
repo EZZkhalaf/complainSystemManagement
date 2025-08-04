@@ -1,5 +1,5 @@
 const express = require('express');
-const { addComplaint, changeComplaintStatus, listComplaints, getComplaintInfo, listUserComplaints, deleteComplaint } = require('../controllers/complaintContollers');
+const { addComplaint, changeComplaintStatus, listComplaints, getComplaintInfo, listUserComplaints, deleteComplaint, handleComplaintInGroup } = require('../controllers/complaintContollers');
 const  userMiddleware = require('../middlware/userMiddlware');
 const checkPermission = require('../middlware/checkPermission');
 const router = express.Router();
@@ -43,6 +43,7 @@ const router = express.Router();
  */
 router.post('/:id', userMiddleware,checkPermission("add_complaint"),addComplaint);
 
+router.post("/handleComplaintInGroup/:id" , userMiddleware,handleComplaintInGroup);
 
 
 /**
@@ -185,6 +186,12 @@ router.get('/user/:id' , userMiddleware,listUserComplaints)
  */
 
 router.delete("/delete/:userId" , userMiddleware,checkPermission("delete_complaint"),deleteComplaint);
+
+
+
+
+
+
 
 
 module.exports = router;

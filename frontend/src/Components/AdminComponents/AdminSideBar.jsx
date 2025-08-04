@@ -69,6 +69,12 @@ const AdminSideBar = () => {
           <span>View Activity</span>
         </NavLink>
       )}
+      <NavLink
+        to="/adminPage/groupsForComplaints/"
+        className={({ isActive }) => `${navLinkBase} ${isActive ? activeLinkStyles : ''}`}
+      >
+        <span>View Groups Complaints</span>
+      </NavLink>
     </>
   );
 

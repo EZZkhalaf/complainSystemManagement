@@ -4,6 +4,7 @@ const { find } = require('../model/User.js');
 const User = require('../model/User.js');
 const Role = require('../model/Role.js');
 const { logAction } = require('../middlware/logHelper.js');
+const Complaint = require('../model/Complaint.js');
 
 
 
@@ -171,6 +172,11 @@ const deleteGroup = async(req,res) => {
         if(!group) return res.status.json({success : false , message : "group not found"})
         const user = req.user;
          await Group.findByIdAndDelete(groupId)
+         await Complaint.updateMany({groupsQueue : groupId},
+            {
+                $pull : {groupsQueue : groupId}
+            }
+         )
 
         await logAction(user , "Delete-Group" , "Group" , group._id , `Has Deleted Group : ${group.name}`)
          return res.status(200).json({ success: true, message: "Group deleted successfully" });   

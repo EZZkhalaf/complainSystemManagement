@@ -8,15 +8,14 @@ const complaintSchema = new mongoose.Schema({
     },
     description : {
         type: String ,
-        default: 'no descrition provided',
+        default: 'no description provided',
         
     },
-    complaintAdmin :{
+    groupsQueue : [{
         type : mongoose.Schema.Types.ObjectId ,
-        ref: 'User',
-        default: null
-    },
-    status : {
+        ref : "Group"
+    }]
+    ,status : {
         type: String,
         enum: ['pending', 'in-progress', 'resolved', 'rejected'],
         default: 'pending'

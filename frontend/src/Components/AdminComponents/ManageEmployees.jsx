@@ -45,7 +45,9 @@ const ManageEmployees = () => {
   const getEmployees = async () => {
     try {
       const roles = await fetchUsersHook();
-      let updatedUsers = roles.users.filter(emp => user._id !== emp.user._id);
+      console.log(roles)
+      let updatedUsers = roles.users.filter(emp => user._id !== emp.user._id)
+       .filter(emp => emp.role !== 'admin');
       setEmployees(updatedUsers);
       setFilteredEmployees(updatedUsers);
     } catch (error) {

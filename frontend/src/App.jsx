@@ -38,9 +38,13 @@ import EnterEmail from './Pages/OTPProcess/EnterEmail'
 import EnterOtp from './Pages/OTPProcess/EnterOtp'
 import ChangePassword from './Pages/OTPProcess/ChangePassword'
 import ViewLogs from './Components/AdminComponents/ViewLogs'
+import GroupsListingForComplaints from './Components/Complaints/GroupsListingForComplaints'
+import ComplaintsList from './Components/Complaints/ComplaintsList'
+import ComplaintInfo from './Components/Complaints/ComplaintInfo'
 
 const App = ()=> {
   const {user} = useAuthContext()
+  console.log(user)
   return (
     
     <AnimatePresence mode='wait'>
@@ -65,6 +69,10 @@ const App = ()=> {
           <Route index element = {<AdminHero />}></Route>
           <Route path="/adminPage/complaints" element = {<ListComplaints />}></Route>
           {hasPermission(user,"view_groups") && <Route path="/adminPage/groups" element = {<ListGroups />}></Route>}
+
+          <Route path="/adminPage/groupsForComplaints/" element = {<GroupsListingForComplaints />}></Route>
+          <Route path="/adminPage/groupsForComplaints/:id" element = {<ComplaintsList />}></Route>
+          <Route path="/adminPage/groupsForComplaints/complaint/:id" element = {<ComplaintInfo />}></Route>
           
           <Route path="/adminPage/add-group" element = {<AddGroup />}></Route>        
           <Route path="/adminPage/current-group/:id" element = {<AdminGroupInfo />}></Route>        
@@ -88,6 +96,7 @@ const App = ()=> {
           <Route path='/adminPage/manageRoles/role/addPermission/:id' element={<AddPermissionsToRole />}/>
 
 
+
           {hasPermission(user,"view logs") && <Route path='/adminPage/view-logs' element={<ViewLogs />}/>}
 
           </Route>
@@ -106,12 +115,12 @@ const App = ()=> {
           {hasPermission(user,"add_complaint") && <Route path="/userPage/add-complaint" element = {<AddComplaint />}></Route>   }
           <Route path="/userPage/list-complaints/:id" element = {<ListUserComplaints />}></Route>        
           <Route path="/userPage/complaint/:id" element = {<UserComplaintInfo />}></Route>        
-          {hasPermission(user,"view_complaints") && (
+          {/* {hasPermission(user,"view_complaints") && (
             <>
               <Route path="/userPage/complaints" element = {<ListComplaints />}></Route>
               <Route path="/userPage/otherComplaint/:id" element = {<AdminComplainInfo />}></Route>     
             </>
-          )}
+          )} */}
           
             
 
@@ -127,6 +136,10 @@ const App = ()=> {
           {hasPermission(user,"add_group") && <Route path="/userPage/add-group" element = {<AddGroup />}></Route>}
           {hasPermission(user,"view_groups") && <Route path="/userPage/groups" element = {<ListGroups />}></Route>}  
           {hasPermission(user,"add_employee_to_group") && <Route path="/userPage/add-employee/:id" element = {<AddEmployeeToGroup />}></Route>  }
+          
+          <Route path="/userPage/groupsForComplaints" element = {<GroupsListingForComplaints />}></Route>  
+          <Route path="/userPage/groupsForComplaints/:id" element = {<ComplaintsList />}></Route> 
+          <Route path="/userPage/groupsForComplaints/complaint/:id" element = {<ComplaintInfo />}></Route> 
   
           {hasPermission(user,"view logs") && <Route path='/userPage/view-logs' element={<ViewLogs />}/>}
 

@@ -11,10 +11,11 @@ import { hasPermission } from '../../utils/AuthHooks';
 
 
 const ComplaintCard = ({ complaint }) => {
+  const {user} = useAuthContext()
   const navigate = useNavigate();
   return (
     <div 
-      onClick={() => navigate(`/${user.role === 'admin' ?"adminPage" : 'userPage'}/complaint/${complaint._id}`)}
+      // onClick={() => navigate(`/${user.role === 'admin' ?"adminPage" : 'userPage'}/complaint/${complaint._id}`)}
       className="bg-white rounded-2xl shadow-md p-6 border border-gray-200 hover:shadow-xl transition duration-200 flex flex-col justify-between">
       <div className="mb-3">
         <h3 className="text-xl font-semibold text-gray-900 mb-1 capitalize">
@@ -50,6 +51,7 @@ const EmployeeInfo = () => {
     const {id} = useParams();
     
     const {user} = useAuthContext();
+    console.log(user)
     const [employee , setEmployee] = useState(null)
     const [groups , setGroups] = useState([])
     const [complaints , setComplaints] = useState([])
@@ -153,7 +155,6 @@ const EmployeeInfo = () => {
       
     }, [employee]);
 
-    console.log(employee)
   return (
     <div className="max-w-full mx-auto p-6 sm:p-10 bg-white rounded-3xl shadow-xl  border border-gray-200">
       <div className="flex justify-end mb-4">

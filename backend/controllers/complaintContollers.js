@@ -4,6 +4,8 @@ const Complaint = require('../model/Complaint');
 const Role = require('../model/Role');
 const nodemailer = require('nodemailer');
 const { logAction } = require('../middlware/logHelper');
+const Group = require('../model/Group');
+const { default: mongoose } = require('mongoose');
 
 
 const addComplaint = async (req, res) => {
@@ -17,11 +19,16 @@ const addComplaint = async (req, res) => {
         if(!user) {
             return res.status(404).json({ message: 'User not found' });
         }
+
+        const group1 = await Group.findOne({name : "HR"});
+        if(!group1) return res.status(404).json({success : false , message : "no default group to take the complaint"})
+
         const newComplaint = new Complaint({
             
             description,
             userId: id,
-            type: type 
+            type: type ,
+            groupsQueue : [group1._id]
         });
         if (!newComplaint) {
             return res.status(500).json({ message: 'Complaint creation failed' });
@@ -42,7 +49,7 @@ const addComplaint = async (req, res) => {
 
 const changeComplaintStatus = async (req, res) => {
   try {
-    const { complaintId, status, userId } = req.body;
+    const { complaintId, status, userId , groupId } = req.body;
 
     if (!complaintId || !status || !userId) {
       return res.status(400).json({ success: false, message: 'Complaint ID, status, and user ID are required' });
@@ -54,6 +61,10 @@ const changeComplaintStatus = async (req, res) => {
     //   return res.status(403).json({ success: false, message: 'Only admins can change complaint status' });
     // }
 
+    const group =await Group.findById(groupId);
+    if(!group) return res.status(404).json({success:false , message : "no group found :("})
+
+
     // Get complaint with user data
     const complaint = await Complaint.findById(complaintId).populate('userId');
     const oldStatus = complaint.status;
@@ -63,6 +74,7 @@ const changeComplaintStatus = async (req, res) => {
 
     // Update status
     complaint.status = status;
+    complaint.assignedGroup = group._id
     await complaint.save();
 
     // Prepare and send email
@@ -146,6 +158,14 @@ const listUserComplaints = async(req,res) =>{
 }
 
 
+// const listGroupComplaints = async(req,res) =>{
+//   try {
+    
+//   } catch (error) {
+    
+//   }
+// }
+
 
 const deleteComplaint = async (req, res) => {
   try {
@@ -186,4 +206,112 @@ const deleteComplaint = async (req, res) => {
 };
 
 
-module.exports = { addComplaint , changeComplaintStatus , listComplaints , getComplaintInfo , listUserComplaints , deleteComplaint};
+const handleComplaintInGroup = async(req,res) =>{
+  try {
+    const { userId , groupId , status} = req.body;
+    const{id} = req.params
+    let complaintId = id;
+    const complaint = await Complaint.findById(complaintId).populate("userId")
+
+    const oldStatus = complaint.status;
+
+    if (!complaint) {
+      return res.status(404).json({ success: false, message: 'Complaint not found' });
+    }
+    const user = await User.findById(userId)
+
+    // const isMember = await Group.find({_id : groupId , users : userId})
+    // if(!isMember) return res.status(400).json({success : false , message : "user is not a member of the group "})
+
+
+    if(status === "in-progress"){
+
+
+        complaint.status = status ;
+        complaint.groupsQueue.push(groupId);
+        await complaint.save();
+
+
+        await logAction(user, "Change-Status", "Complaint", complaint._id, `Changed Complaint ${complaint._id} status from ${oldStatus} to ${status} and added group ${groupId} to queue`);
+        return res.status(200).json({ success: true, message: 'Complaint status updated and group assigned', complaint });
+
+    }else {
+
+        // Update status
+        complaint.status = status;
+        await complaint.save();
+
+        // Prepare and send email
+        const transporter = nodemailer.createTransport({
+          service: 'Gmail',
+          auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+          },
+        });
+
+        const mailOptions = {
+          from: process.env.EMAIL_USER,
+          to: complaint.userId.email,
+          subject: 'Complaint Status Updated',
+          html: `<p>Hello ${complaint.userId.name},</p>
+                <p>Your complaint status has been updated to <strong>${status}</strong>.</p>`,
+        };
+
+        await transporter.sendMail(mailOptions);
+        
+        await logAction(user , "Change-Status" , "Complaint" , complaint._id , `Changed the Complaint ${complaint._id} from ${oldStatus} To ${complaint.status}`)
+        res.status(200).json({ success: true, message: 'Complaint status updated and email sent', complaint });
+    }
+  }catch (error) {
+    console.error("Error deleting complaint:", error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+}
+
+const listGroupComplaints = async(req,res)=>{
+  try {
+    const { userId , type , status , page =1 , limit= 10} = req.body;
+    const {id} = req.params;
+    let groupId = id
+    if (!mongoose.Types.ObjectId.isValid(groupId) || !mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ success: false, message: "Invalid groupId or userId" });
+    }
+
+
+    const group = await Group.findById(groupId);
+    const inTheGroup = group.users.some(user => user.equals(userId))
+    if(!inTheGroup) return res.status(403).json({success : false , message :"user is not allowed to view other groups complaints"})
+      
+      const skip = (page -1 )*limit
+      const filter ={
+        $expr:{
+          $eq:[
+            {$arrayElemAt : ["$groupsQueue" , -1]}//last id 
+            , new mongoose.Types.ObjectId(groupId)
+          ]
+        }
+      }
+
+      if(type) filter.type = type;
+      if(status) filter.status = status;
+
+    const complaints = await Complaint.find(filter)
+        .sort({createdAt : -1})
+        .skip(skip)
+        .limit(Number(limit));
+
+    const total = await Complaint.countDocuments(filter);
+
+
+    return res.status(200).json({success:true , complaints,total , page : Number(page) ,totalPages: Math.ceil(total / limit)})
+  }catch (error) {
+    console.error("Error fetching complaints:", error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+}
+
+module.exports = { 
+  addComplaint , changeComplaintStatus , listComplaints , getComplaintInfo , 
+  listUserComplaints , deleteComplaint , listGroupComplaints , handleComplaintInGroup
+};
