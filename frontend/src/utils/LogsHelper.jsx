@@ -1,14 +1,20 @@
-export const getLogsHook = async(page , logsPerPage) =>{
+import { toast } from "react-toastify";
+
+export const getLogsHook = async(page , logsPerPage , {action , resource , user}) =>{
     try {
         const res = await fetch(`http://localhost:5000/api/logs/`, {
                 method : "POST",
                 headers: {
-                  'Authorization': `Bearer ${localStorage.getItem('token')}`
+                  'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                  'Content-Type' : 'application/json'
                 } ,
-                body :{
-                    page ,
-                    logsPerPage
-                }
+                body :JSON.stringify({
+                    page : page ,
+                    logsPerPage:logsPerPage ,
+                    action , 
+                    user :user ,
+                    resource : resource
+                })
               });
 
 

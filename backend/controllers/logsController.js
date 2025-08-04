@@ -1,28 +1,39 @@
 
 
+const { logAction } = require('../middlware/logHelper');
 const Logs = require('../model/Logs');
 
 const getLogs = async (req, res) => {
   try {
-    const { page, logsPerPage } = req.body; // default values if not passed
+    const { page, logsPerPage  , action , user, resource } = req.body; 
+
+    const filters = {}
+    if (action) filters.action = action;
+    if (resource) filters.resource = resource;
+
+  
+    let logs = await Logs.find(filters)
+      .populate('user' , "name")
+      .sort({ timestamp: -1 }) // latest first
+      
+
+      if(user){
+        const regex = new RegExp(user,'i');
+        logs = logs.filter((log) => regex.test(log.user?.name))
+      }
+
+    
+    const totalLogs = logs.length;
 
     const skip = (page - 1) * logsPerPage;
 
-    // Get logs with pagination
-    const logs = await Logs.find()
-        .populate('user')
-      .sort({ timestamp: -1 }) // latest first
-      .skip(skip)
-      .limit(logsPerPage);
-
-    
-    const totalLogs = await LogAction.countDocuments();
+    const paginatedLogs = logs.slice(skip,skip + Number(logsPerPage))
 
     res.status(200).json({
       success: true,
-      data: logs,
+      data: paginatedLogs,
       totalPages: Math.ceil(totalLogs / logsPerPage),
-      currentPage: page,
+      currentPage: Number(page),
     });
   } catch (error) {
     console.error("Error fetching logs:", error);

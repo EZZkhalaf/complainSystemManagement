@@ -1,29 +1,34 @@
 import React, { useState, useEffect } from 'react';
+import { getLogsHook } from '../../utils/LogsHelper';
 
-const mockLogs = Array.from({ length: 20 }).map((_, i) => ({
-  _id: i + 1,
-  user: { name: `User ${i + 1}`, email: `user${i + 1}@test.com` },
-  action: "Some_Action",
-  resource: "Resource_Name",
-  resourceId: "abcd1234",
-  message: `This is log message number ${i + 1}`,
-  timestamp: new Date().toISOString()
-}));
+
 
 const LOGS_PER_PAGE = 10;
 
 const ViewLogs = () => {
   const [logs, setLogs] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages , setTotalPages] = useState(1);
 
+  const [ user , setUser ] = useState("");
+  const [ action , setAction] = useState("");
+  const [ resource , setResource ] = useState("");
+
+
+  const fetchLogs = async() =>{
+    const data = await getLogsHook(currentPage , LOGS_PER_PAGE , {action , resource , user})
+    console.log(data)
+    setLogs(data.data);
+    setTotalPages(Math.ceil(data.totalPages ));
+  }
   useEffect(() => {
-    const startIndex = (currentPage - 1) * LOGS_PER_PAGE;
-    const paginatedLogs = mockLogs.slice(startIndex, startIndex + LOGS_PER_PAGE);
-    setLogs(paginatedLogs);
-  }, [currentPage]);
+        fetchLogs()
+  }, [currentPage , action , resource , user]);
 
-  const totalPages = Math.ceil(mockLogs.length / LOGS_PER_PAGE);
 
+   const handleFilterChange = ()=>{
+    setCurrentPage(1)
+   }
   const handlePageChange = (direction) => {
     setCurrentPage((prev) => {
       if (direction === 'prev' && prev > 1) return prev - 1;
@@ -33,56 +38,99 @@ const ViewLogs = () => {
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-2xl font-semibold mb-4">Log Viewer</h2>
+    <div className="p-6 bg-gray-50 min-h-screen">
+  <h2 className="text-3xl font-bold mb-6 text-gray-800">Company Logs</h2>
 
-      <table className="min-w-full bg-white border rounded">
-        <thead>
-          <tr>
-            <th className="border px-4 py-2">#</th>
-            <th className="border px-4 py-2">User</th>
-            <th className="border px-4 py-2">Action</th>
-            <th className="border px-4 py-2">Resource</th>
-            <th className="border px-4 py-2">Message</th>
-            <th className="border px-4 py-2">Timestamp</th>
-          </tr>
-        </thead>
-        <tbody>
-          {logs.map((log, index) => (
-            <tr key={log._id} className="text-sm">
-              <td className="border px-4 py-2">{(currentPage - 1) * LOGS_PER_PAGE + index + 1}</td>
-              <td className="border px-4 py-2">{log.user.name}</td>
-              <td className="border px-4 py-2">{log.action}</td>
-              <td className="border px-4 py-2">{log.resource}</td>
-              <td className="border px-4 py-2">{log.message}</td>
-              <td className="border px-4 py-2">{new Date(log.timestamp).toLocaleString()}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+          {/* Filters */}
+      <div className="flex flex-wrap gap-4 mb-4">
+        <input
+          type="text"
+          placeholder="Search by user..."
+          value={user}
+          onChange={(e) => { setUser(e.target.value); handleFilterChange(); }}
+          className="px-4 py-2 border rounded shadow-sm focus:outline-none focus:ring focus:border-blue-300"
+        />
 
-      <div className="flex justify-between items-center mt-4">
-        <button
-          onClick={() => handlePageChange('prev')}
-          disabled={currentPage === 1}
-          className="bg-gray-300 hover:bg-gray-400 px-3 py-1 rounded disabled:opacity-50"
+        <select
+          value={action}
+          onChange={(e) => { setAction(e.target.value); handleFilterChange(); }}
+          className="px-4 py-2 border rounded shadow-sm focus:outline-none focus:ring focus:border-blue-300"
         >
-          Previous
-        </button>
+          <option value="">All Actions</option>
+          <option value="Login">Login</option>
+          <option value="Add-Permission">Add-Permission</option>
+          <option value="Delete-Role">Delete-Role</option>
+          <option value="Delete-Group">Delete-Group</option>
+          <option value="Add-User">Add-User</option>
+        </select>
 
-        <span className="text-sm">
-          Page {currentPage} of {totalPages}
-        </span>
-
-        <button
-          onClick={() => handlePageChange('next')}
-          disabled={currentPage === totalPages}
-          className="bg-gray-300 hover:bg-gray-400 px-3 py-1 rounded disabled:opacity-50"
+        <select
+          value={resource}
+          onChange={(e) => { setResource(e.target.value); handleFilterChange(); }}
+          className="px-4 py-2 border rounded shadow-sm focus:outline-none focus:ring focus:border-blue-300"
         >
-          Next
-        </button>
+          <option value="">All Resources</option>
+          <option value="User">User</option>
+          <option value="Permission">Permission</option>
+          <option value="Role">Role</option>
+          <option value="Group">Group</option>
+          <option value="Complaint">Complaint</option>
+        </select>
       </div>
-    </div>
+
+
+  <div className="overflow-x-auto shadow rounded-lg bg-white">
+    <table className="min-w-full text-sm text-left text-gray-700">
+      <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
+        <tr>
+          <th className="px-6 py-3 border-b">#</th>
+          <th className="px-6 py-3 border-b">User</th>
+          <th className="px-6 py-3 border-b">Action</th>
+          <th className="px-6 py-3 border-b">Resource</th>
+          <th className="px-6 py-3 border-b">Message</th>
+          <th className="px-6 py-3 border-b">Timestamp</th>
+        </tr>
+      </thead>
+      <tbody>
+        {logs.map((log, index) => (
+          <tr key={log._id} className="hover:bg-gray-50">
+            <td className="px-6 py-4 border-b">{(currentPage - 1) * LOGS_PER_PAGE + index + 1}</td>
+            <td className="px-6 py-4 border-b">{log?.user?.name || 'Unknown'}</td>
+            <td className="px-6 py-4 border-b text-blue-600 font-medium">{log?.action}</td>
+            <td className="px-6 py-4 border-b">{log?.resource}</td>
+            <td className="px-6 py-4 border-b">{log?.message}</td>
+            <td className="px-6 py-4 border-b text-gray-500">
+              {new Date(log?.timestamp).toLocaleString()}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <div className="flex justify-between items-center mt-6">
+    <button
+      onClick={() => handlePageChange('prev')}
+      disabled={currentPage === 1}
+      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+    >
+      Previous
+    </button>
+
+    <span className="text-sm text-gray-700 font-medium">
+      Page {currentPage} of {totalPages}
+    </span>
+
+    <button
+      onClick={() => handlePageChange('next')}
+      disabled={currentPage === totalPages}
+      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+    >
+      Next
+    </button>
+  </div>
+</div>
+
   );
 };
 
