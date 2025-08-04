@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getLogsHook } from '../../utils/LogsHelper';
+import { OrbitProgress } from 'react-loading-indicators';
 
 
 
@@ -14,12 +15,15 @@ const ViewLogs = () => {
   const [ action , setAction] = useState("");
   const [ resource , setResource ] = useState("");
 
+  const [loading , setLoading] = useState(false)
+
 
   const fetchLogs = async() =>{
+    setLoading(true);
     const data = await getLogsHook(currentPage , LOGS_PER_PAGE , {action , resource , user})
-    console.log(data)
     setLogs(data.data);
     setTotalPages(Math.ceil(data.totalPages ));
+    setLoading(false)
   }
   useEffect(() => {
         fetchLogs()
@@ -36,6 +40,11 @@ const ViewLogs = () => {
       return prev;
     });
   };
+  if(loading) return(
+            <div className="max-w-md min-h-full mx-auto p-8 bg-gradient-to-br space-y-6 flex justify-center items-center">
+                <OrbitProgress color="#32cd32" size="medium" text="" textColor="" />
+            </div>
+    )
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">

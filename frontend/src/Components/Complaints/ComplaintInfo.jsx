@@ -12,6 +12,7 @@ import { listGroupsHook } from '../../utils/GroupsHelper';
 const ComplaintInfo = () => {
     const [complaint, setComplaints] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [ btnLoading , setBtnLoading] = useState(false)
   const [newStatus , setNewStatus] = useState("");
   const [groups , setGroups] = useState([])
   const [ selectedGroup , setSelectedGroup] = useState("");
@@ -26,7 +27,6 @@ const ComplaintInfo = () => {
       setComplaints(response);
       setNewStatus(response.status)
       const gData  = await listGroupsHook(user._id)
-      console.log(gData)
       setGroups(gData)
     } catch (err) {
         console.error('Error fetching complaints:', err);
@@ -36,11 +36,13 @@ const ComplaintInfo = () => {
 };
 
 
-const changeComaplaintStatus = async(e) =>{
+const changeComaplaintStatus = async(Decision) =>{
+    setLoading(true);
     let complaintId = id 
     let userId = user._id
     // console.log(newStatus)
-    const data = await handleComplaintInGroupHook(complaintId , userId , selectedGroup ,newStatus)
+    const data = await handleComplaintInGroupHook(complaintId , userId , Decision)
+    setLoading(false)
     if(data.success){
         navigate(`/${user.role === 'admin' ? 'adminPage' : 'userPage'}/groupsForComplaints`)
     }
@@ -59,7 +61,7 @@ useEffect(() => {
 }, []);
 
   if(loading) return(
-            <div className="max-w-md mx-auto p-8 bg-gradient-to-br space-y-6 flex justify-center items-center">
+            <div className="max-w-md min-h-full mx-auto p-8 bg-gradient-to-br space-y-6 flex justify-center items-center">
                 <OrbitProgress color="#32cd32" size="medium" text="" textColor="" />
             </div>
     )
@@ -95,13 +97,10 @@ return (
       )}
     </div>
 
-    {/* Title */}
     <h1 className="text-3xl font-bold text-gray-800 mb-6">Complaint Details</h1>
 
-    {/* Complaint Card */}
     <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 space-y-6">
 
-      {/* User Info */}
       <div>
         <p className="text-gray-600 font-medium mb-1">User:</p>
         {hasPermission(user, "view_employees") ? (
@@ -132,44 +131,38 @@ return (
 
       {/* Status */}
       <div>
-        <p className="text-gray-600 font-medium mb-2">Status:</p>
+        <p className="text-gray-600 font-medium mb-2">Status: {complaint.status}</p>
         {(complaint.status === "pending" || complaint.status === "in-progress") ? (
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <div>
+            {/* <p className="text-gray-600 font-medium mb-2">Status: {complaint.status}</p> */}
 
-            {/* Status Select */}
-            <select
-              className="w-full sm:w-auto px-4 py-2 border rounded-md text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
-              defaultValue={complaint.status}
-              onChange={(e) => setNewStatus(e.target.value)}
-            >
-              <option value="pending">Pending</option>
-              <option value="in-progress">In Progress</option>
-              <option value="resolved">Resolved</option>
-              <option value="rejected">Rejected</option>
-            </select>
+            {(complaint.status === "pending" || complaint.status === "in-progress") ? (
+                <div className="flex  sm:flex-row sm:items-center gap-4">
 
-            {/* Group Select */}
-            <select
-              className="w-full sm:w-auto px-4 py-2 border rounded-md text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 max-h-40 overflow-y-auto"
-              value={selectedGroup}
-              onChange={(e) => setSelectedGroup(e.target.value)}
-            >
-              <option value="">Select Group</option>
-              {groups.map((group) => (
-                <option key={group._id} value={group._id}>
-                  {group.name}
-                </option>
-              ))}
-            </select>
+                <button
+                    onClick={() => changeComaplaintStatus("accept")}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition"
+                >
+                    Accept
+                </button>
 
-            {/* Submit Button */}
-            <button
-              onClick={changeComaplaintStatus}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition"
-            >
-              Submit
-            </button>
-          </div>
+                <button
+                    onClick={() => changeComaplaintStatus("reject")}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition"
+                >
+                    Reject
+                </button>
+
+                </div>
+            ) : (
+                <span
+                className={`inline-block mt-1 px-3 py-1 rounded-full text-sm font-semibold ${getStatusStyle(complaint.status)}`}
+                >
+                {complaint.status}
+                </span>
+            )}
+            </div>
+
         ) : (
           <span
             className={`inline-block mt-1 px-3 py-1 rounded-full text-sm font-semibold ${getStatusStyle(complaint.status)}`}

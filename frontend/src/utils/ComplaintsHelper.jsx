@@ -158,9 +158,8 @@ export const deleteComplaintHook = async(complaintId, userId , navigate) =>{
 }
 
 
-export const handleComplaintInGroupHook = async(complaintId , userId , groupId ,status) =>{
+export const handleComplaintInGroupHook = async(complaintId , userId  ,status) =>{
     try {
-        console.log(groupId)
        const response = await fetch(`http://localhost:5000/api/complaints/handleComplaintInGroup/${complaintId}` , {
            method:"POST" ,
             headers: {
@@ -169,14 +168,13 @@ export const handleComplaintInGroupHook = async(complaintId , userId , groupId ,
             } ,
              body : JSON.stringify({
                 userId : userId ,
-                groupId : groupId ,
+                // groupId : groupId ,
                 status : status
 
              })
         })
 
         const data= await response.json();
-        console.log(data)
         if(data.success){
             toast.success("complaint status changed successfully")
             return data

@@ -24,13 +24,11 @@ const ListGroups = () => {
     }
   }, [user]);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <OrbitProgress color="#2563eb" size="medium" />
-      </div>
-    );
-  }
+  if(loading) return(
+              <div className="max-w-md min-h-full mx-auto p-8 bg-gradient-to-br space-y-6 flex justify-center items-center">
+                  <OrbitProgress color="#32cd32" size="medium" text="" textColor="" />
+              </div>
+      )
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">

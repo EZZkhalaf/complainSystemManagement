@@ -114,7 +114,7 @@ const listComplaints = async(req,res)=>{
         // if(isAdmin.role !== 'admin'){
         //     return res.status(400).json({success : false , error : "the user should be an admin to perform this action "})
         // }else if(isAdmin.role === 'admin'){
-            const complaints = await Complaint.find().populate("userId" , "-password");
+            const complaints = await Complaint.find().populate("userId" , "-password").sort({createdAt : -1});
             return res.status(200).json({success : true , complaints})
     // }
 
@@ -158,13 +158,7 @@ const listUserComplaints = async(req,res) =>{
 }
 
 
-// const listGroupComplaints = async(req,res) =>{
-//   try {
-    
-//   } catch (error) {
-    
-//   }
-// }
+
 
 
 const deleteComplaint = async (req, res) => {
@@ -183,14 +177,7 @@ const deleteComplaint = async (req, res) => {
     }
 
     const isOwner = complaint.userId === user.user._id
-    // const isAdmin = user.role === "admin";
-
-    // if (!isOwner && !isAdmin) {
-    //   return res.status(401).json({
-    //     success: false,
-    //     message: "User not authorized to delete this complaint",
-    //   });
-    // }
+    
 
     await Complaint.findByIdAndDelete(complaintId);
 
@@ -206,63 +193,89 @@ const deleteComplaint = async (req, res) => {
 };
 
 
+
+const sendComplaintEmail = async (to, status, name) => {
+  const transporter = nodemailer.createTransport({
+    service: "Gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to,
+    subject: "Complaint Status Updated",
+    html: `<p>Hello ${name},</p>
+           <p>Your complaint has been <strong>${status}</strong>.</p>`,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
+
 const handleComplaintInGroup = async(req,res) =>{
   try {
-    const { userId , groupId , status} = req.body;
+    const { userId  , status} = req.body;
     const{id} = req.params
     let complaintId = id;
+
+
     const complaint = await Complaint.findById(complaintId).populate("userId")
-
-    const oldStatus = complaint.status;
-
     if (!complaint) {
       return res.status(404).json({ success: false, message: 'Complaint not found' });
     }
     const user = await User.findById(userId)
 
-    // const isMember = await Group.find({_id : groupId , users : userId})
-    // if(!isMember) return res.status(400).json({success : false , message : "user is not a member of the group "})
+
+    const groups = [
+      "688cb7b6edae4715a63bf580" ,//hr
+      "689025363f7969c82baa89f8" ,//g1
+      "689025413f7969c82baa8a0c"//g2
+    ]
+
+    const currentStep = complaint.groupsQueue.length;
+
+    if(currentStep >= groups.length) 
+        return res.status(400).json({success : false , message : "Complaint already got handeled"})
+    
+    const currentGroup = groups[currentStep];
+
+    if(complaint.groupsQueue.includes(currentGroup)) 
+        return res.status(400).json({ success: false, message: "Current group already handled this complaint." });
 
 
-    if(status === "in-progress"){
-
-
-        complaint.status = status ;
-        complaint.groupsQueue.push(groupId);
-        await complaint.save();
-
-
-        await logAction(user, "Change-Status", "Complaint", complaint._id, `Changed Complaint ${complaint._id} status from ${oldStatus} to ${status} and added group ${groupId} to queue`);
-        return res.status(200).json({ success: true, message: 'Complaint status updated and group assigned', complaint });
-
-    }else {
-
-        // Update status
-        complaint.status = status;
-        await complaint.save();
-
-        // Prepare and send email
-        const transporter = nodemailer.createTransport({
-          service: 'Gmail',
-          auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-          },
-        });
-
-        const mailOptions = {
-          from: process.env.EMAIL_USER,
-          to: complaint.userId.email,
-          subject: 'Complaint Status Updated',
-          html: `<p>Hello ${complaint.userId.name},</p>
-                <p>Your complaint status has been updated to <strong>${status}</strong>.</p>`,
-        };
-
-        await transporter.sendMail(mailOptions);
+    if(status === 'accept'){
+        complaint.groupsQueue.push(currentGroup);
+        if(currentStep === groups.length - 1 ){
+            complaint.status = 'resolved'
+            await complaint.save();
+            await sendComplaintEmail(complaint.userId.email , "Resolved" , complaint.userId.name)
+            await logAction(user, "Resolve", "Complaint", complaint._id, `Final group resolved The complaint.`);
+            return res.status(200).json({ success: true, message: "Complaint resolved and user notified.", complaint });
+        }else{
+            complaint.status = "in-progress";
+            await complaint.save();
+            await logAction(user, "Accept", "Complaint", complaint._id, `Complaint accepted by group ${currentGroup}.`);
+            return res.status(200).json({ success: true, message: "Accepted and passed to next group.", complaint });
+        }
         
-        await logAction(user , "Change-Status" , "Complaint" , complaint._id , `Changed the Complaint ${complaint._id} from ${oldStatus} To ${complaint.status}`)
-        res.status(200).json({ success: true, message: 'Complaint status updated and email sent', complaint });
     }
+
+    if(status ==='reject'){
+      complaint.status = 'rejected';
+      complaint.groupsQueue.push(currentGroup)
+
+      await complaint.save();
+      await sendComplaintEmail(complaint.userId.email, "rejected", complaint.userId.name);
+      await logAction(user, "Reject", "Complaint", complaint._id, `Complaint Rejected by group ${currentGroup}.`);
+      
+      return res.status(200).json({ success: true, message: "Rejected and notified the user.", complaint });
+    }
+
+    return res.status(400).json({ success: false, message: "Invalid status. Use 'accept' or 'reject' only." });
+
   }catch (error) {
     console.error("Error deleting complaint:", error);
     return res.status(500).json({ success: false, message: "Internal server error" });
@@ -296,7 +309,7 @@ const listGroupComplaints = async(req,res)=>{
       if(type) filter.type = type;
       if(status) filter.status = status;
 
-    const complaints = await Complaint.find(filter)
+    const complaints = await Complaint.find(filter).sort({createdAt : -1})
         .sort({createdAt : -1})
         .skip(skip)
         .limit(Number(limit));

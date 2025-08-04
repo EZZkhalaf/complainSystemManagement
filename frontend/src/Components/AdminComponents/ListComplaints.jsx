@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { listComplaintsHook } from '../../utils/ComplaintsHelper';
 import { useAuthContext } from '../../Context/authContext';
 import { useNavigate } from 'react-router-dom';
+import { OrbitProgress } from 'react-loading-indicators';
 
 // Dynamic styles for complaint status
 const getStatusStyles = (status) => {
@@ -18,6 +19,7 @@ const ComplaintCard = ({ complaint }) => {
   const navigate = useNavigate();
   const { user } = useAuthContext();
 
+  
   return (
     <div
       onClick={() => {
@@ -56,11 +58,14 @@ const ComplaintCard = ({ complaint }) => {
 const ListComplaints = () => {
   const [complaints, setComplaints] = useState([]);
   const { user } = useAuthContext();
-
+  const [loading , setLoading] = useState(false)
   const fetchComplaints = async () => {
+    setLoading(true)
     try {
+
       const data = await listComplaintsHook(user._id);
       setComplaints(data.complaints);
+      setLoading(false)
     } catch (error) {
       console.error('Error fetching complaints:', error);
     }
@@ -73,6 +78,12 @@ const ListComplaints = () => {
   const filteredComplaints = complaints
     .filter((comp) => comp.userId._id !== user._id)
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    if(loading) return(
+            <div className="max-w-md min-h-full mx-auto p-8 bg-gradient-to-br space-y-6 flex justify-center items-center">
+                <OrbitProgress color="#32cd32" size="medium" text="" textColor="" />
+            </div>
+    )
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">

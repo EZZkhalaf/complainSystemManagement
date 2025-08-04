@@ -43,6 +43,7 @@ const AddPermissionsToRole = () => {
         toast.error("please enter the required fields .")
         return null
       }
+      
       const data = await createPermissionHook(temp)
       if(data.success) {
         toast.success(data.message);
@@ -151,7 +152,7 @@ const AddPermissionsToRole = () => {
                     .join(' ')}
                 </td>
                 <td className="border border-gray-300 px-4 py-2">{perm.description}</td>
-                <td className="border border-gray-300 px-4 py-2">
+                <td className="border border-gray-300 px-4 py-2 grid grid-cols-2">
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => toggleSelect(perm._id)}
@@ -163,14 +164,14 @@ const AddPermissionsToRole = () => {
                     >
                       {selected.includes(perm._id) ? 'Selected' : 'Select'}
                     </button>
-                    <button
-                      onClick={() => handleDelete(perm._id)} // implement this function
-                      className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                      title="Delete Permission"
-                    >
-                      ×
-                    </button>
                   </div>
+                  <button
+                    onClick={() => handleDelete(perm._id)} // implement this function
+                    className="bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600 font-bold"
+                    title="Delete Permission"
+                  >
+                    X
+                  </button>
                 </td>
               </tr>
             ))}

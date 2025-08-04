@@ -4,6 +4,7 @@ import { useAuthContext } from '../../Context/authContext';
 import { fetchUsersHook } from '../../utils/UserHelper';
 import defaultPhoto from '../../assets/defaultPhoto.png';
 import { toast } from 'react-toastify';
+import { OrbitProgress } from 'react-loading-indicators';
 
 const EmpCard = ({ emp }) => {
   const { user } = useAuthContext();
@@ -41,8 +42,10 @@ const ManageEmployees = () => {
   const [search, setSearch] = useState("");
   const [employees, setEmployees] = useState([]);
   const [filteredEmployees, setFilteredEmployees] = useState([]);
+  const [loading , setLoading] = useState(false)
 
   const getEmployees = async () => {
+    setLoading(true);
     try {
       const roles = await fetchUsersHook();
       console.log(roles)
@@ -50,6 +53,7 @@ const ManageEmployees = () => {
        .filter(emp => emp.role !== 'admin');
       setEmployees(updatedUsers);
       setFilteredEmployees(updatedUsers);
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching employees:", error);
       toast.error("Failed to load employees.");
@@ -68,6 +72,12 @@ const ManageEmployees = () => {
       )
     );
   }, [search, employees]);
+
+  if(loading) return(
+            <div className="max-w-md min-h-full mx-auto p-8 bg-gradient-to-br space-y-6 flex justify-center items-center">
+                <OrbitProgress color="#32cd32" size="medium" text="" textColor="" />
+            </div>
+    )
 
   return (
     <div className="max-w-7xl mx-auto  ">
