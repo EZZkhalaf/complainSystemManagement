@@ -47,7 +47,7 @@ const ViewLogs = () => {
     )
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-gray-50 min-h-screen w-full">
   <h2 className="text-3xl font-bold mb-6 text-gray-800">Company Logs</h2>
 
           {/* Filters */}
@@ -89,7 +89,7 @@ const ViewLogs = () => {
 
 
   <div className="overflow-x-auto shadow rounded-lg bg-white">
-    <table className="min-w-full text-sm text-left text-gray-700">
+    <table className="w-full text-sm text-left text-gray-700">
       <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
         <tr>
           <th className="px-6 py-3 border-b">#</th>

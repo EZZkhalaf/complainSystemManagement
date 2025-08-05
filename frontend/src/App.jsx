@@ -41,6 +41,7 @@ import ViewLogs from './Components/AdminComponents/ViewLogs'
 import GroupsListingForComplaints from './Components/Complaints/GroupsListingForComplaints'
 import ComplaintsList from './Components/Complaints/ComplaintsList'
 import ComplaintInfo from './Components/Complaints/ComplaintInfo'
+import ComplaintGroupsRule from './Components/Complaints/ComplaintGroupsRule'
 
 const App = ()=> {
   const {user} = useAuthContext()
@@ -73,6 +74,7 @@ const App = ()=> {
           <Route path="/adminPage/groupsForComplaints/" element = {<GroupsListingForComplaints />}></Route>
           <Route path="/adminPage/groupsForComplaints/:id" element = {<ComplaintsList />}></Route>
           <Route path="/adminPage/groupsForComplaints/complaint/:id" element = {<ComplaintInfo />}></Route>
+          <Route path="/adminPage/ComplaintGroupsRule" element = {<ComplaintGroupsRule />}></Route>
           
           <Route path="/adminPage/add-group" element = {<AddGroup />}></Route>        
           <Route path="/adminPage/current-group/:id" element = {<AdminGroupInfo />}></Route>        

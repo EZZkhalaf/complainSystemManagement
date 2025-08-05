@@ -5,6 +5,7 @@ const User = require('../model/User.js');
 const Role = require('../model/Role.js');
 const { logAction } = require('../middlware/logHelper.js');
 const Complaint = require('../model/Complaint.js');
+const ComplaintGroupsRule = require('../model/ComplaintGroupsRule.js');
 
 
 
@@ -187,4 +188,109 @@ const deleteGroup = async(req,res) => {
     }
 }
 
-module.exports = {createGroup , addUserToGroup , removeUserFromGroup , groupInfoAndUsers , getUserGroups , listGroups , deleteGroup}
+const searchGroups = async(req,res) =>{
+    try {
+        const {search} = req.body;
+
+        const groups = await Group.find({name : {$regex : search , $options : 'i'} })
+
+        return res.status(200).json({success : true , groups})
+    } catch (error) {
+        console.error("Error deleting group:", error);
+        res.status(500).json({ success: false, message: "Server error" });        
+    }
+}
+
+
+const addGroupToRule = async(req,res)=>{
+    try {
+        const {groupId} = req.body;
+        const {id} = req.params;
+        if(!groupId){
+            return res.status(400).json({success:false , message : "no group id provided"})
+        }
+
+        const user = await User.findById(id);
+        if(!user){
+            return res.status(404).json({success:false , message : "no user found with this id "})
+        }
+        const group = await Group.findById(groupId)
+        if(!group){
+            return res.status(404).json({success:false , message : "no group found with this id "})
+        }
+        // const existsInGroup = await ComplaintGroupsRule.findOne({groupsSequence : group})
+        let rule = await ComplaintGroupsRule.findOne()
+        if(!rule){
+            rule = await ComplaintGroupsRule.create({
+                groupsSequence:[groupId]
+            })
+
+            return res.status(200).json({success : true , rule})
+            
+        }
+        if(rule.groupsSequence.some( g => g.toString() === groupId)) {
+            
+            return res.status(400).json({ success: false, message : "group already in the complaint groups sequence" });
+        } else {
+            rule.groupsSequence.push(groupId);
+            
+            await rule.save();
+            
+            rule = await rule.populate("groupsSequence")
+            
+            await logAction(user , "Edit-Rule" , "Rule" , rule._id , `The User Has Added Group ${group.name} from Rule`)
+        
+            return res.status(200).json({success : true , rule , groupsSequence : rule.groupsSequence})
+        }
+    }catch (error) {
+        console.error("Error Adding group To Rule:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+}
+
+const removeGroupFromRule = async(req,res)=>{
+    try {
+        const {groupId} = req.body ;
+        const {id} = req.params;
+        
+        console.log(groupId)
+        const user = await User.findById(id);
+        if(!user){
+            return res.status(404).json({success:false , message : "no user found with this id "})
+        }
+        const group = await Group.findById(groupId)
+        if(!group){
+            return res.status(404).json({success:false , message : "no group found with this id "})
+        }
+        let rule = await ComplaintGroupsRule.findOne({groupsSequence : groupId}).populate("groupsSequence")
+        if(!rule){
+            return res.status(404).json({success : false , message : "rule not found :("})
+        }
+
+        rule.groupsSequence = rule.groupsSequence.filter( g => g._id.toString() !== groupId);
+        rule.updatedAt = new Date();
+        await rule.save();
+        rule = await rule.populate("groupsSequence")
+
+        await logAction(user , "Edit-Rule" , "Rule" , rule._id , `The User Has Removed Group ${group.name} from Rule`)
+        return res.status(200).json({success : true , rule , groupsSequence : rule.groupsSequence})
+    } catch (error) {
+        console.error("Error Adding group To Rule:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+}
+
+const getRules = async (req,res) => {
+    try {
+        const rule = await ComplaintGroupsRule.findOne().populate("groupsSequence" , "-users")
+        res.status(200).json({ success: true, rule }); 
+    } catch (error) {
+        console.error("Error Fetching Rule:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+}
+
+module.exports = {createGroup , addUserToGroup , removeUserFromGroup ,
+     groupInfoAndUsers , getUserGroups , listGroups , deleteGroup , searchGroups,
+     addGroupToRule , getRules , removeGroupFromRule
+    }

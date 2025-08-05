@@ -19,6 +19,104 @@ export const  getUserGroupsHook = async(userId) =>{
     } 
 }
 
+
+export const searchGroupsHook = async(search , userId) =>{
+  try {
+      const res = await fetch(`http://localhost:5000/api/group/searchGroups/${userId}`, {
+        method : "POST" ,
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type' : 'application/json'
+        },
+        body : JSON.stringify({
+          search
+        })
+      });
+      const data = await res.json();
+      // console.log(data)
+      if (data.success) {
+        return data
+      } else {
+        toast.error("error searching the groups")
+        return 
+      }
+  } catch (error) {
+      console.error("Failed to fetch groups:", error);
+  } 
+}
+
+export const getRulesHook = async(userId)=>{
+  try {
+      const res = await fetch(`http://localhost:5000/api/group/getRules/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      const data = await res.json();
+      // console.log(data)s
+      if (data.success) {
+        return data
+      } else {
+        toast.error(data.message)
+        return 
+      }
+  } catch (error) {
+      console.error("Failed to fetch groups:", error);
+  } 
+}
+
+// removeGroupFromRule
+export const removeGroupFromRuleHook = async(groupId , userId)=>{
+    try {
+      const res = await fetch(`http://localhost:5000/api/group/removeGroupFromRule/${userId}`, {
+        method : "DELETE" ,
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type' : 'application/json'
+        },
+        body : JSON.stringify({
+          groupId : groupId
+        })
+      });
+      const data = await res.json();
+      console.log(data)
+      if (data.success) {
+        return data
+      } else {
+        toast.error(data.message)
+        return 
+      }
+  } catch (error) {
+      console.error("Failed to fetch groups:", error);
+  } 
+}
+
+
+export const addGroupToRuleHook = async(groupId , userId)=>{
+    try {
+      const res = await fetch(`http://localhost:5000/api/group/addGroupToRule/${userId}`, {
+        method : "POST" ,
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type' : 'application/json'
+        },
+        body : JSON.stringify({
+          groupId : groupId
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        return data
+      } else {
+        toast.error(data.message)
+        return 
+      }
+  } catch (error) {
+      console.error("Failed to fetch groups:", error);
+  } 
+}
+
+
 export const listGroupsHook = async(id) =>{
     try {
       const res = await fetch(`http://localhost:5000/api/group/admin/${id}`, {

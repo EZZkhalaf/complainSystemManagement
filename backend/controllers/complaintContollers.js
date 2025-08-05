@@ -6,6 +6,7 @@ const nodemailer = require('nodemailer');
 const { logAction } = require('../middlware/logHelper');
 const Group = require('../model/Group');
 const { default: mongoose } = require('mongoose');
+const ComplaintGroupsRule = require('../model/ComplaintGroupsRule');
 
 
 const addComplaint = async (req, res) => {
@@ -229,15 +230,18 @@ const handleComplaintInGroup = async(req,res) =>{
     const user = await User.findById(userId)
 
 
-    const groups = [
-      "688cb7b6edae4715a63bf580" ,//hr
-      "689025363f7969c82baa89f8" ,//g1
-      "689025413f7969c82baa8a0c"//g2
-    ]
+
+    // const groups = [
+    //   "688cb7b6edae4715a63bf580" ,//hr
+    //   "689025363f7969c82baa89f8" ,//g1
+    //   "689025413f7969c82baa8a0c"//g2
+    // ]
+    const rule = await ComplaintGroupsRule.findOne();
+    const groups = rule.groupsSequence;
 
     const currentStep = complaint.groupsQueue.length;
 
-    if(currentStep >= groups.length) 
+    if(currentStep > groups.length) 
         return res.status(400).json({success : false , message : "Complaint already got handeled"})
     
     const currentGroup = groups[currentStep];

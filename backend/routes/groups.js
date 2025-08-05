@@ -1,6 +1,6 @@
 const express = require('express');
 const  userMiddleware  = require('../middlware/userMiddlware');
-const { createGroup , addUserToGroup, removeUserFromGroup, groupInfoAndUsers, listGroups, getUserGroups, deleteGroup } = require('../controllers/groupsControllers');
+const { createGroup , addUserToGroup, removeUserFromGroup, groupInfoAndUsers, listGroups, getUserGroups, deleteGroup, searchGroups, addGroupToRule, getRules, removeGroupFromRule } = require('../controllers/groupsControllers');
 const { model } = require('mongoose');
 const checkPermission = require('../middlware/checkPermission');
 const { listGroupComplaints } = require('../controllers/complaintContollers');
@@ -51,6 +51,8 @@ const router = express.Router();
  *         description: Invalid request data
  */
 router.post('/:userId' , userMiddleware, checkPermission("add_group"),createGroup);
+
+
 
 
 /**
@@ -192,6 +194,12 @@ router.get('/admin/:id' , userMiddleware , listGroups);
 
 router.post('/groupcomplaints/:id' , userMiddleware , listGroupComplaints);
 
+router.post('/searchGroups/:id' , userMiddleware , searchGroups);
+
+
+router.post('/addGroupToRule/:id' , userMiddleware , addGroupToRule);
+router.delete('/removeGroupFromRule/:id' , userMiddleware , removeGroupFromRule);
+router.get('/getRules/:id' , userMiddleware , getRules);
 
 
 module.exports = router;
