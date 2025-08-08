@@ -33,6 +33,7 @@ mongoose.connect(process.env.CONNECTION_STRING)
 
 const port = process.env.PORT || 5000;
 
+//testing
 
 app.use("/api/auth" , authRouter)
 app.use("/api/user", userRouter);

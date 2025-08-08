@@ -18,7 +18,7 @@ const AdminSideBar = () => {
   const activeLinkStyles = 'bg-blue-800 text-white shadow-inner';
 
   const navLinks = (
-    <>
+    <div className='fixed'>
       <NavLink
         to="/adminPage/"
         end
@@ -82,7 +82,7 @@ const AdminSideBar = () => {
       >
         <span>Manage Complaint Groups</span>
       </NavLink>
-    </>
+    </div>
   );
 
   return (
