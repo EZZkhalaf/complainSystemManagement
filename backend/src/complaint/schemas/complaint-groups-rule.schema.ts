@@ -4,9 +4,9 @@ import { ref } from "process";
 
 
 @Schema({timestamps : true})
-export class ComplaintGroupsRule extends Document{
+export class ComplaintGroupsRule {
     @Prop({type : [{type : Types.ObjectId , ref : "Group"}] , default : []})
     groupsSequence : Types.ObjectId[]
 }
-
+export type ComplaintGroupsRuleDocument = ComplaintGroupsRule & Document;
 export const ComplaintGroupsRuleSchema = SchemaFactory.createForClass(ComplaintGroupsRule);

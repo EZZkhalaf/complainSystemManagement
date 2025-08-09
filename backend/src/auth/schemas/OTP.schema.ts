@@ -16,6 +16,7 @@ export class OTP extends Document{
     @Prop({default : false})
     verified : boolean
 }
+export type OTPDocument = OTP & Document;
 
 export const OTPSchema = SchemaFactory.createForClass(OTP);
 

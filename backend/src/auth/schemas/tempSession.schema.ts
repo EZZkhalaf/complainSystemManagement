@@ -21,5 +21,6 @@ export class TempSession extends Document{
     valid : boolean
 
 }
+export type TempSessionDocument = TempSession & Document;
 
 export const TempSessionSchema = SchemaFactory.createForClass(TempSession)

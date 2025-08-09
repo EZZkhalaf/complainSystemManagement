@@ -19,4 +19,5 @@ export class User extends Document{
     
 }
 
+export type UserDocument = User & Document;
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -15,5 +15,5 @@ export class Role extends Document{
     permissions: Types.ObjectId[]
 }
 
-
+export type RoleDocument = Role & Document;
 export const RoleSchema = SchemaFactory.createForClass(Role);

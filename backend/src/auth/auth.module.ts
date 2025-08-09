@@ -4,12 +4,18 @@ import { AuthService } from './auth.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { OTP, OTPSchema } from './schemas/OTP.schema';
 import { TempSession, TempSessionSchema } from './schemas/tempSession.schema';
+import { User, UserSchema } from 'src/user/schemas/user.schema';
+import { Role, RoleSchema } from 'src/roles/schemas/role.schema';
+import { Group, GroupSchema } from 'src/groups/schemas/group.schema';
 
 @Module({
   imports : [
     MongooseModule.forFeature([
+      {name : User.name , schema : UserSchema},
+      {name : Role.name , schema : RoleSchema},
       {name : OTP.name , schema : OTPSchema} ,
-      {name : TempSession.name , schema : TempSessionSchema}
+      {name : TempSession.name , schema : TempSessionSchema},
+      {name : Group.name , schema : GroupSchema}
     ])
   ],
   controllers: [AuthController],

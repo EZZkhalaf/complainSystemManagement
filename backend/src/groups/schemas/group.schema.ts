@@ -3,7 +3,6 @@ import { Types } from "mongoose";
 
 
 
-export type GroupDocument = Group & Document;
 
 @Schema({timestamps : true})
 export class Group{
@@ -14,5 +13,5 @@ export class Group{
     @Prop({type : [{type : Types.ObjectId , ref:"User"}] , default : []})
     users : Types.ObjectId[]
 }
-
+export type GroupDocument = Group & Document;
 export const GroupSchema = SchemaFactory.createForClass(Group);

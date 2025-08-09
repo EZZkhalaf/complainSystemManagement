@@ -15,4 +15,5 @@ export class Permission extends Document{
 
 }
 
+export type PermissionDocument = Permission & Document;
 export const PremissionSchema = SchemaFactory.createForClass(Permission)
