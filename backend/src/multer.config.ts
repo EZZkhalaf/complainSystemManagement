@@ -3,7 +3,7 @@ import * as path from 'path';
 
 export const multerConfig = {
   storage: diskStorage({
-    destination: 'public/uploads',
+    destination: path.join(__dirname, '..', '..', 'public', 'uploads'),
     filename: (req, file, cb) => {
       const ext = path.extname(file.originalname);
       const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;

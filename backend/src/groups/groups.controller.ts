@@ -4,6 +4,8 @@ import { UserIdParameterDto } from './dtos/user-id-parameter.dto';
 import { CreateGroupDto } from './dtos/create-group.dto';
 import { RemoveUserFromGroupDto } from './dtos/remove-user-from-group.dto';
 import { ListGroupComplaintsDto } from './dtos/list-group-complaints.dto';
+import { SearchGroupDto } from './dtos/search-group.dto';
+import { AddGroupToRuleDto } from './dtos/add-group-to-rule.dto';
 
 @Controller('group')
 export class GroupsController {
@@ -46,18 +48,18 @@ export class GroupsController {
     }
 
     @Post("searchGroups/:id")
-    async searchGroups(@Param("id") id : string ,@Body() search : string ){
-        return this.groupsService.searchGroups(search)
+    async searchGroups(@Param("id") id : string ,@Body() dto : SearchGroupDto ){
+        return this.groupsService.searchGroups(dto.search)
     }
 
     @Post("addGroupToRule/:id")
-    async addGroupToRule(@Param("id") id : string , @Body() groupId : string){
-        return this.groupsService.addGroupToRule(id , groupId)
+    async addGroupToRule(@Param("id") id : string , @Body() groupId : AddGroupToRuleDto){
+        return this.groupsService.addGroupToRule(id , groupId.groupId)
     }
 
     @Delete("removeGroupFromRule/:id")
-    async removeGroupFromRule(@Param("id") id : string , @Body() groupId: string){
-        return this.groupsService.removeGroupFromRule(id , groupId)
+    async removeGroupFromRule(@Param("id") id : string , @Body() groupId: AddGroupToRuleDto){
+        return this.groupsService.removeGroupFromRule(id , groupId.groupId)
     }
 
     @Get("getRules/:id")

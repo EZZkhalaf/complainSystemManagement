@@ -16,7 +16,6 @@ export class RolesService {
 
 
     async addNewRole(req : any ,newRole : string){
-        // console.log('dddddddddddddddddddddddddddddddddddddddddddddd')
         if(newRole.length === 0)
             throw new BadRequestException("please fill the role name ")
 

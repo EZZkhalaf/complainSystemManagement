@@ -221,11 +221,11 @@ export class GroupsService {
         if(!group)
             throw new NotFoundException("group not found ")
 
-        let rule = await this.complaintGroupsRule.findOne({groupsSequence:groupId}).populate("groupsSequence")
+        let rule = await this.complaintGroupsRule.findOne({groupsSequence:groupId})
         if(!rule)
             throw new NotFoundException("rule not found")
 
-        rule.groupsSequence = rule.groupsSequence.filter( g=> g.toString() !== groupId.toString())
+        rule.groupsSequence = rule.groupsSequence.filter((g)=> g.toString() !== groupId.toString())
 
         await rule.save()
         rule = await rule.populate("groupsSequence")

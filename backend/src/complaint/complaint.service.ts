@@ -92,6 +92,7 @@ export class ComplaintService {
 
     
 
+    ///////
     async handleComplaintInGroup(id: string, dto: HandleComplaintInGroupDto) {
         const { userId, status } = dto;
 
@@ -108,20 +109,23 @@ export class ComplaintService {
 
         if (!groups || !Array.isArray(groups))
             return {
+                success : false,
                 status: 500,
                 body: { success: false, message: 'Group sequence rule is missing or invalid.' },
-        };
+            };
 
         if (currentStep > groups?.length )
-        return {
-            status: 400,
-            body: { success: false, message: 'Complaint already handled' },
-        };
+            return {
+                success : false,
+                status: 400,
+                body: { success: false, message: 'Complaint already handled' },
+            };
 
         const currentGroup = groups[currentStep];
 
         if (complaint.groupsQueue.includes(currentGroup))
         return {
+            success : false,
             status: 400,
             body: { success: false, message: 'Current group already handled this complaint.' },
         };
@@ -136,6 +140,7 @@ export class ComplaintService {
             await sendComplaintEmail(userDoc.email, 'Resolved', userDoc.name);
             // await logAction(user, 'Resolve', 'Complaint', complaint._id, `Final group resolved the complaint.`);
             return {
+            success : true ,
             status: 200,
             body: { success: true, message: 'Complaint resolved and user notified.', complaint },
             };
@@ -144,8 +149,9 @@ export class ComplaintService {
             await complaint.save();
             // await logAction(user, 'Accept', 'Complaint', complaint._id, `Complaint accepted by group ${currentGroup}.`);
             return {
-            status: 200,
-            body: { success: true, message: 'Accepted and passed to next group.', complaint },
+                success : true,
+                status: 200,
+                body: { success: true, message: 'Accepted and passed to next group.', complaint },
             };
         }
         }

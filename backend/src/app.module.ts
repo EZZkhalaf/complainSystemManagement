@@ -10,6 +10,9 @@ import { GroupsModule } from './groups/groups.module';
 import { LogsModule } from './logs/logs.module';
 import { RolesModule } from './roles/roles.module';
 import { DatabaseService } from './database.service';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+
 
 @Module({
   imports: [
@@ -20,7 +23,11 @@ import { DatabaseService } from './database.service';
     UserModule,
     GroupsModule,
     LogsModule,
-    RolesModule
+    RolesModule,
+    ServeStaticModule.forRoot({
+      rootPath : join(__dirname,"..","public","uploads"),
+      serveRoot:"/uploads"
+    })
   ],
   controllers: [AppController],
   providers: [AppService , DatabaseService],
