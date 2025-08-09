@@ -21,7 +21,7 @@ export class GroupsController {
     }
 
     @Delete(":groupId")
-    async deleteGroup(@Param("groupId") groupId: string, @Req() req){
+    async deleteGroup(@Param("groupId") groupId: string, @Req() req : any){
         return this.groupsService.deleteGroup(req.user , groupId)
     }
 
@@ -58,5 +58,10 @@ export class GroupsController {
     @Delete("removeGroupFromRule/:id")
     async removeGroupFromRule(@Param("id") id : string , @Body() groupId: string){
         return this.groupsService.removeGroupFromRule(id , groupId)
+    }
+
+    @Get("getRules/:id")
+    async getRules(@Param("id") id : string){
+        return this.groupsService.getRules()
     }
 }
