@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ComplaintService } from './complaint.service';
 import { AddComplaintDto } from './dtos/add-complaint.dto';
 import { HandleComplaintInGroupDto } from './dtos/handle-complaint-in-group.dto';
@@ -33,10 +33,11 @@ export class ComplaintController {
         return this.complaintService.changeComplaintStatus(dto)
     }
 
-    @Get(":id")
+    @Post()
     @UseGuards(CheckTokenGaurd,CheckPermissionGaurd)
     @Permission("view_complaints")
-    async listComplaints(@Param("id") dto : ListComplaintsDto){
+    async listComplaints(@Body() dto : ListComplaintsDto){
+        console.log(dto)
         return this.complaintService.listComplaints(dto);
     }
 

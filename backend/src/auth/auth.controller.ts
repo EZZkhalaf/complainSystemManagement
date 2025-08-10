@@ -1,10 +1,11 @@
-import { Body, Controller, Get, Post, Put, Query, Res, Response } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Query, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dtos/register.dto';
 import { LoginDto } from './dtos/login.dto';
 import { SendOtpDto } from './dtos/send-otp.dto';
 import { VerifyOtpDto } from './dtos/verify-otp.dto';
 import { ChangeOtpPasswordDto } from './dtos/change-otp-password.dto';
+import type { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -33,7 +34,8 @@ export class AuthController {
 
     @Post("verify-otp")
     async verifyOtp(@Body() otpDto : VerifyOtpDto , @Res() res : Response){
-        return this.authService.verifyOtp(otpDto.email, otpDto.otp);
+        const result = await this.authService.verifyOtp(otpDto.email, otpDto.otp);
+        return res.status(200).json(result)
     }
 
     @Put("change-password-otp")

@@ -1,13 +1,18 @@
 import { toast } from "react-toastify";
 
 
-export const listComplaintsHook = async(userId)=>{
+export const listComplaintsHook = async(userId , page , limit )=>{
     try {
-        const response = await fetch(`http://localhost:5000/api/complaints/${userId}` , {
-            method : 'GET',
+        const response = await fetch(`http://localhost:5000/api/complaints` , {
+            method : 'POST',
             headers: {
-                "Authorization": `Bearer ${localStorage.getItem('token')}`
-            }
+                "Authorization": `Bearer ${localStorage.getItem('token')}`,
+                "Content-Type" : "application/json"
+            },
+            body : JSON.stringify({
+                page :page ,
+                limit : limit
+            })
         })
 
         const data= await response.json();

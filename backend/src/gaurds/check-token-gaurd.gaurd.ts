@@ -41,7 +41,6 @@ export class CheckTokenGaurd implements CanActivate{
                 permissions : role?.permissions || [],
                 role : role?.role || "user"
             }
-            console.log(req.user)
             return true
         }catch (err) {
            throw new UnauthorizedException('Token is invalid or expired');

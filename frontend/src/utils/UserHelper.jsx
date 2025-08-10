@@ -122,7 +122,11 @@ export const editUserInfoHook = async(formdata , id )=>{
         console.log(data)
         if(data.success){
             toast.success("updated info successfully")
-            localStorage.setItem("user" , JSON.stringify(data.newUser))
+
+            const existingUser = JSON.parse(localStorage.getItem("user")) || {}
+            const updatedUser = { ...existingUser, ...data.newUser }
+
+            localStorage.setItem("user", JSON.stringify(updatedUser))
             return data.newUser
         }else{
             toast.error(data.message)

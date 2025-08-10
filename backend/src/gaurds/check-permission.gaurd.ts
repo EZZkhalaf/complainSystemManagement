@@ -36,7 +36,6 @@ export class CheckPermissionGaurd implements CanActivate {
         if(!hasPermission)
             throw new ForbiddenException("permission denied ")
 
-        console.log("gaurd working ")
         return true
     }   
 }

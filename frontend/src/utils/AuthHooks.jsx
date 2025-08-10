@@ -7,7 +7,6 @@ export const loginHook = async(email,password,navigate,login) =>{
             toast.error("please fill the required fields")
             return;
         }
-        // console.log(email,password)
 
         const response = await fetch("http://localhost:5000/api/auth/login",{
             method : "POST" , 
@@ -27,7 +26,6 @@ export const loginHook = async(email,password,navigate,login) =>{
         }
         if(data.success){
             toast.success("logged in successfully ")
-            console.log(data)
             login(data)
             if(data.user.role === "admin"){
                 navigate('/adminPage')
@@ -59,7 +57,6 @@ export const registerHook = async(name , email , password , navigate) =>{
             })
         })
         const data = await response.json();
-        console.log(data)
         if(data.success){
             toast.success("Verification email sent. Check your inbox.");
             navigate('/login');
@@ -94,7 +91,6 @@ export const sendOtpToEmailHook = async(email,navigate) =>{
             })
         })
         const data = await response.json();
-        console.log(data)
         if(data.success){
             toast.success("OTP sent to Email. Check your inbox.");
             navigate(`/otp-confirm?email=${encodeURIComponent(email)}`);

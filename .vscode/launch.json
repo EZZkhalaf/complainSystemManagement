@@ -1,0 +1,24 @@
+{
+  "version": "0.2.0",
+  "compounds": [
+    {
+      "name": "Full Stack Debugger",
+      "configurations": ["Client Debugger", "Nest Debugger"]
+    }
+  ],
+  "configurations": [
+    {
+      "type": "chrome",
+      "name": "Client Debugger",
+      "request": "launch",
+      "url": "http://localhost:5173",
+    },
+    {
+      "type": "node-terminal",
+      "name": "Nest Debugger",
+      "request": "launch",
+      "command": "npm start",
+      "cwd": "${workspaceFolder}\\backend"
+    }
+  ]
+}

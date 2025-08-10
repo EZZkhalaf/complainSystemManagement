@@ -239,23 +239,24 @@ export class UserService {
             }
 
             await this.userModel.findByIdAndUpdate(id, {
-            name: newName,
-            email: newEmail,
-            password: newHashPassword,
-            profilePicture: imagePath,
+                name: newName,
+                email: newEmail,
+                password: newHashPassword,
+                profilePicture: imagePath,
             });
 
             const updatedUser = await this.userModel.findById(id);
             const role = await this.roleModel.findOne({ user: id });
+            const updatedUserId = (updatedUser?._id as Types.ObjectId).toString()
+            await this.logsService.logAction(
+                updatedUser,
+                'User-Info',
+                'User',
+                updatedUserId,
+                'Changed user info (name/email/password)',
+            );
 
-            // await logAction(
-            //     updatedUser,
-            //     'User-Info',
-            //     'User',
-            //     updatedUser._id,
-            //     'Changed user info (name/email/password)',
-            // );
-
+            //edit service
             return {
                 success: true,
                 newUser: {
@@ -266,6 +267,8 @@ export class UserService {
                     profilePicture: updatedUser?.profilePicture,
                 },
             };
+
+            
     }
     
 
@@ -324,8 +327,10 @@ export class UserService {
         if(!isValidObjectId(id))
             throw new BadRequestException("id is not valid")
 
-        const role = await this.roleModel.findOne({user : id}).populate("user","-password")
-        if(!role || !role.user)
+        const user = await this.userModel.findById(id);
+
+        const role = await this.roleModel.findOne({user : id});
+        if(!role)
             throw new NotFoundException("user not found")
 
         const groups = await this.groupModel.find({users : id})
@@ -333,7 +338,7 @@ export class UserService {
 
         return {
             success: true,
-            user: role.user,     // only the populated user object
+            user: user,     // only the populated user object
             role: role.role,     // role string (if needed)
             groups,
             complaints,

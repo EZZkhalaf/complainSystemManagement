@@ -166,7 +166,7 @@ export class AuthService {
                     profilePicture: user.profilePicture,
                     permissions: tempRole.permissions,
                 },
-                };
+            };
         }catch (error) {
             console.log(error)
             throw new BadRequestException('error cant login');
@@ -180,9 +180,9 @@ export class AuthService {
         const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
         await this.otpModel.create({
-        email,
-        code: otp,
-        expiresAt,
+            email,
+            code: otp,
+            expiresAt,
         });
 
         await sendEmail(email , "your OTP ", `Your OTP is: ${otp}`);
@@ -194,23 +194,25 @@ export class AuthService {
     }
 
     async verifyOtp(email : string , otp : string ){
-        const isCorrect = await this.otpModel.findOne({email , code : otp , expiresAt : {$gt : new Date()}}).sort({createdAt : -1})
+        // const isCorrect = await this.otpModel.findOne({email , code : otp , expiresAt : {$gt : new Date()}}).sort({createdAt : -1})
+        console.log(otp)
+        const isCorrect = await this.otpModel.findOne(
+            { email, code: otp, expiresAt: { $gt: new Date() } },
+            null,
+            { sort: { createdAt: -1 } }
+        );
         if(!isCorrect){
-            return {
-                success : false ,
-                message : "Invalid or expired OTP",
-                statusCode : 400
-            }
+            throw new BadRequestException("invalid or expired OTP")
         }
 
         const resetToken = uuidv4();
-        await this.tempSessionModel.create({
+        const f = await this.tempSessionModel.create({
             email , 
             token : resetToken ,
             expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
         })
 
-        await this.otpModel.deleteMany({email})
+        const f2 = await this.otpModel.deleteMany({email})
         return {
             success: true,
             message: 'OTP verified',

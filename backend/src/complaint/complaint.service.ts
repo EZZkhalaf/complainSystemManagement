@@ -236,11 +236,31 @@ export class ComplaintService {
     }
 
 
-    async listComplaints(dto : ListComplaintsDto) : Promise<{ success: boolean; complaints: ComplaintDocument[] }>{
+    async listComplaints(dto: ListComplaintsDto): Promise<{
+        success: boolean;
+        complaints: ComplaintDocument[];
+        currentPage: number;
+        totalPages: number;
+    }> {
+    const { page , limit } = dto;
 
-        const complaints = await this.complaintModel.find().populate("userId" , "-password").sort({createdAt : -1});
-        return {success : true , complaints}
-    }
+    const skip = (page - 1) * limit;
+    const totalCount = await this.complaintModel.countDocuments();
+
+    const complaints = await this.complaintModel
+        .find()
+        .populate("userId", "-password")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+    return {
+        success: true,
+        complaints,
+        currentPage: page,
+        totalPages: Math.ceil(totalCount / limit),
+    };
+}
 
     async getComplaintInfo(id : string) : Promise<{ success: boolean; complaint: ComplaintDocument }>{
         

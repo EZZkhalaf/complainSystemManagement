@@ -51,7 +51,6 @@ const EmployeeInfo = () => {
     const {id} = useParams();
     
     const {user} = useAuthContext();
-    console.log(user)
     const [employee , setEmployee] = useState(null)
     const [groups , setGroups] = useState([])
     const [complaints , setComplaints] = useState([])
@@ -60,6 +59,8 @@ const EmployeeInfo = () => {
 
 
     const navigate = useNavigate();
+
+    console.log("id::", id)
 
 
     const [editing, setEditing] = useState(false);
@@ -126,14 +127,14 @@ const EmployeeInfo = () => {
 
     const getUserData = async()=>{
         const data = await getUserByIdHook(id);
-        
+        console.log(data)
         const roles = await fetchRolesHook();
         setRoles(roles.map(({user , ...rest}) => rest))
 
 
         if (!data || !data.user || data.user.length === 0) return;
 
-        const user1 = data.user[0]; 
+        const user1 = data.user; 
 
         setEmployee(user1);
         setGroups(data.groups);
@@ -148,6 +149,7 @@ const EmployeeInfo = () => {
         getUserData()
     },[])
 
+    // console.log(employee)
     useEffect(() => {
       if (employee?.role) {
         setSelectedRole(selectedRole); // sync role after data is fetched

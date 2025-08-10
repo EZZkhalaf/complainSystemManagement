@@ -36,6 +36,7 @@ import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express'; // <-- add this
 import mongoose from 'mongoose';
 import { join } from 'path';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule); // <-- change here
@@ -50,6 +51,13 @@ async function bootstrap() {
 
   app.useStaticAssets(join(__dirname, '..', '..', 'public'));
 
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true, // <-- important!
+      transformOptions: { enableImplicitConversion: true }, // allow automatic string->number
+    }),
+  );
 
   mongoose.connection.on('connected', () => {
     console.log('Successfully connected to MongoDB');
