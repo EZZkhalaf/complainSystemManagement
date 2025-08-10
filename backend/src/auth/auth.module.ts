@@ -7,6 +7,9 @@ import { TempSession, TempSessionSchema } from './schemas/tempSession.schema';
 import { User, UserSchema } from 'src/user/schemas/user.schema';
 import { Role, RoleSchema } from 'src/roles/schemas/role.schema';
 import { Group, GroupSchema } from 'src/groups/schemas/group.schema';
+import { LogsService } from 'src/logs/logs.service';
+import { Logs, LogsSchema } from 'src/logs/schemas/logs.schema';
+import { LogsModule } from 'src/logs/logs.module';
 
 @Module({
   imports : [
@@ -15,10 +18,12 @@ import { Group, GroupSchema } from 'src/groups/schemas/group.schema';
       {name : Role.name , schema : RoleSchema},
       {name : OTP.name , schema : OTPSchema} ,
       {name : TempSession.name , schema : TempSessionSchema},
-      {name : Group.name , schema : GroupSchema}
-    ])
+      {name : Group.name , schema : GroupSchema},
+      {name : Logs.name , schema : LogsSchema}
+    ]) ,
+    LogsModule
   ],
   controllers: [AuthController],
-  providers: [AuthService]
+  providers: [AuthService  ]
 })
 export class AuthModule {}

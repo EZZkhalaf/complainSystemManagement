@@ -5,8 +5,5 @@ import { PermissionDto } from './permissions.dto';
 
 export class CreatePermissionDto {
     @IsArray()
-    @ArrayNotEmpty()
-    @ValidateNested({ each: true })
-    @Type(() => PermissionDto)
-    permissions: PermissionDto[];
+    permissions : PermissionDto[]
 }

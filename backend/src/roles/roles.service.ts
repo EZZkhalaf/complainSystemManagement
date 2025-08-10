@@ -1,17 +1,22 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Role, RoleDocument } from './schemas/role.schema';
-import { isValidObjectId, Model } from 'mongoose';
+import { isValidObjectId, Model, Types } from 'mongoose';
 import { Permission, PermissionDocument } from './schemas/permission.schema';
 import { PermissionDto } from './dtos/permissions.dto';
 import { AddPermissionsToRoleDto } from './dtos/add-permissions-to-role.dto';
 import { NotFoundError } from 'rxjs';
+import { LogsService } from 'src/logs/logs.service';
+import { User, UserDocument } from 'src/user/schemas/user.schema';
+import { CreatePermissionDto } from './dtos/create-permissions.dto';
 
 @Injectable()
 export class RolesService {
     constructor(
+        private readonly logsService : LogsService,
         @InjectModel(Role.name) private roleModel : Model<RoleDocument> ,
-        @InjectModel(Permission.name) private permissionModel : Model<PermissionDocument>
+        @InjectModel(Permission.name) private permissionModel : Model<PermissionDocument>,
+        @InjectModel(User.name) private userModel : Model<UserDocument>
     ){}
 
 
@@ -29,8 +34,9 @@ export class RolesService {
         if(!createdRole)
             throw new InternalServerErrorException("error creating the role ")
         await createdRole.save()
+        const createdRoleId = (createdRole._id as Types.ObjectId).toString()
         const user = req.user
-        // await logAction(user , "Add-Role" , "Role" , createdRole._id , `Has Created New Role : ${newRole}`)
+        await this.logsService.logAction(user , "Add-Role" , "Role" , createdRoleId , `Has Created New Role : ${newRole}`)
 
         return {
             success : true ,
@@ -45,73 +51,81 @@ export class RolesService {
     }
 
     async addPermissions(
-        permissions: { name: string; description: string }[],
+        user : any,
+        permissions: CreatePermissionDto,
         ) {
-        if (!Array.isArray(permissions)) {
-            throw new BadRequestException('The permissions must be an array');
-        }
+            try{
+                if (!Array.isArray(permissions)) {
+                    throw new BadRequestException('The permissions must be an array');
+                }
 
-        const invalidPermissions = permissions.some(
-            (p) =>
-            typeof p !== 'object' ||
-            !p.name ||
-            !p.description ||
-            typeof p.name !== 'string' ||
-            typeof p.description !== 'string',
-        );
+                const invalidPermissions = permissions.some(
+                    (p) =>
+                    typeof p !== 'object' ||
+                    !p.name ||
+                    !p.description ||
+                    typeof p.name !== 'string' ||
+                    typeof p.description !== 'string',
+                );
 
-        if (invalidPermissions) {
-            throw new BadRequestException(
-                "Each permission must be an object with 'name' and 'description' as strings",
-            );
-        }
+                if (invalidPermissions) {
+                    throw new BadRequestException(
+                        "Each permission must be an object with 'name' and 'description' as strings",
+                    );
+                }
 
-        const uniquePermissions = [
-            ...new Map(permissions.map((p) => [p.name, p])).values(),
-        ];
+                const uniquePermissions = [
+                    ...new Map(permissions.map((p) => [p.name, p])).values(),
+                ];
 
-        const existing = await this.permissionModel
-            .find({ name: { $in: uniquePermissions.map((p) => p.name) } })
-            .select('name');
+                const existing = await this.permissionModel
+                    .find({ name: { $in: uniquePermissions.map((p) => p.name) } })
+                    .select('name');
 
-        const existingNames = new Set(existing.map((p) => p.name));
-        const newPermissions = uniquePermissions.filter(
-            (p) => !existingNames.has(p.name),
-        );
+                const existingNames = new Set(existing.map((p) => p.name));
+                const newPermissions = uniquePermissions.filter(
+                    (p) => !existingNames.has(p.name),
+                );
 
-        if (newPermissions.length === 0) {
-            return {
-            success: true,
-            message: 'No new permissions to add (all already exist)',
-            };
-        }
+                if (newPermissions.length === 0) {
+                    return {
+                    success: true,
+                    message: 'No new permissions to add (all already exist)',
+                    };
+                }
 
-        const inserted = await this.permissionModel.insertMany(newPermissions);
+                const inserted = await this.permissionModel.insertMany(newPermissions);
 
-        // const user = req.user;
-        // await logAction(user, 'Add-Permission', 'Permission', user._id, `Added permissions: [${newPermissions.map(p => p.name).join(', ')}]`);
+                await this.logsService.logAction(user, 'Add-Permission', 'Permission', user._id, `Added permissions: [${newPermissions.map(p => p.name).join(', ')}]`);
 
-        return {
-            success: true,
-            message: 'New permissions added successfully',
-            data: inserted,
-        };
+                return {
+                    success: true,
+                    message: 'New permissions added successfully',
+                    data: inserted,
+                };
+            }catch(err){
+                console.log(err)
+                throw new InternalServerErrorException("internal server error ")
+            }
     }
 
 
-    async deletePermission( id : string){
+    async deletePermission(user : any ,  id : string){
         if(!isValidObjectId(id)){
             throw new BadRequestException("id is invalid so search")
         }
 
         const p = await this.permissionModel.findById(id);
+        const deleteResult = await this.permissionModel.deleteOne({ _id: id });
+        if (deleteResult.deletedCount === 0) {
+            throw new InternalServerErrorException('Failed to delete permission');
+        }        
         await this.roleModel.updateMany(
             {permissions : id},
             { $pull : {permissions : id}}
         )
 
-        // const user = req.user
-        // await logAction(user , "Add-Permission" , "Permission" , user._id , `Has Deleted the Permission : [${p.name}]`)
+        await this.logsService.logAction(user , "Delete-Permission" , "Permission" , user._id , `Has Deleted the Permission : [${p?.name}]`)
 
         return{success : true , message :"permission deleted successfully" }
     }

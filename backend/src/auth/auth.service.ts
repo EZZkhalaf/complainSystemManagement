@@ -15,10 +15,12 @@ import { sendEmail } from 'src/utils/email.util';
 import { TempSession, TempSessionDocument } from './schemas/tempSession.schema';
 import { v4 as uuidv4 } from 'uuid';
 import { ChangeOtpPasswordDto } from './dtos/change-otp-password.dto';
+import { LogsService } from 'src/logs/logs.service';
 
 @Injectable()
 export class AuthService {
     constructor(
+        private readonly logsService : LogsService,
         @InjectModel(User.name) private userModel = Model<UserDocument> ,
         @InjectModel(Role.name) private roleModel = Model<RoleDocument> ,
         @InjectModel(Group.name) private groupModel = Model<GroupDocument> ,
@@ -107,7 +109,7 @@ export class AuthService {
             await newRole.save();
             }
 
-            // optional: logAction(newUser, ...)
+            await this.logsService.logAction(newUser , "Register" , "User" , newUser._id , "Created A New Account")
 
             return { message: 'Account verified and created successfully' };
         } catch (error) {
@@ -141,7 +143,15 @@ export class AuthService {
             const group = await this.groupModel.find({users : user._id});
 
             const token = jwt.sign({_id : user._id , role : tempRole.role} , process.env.JWT_SECRET || "jsonwebtokensecret", {expiresIn : "10d"})
-            //logAction part
+            
+
+            await this.logsService.logAction(
+                user ,
+                "Login" 
+                , "User" , 
+                user._id , 
+                "Logged In"
+            )
 
             return {
                 success: true,
@@ -230,7 +240,7 @@ export class AuthService {
 
         await this.tempSessionModel.deleteMany({email});
 
-        //here is the logAction
+        this.logsService.logAction(user , "Change-Password" , "User" , user._id , "Changed the Password using forget password method ")
 
         return { success: true, message: "Password changed successfully" }
     }

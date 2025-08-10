@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, Type } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { HydratedDocument, Model, Types } from 'mongoose';
 import { User, UserDocument } from 'src/user/schemas/user.schema';
@@ -14,6 +14,7 @@ import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
 import { sendEmail } from 'src/utils/email.util';
 import * as nodemailer from 'nodemailer'
 import { ListComplaintsDto } from './dtos/list-complaints.dto';
+import { LogsService } from 'src/logs/logs.service';
 
 
 
@@ -48,6 +49,7 @@ export class ComplaintService {
     }
 
     constructor(
+        private readonly logsService : LogsService,
         @InjectModel(Complaint.name) private complaintModel : Model<ComplaintDocument>,
         @InjectModel(ComplaintGroupsRule.name) private complaintGroupsRule : Model<ComplaintGroupsRule>,
         @InjectModel(Role.name) private roleModel : Model<RoleDocument>,
@@ -76,7 +78,8 @@ export class ComplaintService {
 
         try {
             await newComplaint.save();
-            // await logAction(user, 'Add-Complaint', 'User', newComplaint._id, `added new Complaint with type ${type}`);
+            const complaintId = (newComplaint._id as Types.ObjectId).toString();
+            await this.logsService.logAction(user, 'Add-Complaint', 'User', complaintId , `added new Complaint with type ${type}`);
         } catch (error) {
             throw new InternalServerErrorException('Complaint creation failed');
         }
@@ -89,6 +92,7 @@ export class ComplaintService {
         };
 
     }
+
 
     
 
@@ -137,8 +141,9 @@ export class ComplaintService {
         if (currentStep === groups.length - 1) {
             complaint.status = 'resolved';
             await complaint.save();
+            const complaintId = (complaint._id as Types.ObjectId).toString()
             await sendComplaintEmail(userDoc.email, 'Resolved', userDoc.name);
-            // await logAction(user, 'Resolve', 'Complaint', complaint._id, `Final group resolved the complaint.`);
+            await this.logsService.logAction(user, 'Resolve', 'Complaint', complaintId, `Final group resolved the complaint.`);
             return {
             success : true ,
             status: 200,
@@ -147,7 +152,8 @@ export class ComplaintService {
         } else {
             complaint.status = 'in-progress';
             await complaint.save();
-            // await logAction(user, 'Accept', 'Complaint', complaint._id, `Complaint accepted by group ${currentGroup}.`);
+            const complaintId = (complaint._id as Types.ObjectId).toString()
+            await this.logsService.logAction(user, 'Accept', 'Complaint', complaintId, `Complaint accepted by group ${currentGroup}.`);
             return {
                 success : true,
                 status: 200,
@@ -161,7 +167,8 @@ export class ComplaintService {
         complaint.groupsQueue.push(currentGroup);
         await complaint.save();
         await sendComplaintEmail(userDoc.email, 'rejected', userDoc.name);
-        //   await logAction(user, 'Reject', 'Complaint', complaint._id, `Complaint Rejected by group ${currentGroup}.`);
+        const complaintId = (complaint._id as Types.ObjectId).toString()
+        await this.logsService.logAction(user, 'Reject', 'Complaint', complaintId, `Complaint Rejected by group ${currentGroup}.`);
         return {
             status: 200,
             body: { success: true, message: 'Rejected and notified the user.', complaint },
@@ -169,8 +176,8 @@ export class ComplaintService {
         }
 
         return {
-        status: 400,
-        body: { success: false, message: "Invalid status. Use 'accept' or 'reject' only." },
+            status: 400,
+            body: { success: false, message: "Invalid status. Use 'accept' or 'reject' only." },
         };
     }
 
@@ -198,6 +205,7 @@ export class ComplaintService {
         const oldStatus = complaint.status;
 
         complaint.status = status;
+        // const complaintId = (complaint._id as Types.ObjectId).toString()
         complaint.groupsQueue.push(group._id)
         await complaint.save();
 
@@ -212,13 +220,13 @@ export class ComplaintService {
         });
 
         // Log action
-        // await logAction(
-        //     user,
-        //     'Change-Status',
-        //     'Complaint',
-        //     complaint._id,
-        //     `Changed the Complaint ${complaint._id} from ${oldStatus} to ${complaint.status}`
-        // );
+        await this.logsService.logAction(
+            user,
+            'Change-Status',
+            'Complaint',
+            complaintId,
+            `Changed the Complaint ${complaint._id} from ${oldStatus} to ${complaint.status}`
+        );
 
         return {
             success: true,
@@ -272,7 +280,7 @@ export class ComplaintService {
         const isOwner = complaint.userId.toString() === userId
         await this.complaintModel.findByIdAndDelete(complaintId)
 
-            // await logAction(user , "Delete-Complaint" , "Complaint" , complaint._id , `The User Deleted ${isOwner ? "His " : "The "} Complaint With Id ${complaint._id}`)
+        await this.logsService.logAction(user , "Delete-Complaint" , "Complaint" , complaintId , `The User Deleted ${isOwner ? "His " : "The "} Complaint With Id ${complaint._id}`)
 
         return {
             success: true, message: "Complaint deleted successfully"

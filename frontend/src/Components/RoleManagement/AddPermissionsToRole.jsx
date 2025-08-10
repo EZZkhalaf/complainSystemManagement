@@ -80,43 +80,39 @@ const AddPermissionsToRole = () => {
     };
 
 
-    console.log(permissions)
 
     return (
-      <div className="p-6">
+      <div className="p-6 bg-gray-50 rounded-lg shadow-sm max-w-full mx-auto">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-          <h2 className="text-xl font-semibold">Assign Permissions</h2>
+          <h2 className="text-2xl font-semibold text-gray-800">Assign Permissions</h2>
 
           {isAdding ? (
-            <div className="w-full md:w-auto">
-              <h3 className="text-lg font-medium mb-2">Add New Permission</h3>
-              <div className="flex flex-col md:flex-row gap-2 md:gap-4 items-stretch md:items-end">
+            <div className="w-full md:w-auto bg-white p-4 rounded-lg shadow-inner">
+              <h3 className="text-lg font-medium mb-3 text-gray-700">Add New Permission</h3>
+              <div className="flex flex-col md:flex-row gap-3 md:gap-5 items-stretch md:items-end">
                 <input
                   type="text"
-                  value ={newPermission.name}
-                  onChange={(e) => {
-                    setNewPermission({...newPermission , name : e.target.value})
-                  }}
+                  value={newPermission.name}
+                  onChange={(e) => setNewPermission({ ...newPermission, name: e.target.value })}
                   placeholder="Permission Name (e.g., edit_complaint)"
-                  className="flex-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300 placeholder-gray-400 transition"
                 />
                 <input
                   type="text"
                   value={newPermission.description}
-                  onChange={(e) => {
-                    setNewPermission({...newPermission , description : e.target.value})
-                  }}
+                  onChange={(e) => setNewPermission({ ...newPermission, description: e.target.value })}
                   placeholder="Permission Description"
-                  className="flex-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300 placeholder-gray-400 transition"
                 />
-                <button 
-                onClick={()=> addNewPermission()}
-                className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition">
+                <button
+                  onClick={() => addNewPermission()}
+                  className="bg-indigo-400 text-white px-4 py-2 rounded-md shadow-sm hover:bg-indigo-500 transition duration-300 ease-in-out focus:ring-2 focus:ring-indigo-400 focus:ring-offset-1"
+                >
                   Add
                 </button>
                 <button
                   onClick={() => setIsAdding(false)}
-                  className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
+                  className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md shadow-sm hover:bg-gray-400 transition duration-300 ease-in-out focus:ring-2 focus:ring-gray-400 focus:ring-offset-1"
                 >
                   Cancel
                 </button>
@@ -125,69 +121,67 @@ const AddPermissionsToRole = () => {
           ) : (
             <button
               onClick={() => setIsAdding(true)}
-              className="bg-blue-600 text-white font-semibold px-4 py-2 rounded hover:bg-blue-700 transition"
+              className="bg-indigo-400 text-white font-semibold px-5 py-2 rounded-md shadow-sm hover:bg-indigo-500 transition duration-300 ease-in-out focus:ring-2 focus:ring-indigo-400 focus:ring-offset-1"
             >
               Add New Permission
             </button>
           )}
         </div>
 
-        <table className="w-full table-auto border-collapse border border-gray-300 scroll-auto">
-          <thead>
-            <tr className="bg-gray-100 text-left">
-              <th className="border border-gray-300 px-4 py-2">#</th>
-              <th className="border border-gray-300 px-4 py-2">Permission Name</th>
-              <th className="border border-gray-300 px-4 py-2">Permission Description</th>
-              <th className="border border-gray-300 px-4 py-2">Select</th>
+        <table className="w-full table-auto border-collapse border border-gray-200 shadow-sm rounded-md overflow-hidden">
+          <thead className="bg-indigo-50">
+            <tr>
+              <th className="border border-gray-200 px-5 py-3 text-gray-600 text-left font-medium">#</th>
+              <th className="border border-gray-200 px-5 py-3 text-gray-600 text-left font-medium">Permission Name</th>
+              <th className="border border-gray-200 px-5 py-3 text-gray-600 text-left font-medium">Permission Description</th>
+              <th className="border border-gray-200 px-5 py-3 text-gray-600 text-center font-medium">Select</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="bg-white">
             {permissions.map((perm, index) => (
-              <tr key={perm._id} className="hover:bg-gray-50">
-                <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
-                <td className="border border-gray-300 px-4 py-2">
+              <tr key={perm._id} className="hover:bg-indigo-50 transition-colors duration-200">
+                <td className="border border-gray-200 px-5 py-3 text-gray-700">{index + 1}</td>
+                <td className="border border-gray-200 px-5 py-3 text-gray-800 font-semibold">
                   {perm.name
                     .split('_')
                     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
                     .join(' ')}
                 </td>
-                <td className="border border-gray-300 px-4 py-2">{perm.description}</td>
-                <td className="border border-gray-300 px-4 py-2 grid grid-cols-2">
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => toggleSelect(perm._id)}
-                      className={`px-3 py-1 rounded ${
-                        selected.includes(perm._id)
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-200 text-gray-800'
-                      }`}
-                    >
-                      {selected.includes(perm._id) ? 'Selected' : 'Select'}
-                    </button>
-                  </div>
+                <td className="border border-gray-200 px-5 py-3 text-gray-700">{perm.description}</td>
+                <td className="border border-gray-200 px-5 py-3 text-center space-x-2 flex justify-center items-center">
                   <button
-                    onClick={() => handleDelete(perm._id)} // implement this function
-                    className="bg-red-500 text-white px-2 py-1 rounded-full hover:bg-red-600 font-bold"
+                    onClick={() => toggleSelect(perm._id)}
+                    className={`px-3 py-1 rounded-md font-medium shadow-sm transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-300 ${
+                      selected.includes(perm._id)
+                        ? 'bg-indigo-400 text-white hover:bg-indigo-700'
+                        : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                    }`}
+                  >
+                    {selected.includes(perm._id) ? 'Selected' : 'Select'}
+                  </button>
+                  <button
+                    onClick={() => handleDelete(perm._id)}
+                    className="bg-red-300 text-red-800 px-3 py-1 rounded-full hover:bg-red-400 shadow-sm transition duration-300 font-semibold focus:outline-none focus:ring-2 focus:ring-red-300"
                     title="Delete Permission"
                   >
-                    X
+                    &times;
                   </button>
                 </td>
               </tr>
             ))}
-
           </tbody>
         </table>
 
-        <div className="flex justify-end mt-4">
+        <div className="flex justify-end mt-6">
           <button
             onClick={handleSubmit}
-            className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition"
+            className="bg-green-400 text-green-900 font-semibold px-8 py-3 rounded-md shadow-md hover:bg-green-500 transition duration-300 ease-in-out focus:ring-2 focus:ring-green-400 focus:ring-offset-1"
           >
             Submit
           </button>
         </div>
       </div>
+
 
     );
 }

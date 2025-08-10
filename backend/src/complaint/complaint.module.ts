@@ -7,6 +7,9 @@ import { ComplaintGroupsRule, ComplaintGroupsRuleSchema } from './schemas/compla
 import { User, UserSchema } from 'src/user/schemas/user.schema';
 import { Group, GroupSchema } from 'src/groups/schemas/group.schema';
 import { Role, RoleSchema } from 'src/roles/schemas/role.schema';
+import { LogsModule } from 'src/logs/logs.module';
+import { CheckTokenGaurd } from 'src/gaurds/check-token-gaurd.gaurd';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
     imports:[
@@ -16,9 +19,10 @@ import { Role, RoleSchema } from 'src/roles/schemas/role.schema';
             {name : User.name , schema : UserSchema} ,
             {name :Group.name , schema : GroupSchema} , 
             {name : Role.name , schema : RoleSchema}
-        ])
+        ]),
+        LogsModule
     ],
     controllers:[ComplaintController],
-    providers : [ComplaintService]
+    providers : [ComplaintService , JwtService]
 })
 export class ComplaintModule {}

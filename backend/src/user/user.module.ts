@@ -6,6 +6,8 @@ import { User, UserSchema } from './schemas/user.schema';
 import { Role, RoleSchema } from 'src/roles/schemas/role.schema';
 import { Group, GroupSchema } from 'src/groups/schemas/group.schema';
 import { Complaint, ComplaintSchema } from 'src/complaint/schemas/complaint.schema';
+import { LogsModule } from 'src/logs/logs.module';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports:[
@@ -14,9 +16,10 @@ import { Complaint, ComplaintSchema } from 'src/complaint/schemas/complaint.sche
       {name : Role.name , schema:RoleSchema} ,
       {name : Group.name , schema : GroupSchema},
       {name : Complaint.name , schema : ComplaintSchema}
-    ])
+    ]),
+    LogsModule
   ],
   controllers: [UserController],
-  providers: [UserService]
+  providers: [UserService ,JwtService ]
 })
 export class UserModule {}

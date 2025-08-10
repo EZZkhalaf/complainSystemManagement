@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException, Type } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { isValidObjectId, Model, Types } from 'mongoose';
 import { User, UserDocument } from 'src/user/schemas/user.schema';
@@ -10,13 +10,18 @@ import { Complaint, ComplaintDocument } from 'src/complaint/schemas/complaint.sc
 import { ListGroupComplaintsDto } from './dtos/list-group-complaints.dto';
 import { ComplaintGroupsRule, ComplaintGroupsRuleDocument } from 'src/complaint/schemas/complaint-groups-rule.schema';
 import { RolesModule } from 'src/roles/roles.module';
+import { LogsService } from 'src/logs/logs.service';
+import { UserIdParameterDto } from './dtos/user-id-parameter.dto';
+import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
 
 @Injectable()
 export class GroupsService {
 
     constructor(
+        private readonly logsService : LogsService,
         @InjectModel(User.name) private userModel : Model<UserDocument> ,
         @InjectModel(Group.name) private groupModel : Model<GroupDocument> , 
+        @InjectModel(Role.name) private roleModel : Model<RoleDocument>,
         @InjectModel(Complaint.name) private complaintModel : Model<ComplaintDocument>,
         @InjectModel(ComplaintGroupsRule.name) private complaintGroupsRule : Model<ComplaintGroupsRuleDocument>
     ){}
@@ -24,13 +29,14 @@ export class GroupsService {
 
     async createGroup(userId: string, dto: CreateGroupDto) {
         const { name, description } = dto;
-
+        // const { userId } = userIdDto
         const nameExists = await this.groupModel.findOne({ name });
         if (nameExists) {
             throw new BadRequestException('Group name already exists');
         }
-
+        
         const user = await this.userModel.findById(userId);
+        console.log(userId)
         if (!user) {
             throw new NotFoundException('User not found');
         }
@@ -41,7 +47,8 @@ export class GroupsService {
             createdBy: userId,
         });
 
-        // await logAction(user, "Create-Group", "Group", newGroup._id, `Created the Group: ${newGroup.name}`);
+        const groupId = (newGroup._id as Types.ObjectId).toString()
+        await this.logsService.logAction(user, "Create-Group", "Group",groupId, `Created the Group: ${newGroup.name}`);
 
         return {
             success: true,
@@ -78,6 +85,7 @@ export class GroupsService {
         if (!isValidObjectId(groupId)) {
         throw new BadRequestException('Invalid groupId format');
         }
+        
 
         const group = await this.groupModel.findById(groupId);
         if (!group) {
@@ -91,7 +99,7 @@ export class GroupsService {
         { $pull: { groupsQueue: groupId } }
         );
 
-        // await logAction(user, "Delete-Group", "Group", group._id, `Has Deleted Group: ${group.name}`);
+        await this.logsService.logAction(user, "Delete-Group", "Group", groupId, `Has Deleted Group: ${group.name}`);
 
         return { success: true, message: 'Group deleted successfully' };
     }
@@ -201,8 +209,8 @@ export class GroupsService {
             await rule.save();
             
             rule = await rule.populate("groupsSequence")
-            
-            // await logAction(user , "Edit-Rule" , "Rule" , rule._id , `The User Has Added Group ${group.name} from Rule`)
+            const ruleId = (rule._id as Types.ObjectId).toString()
+            await this.logsService.logAction(user , "Edit-Rule" , "Rule" , ruleId , `The User Has Added Group ${group.name} from Rule`)
         
             return {success : true , rule , groupsSequence : rule.groupsSequence}
         }
@@ -229,8 +237,8 @@ export class GroupsService {
 
         await rule.save()
         rule = await rule.populate("groupsSequence")
-
-        // await logAction(user , "Edit-Rule" , "Rule" , rule._id , `The User Has Removed Group ${group.name} from Rule`)
+        const ruleId = (rule._id as Types.ObjectId).toString()
+        await this.logsService.logAction(user , "Edit-Rule" , "Rule" , ruleId , `The User Has Removed Group ${group.name} from Rule`)
 
         return {success : true , rule , groupsSequence : rule.groupsSequence}
     }

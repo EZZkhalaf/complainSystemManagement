@@ -83,7 +83,7 @@ const ComplaintGroupsRule = () => {
 
   
   return (
-    <div className="max-w-6xl mx-auto p-6 bg-gray-50 min-h-screen">
+    <div className="max-w-full mx-auto p-6 bg-gray-50 min-h-screen">
       <h1 className="text-3xl font-semibold mb-4  text-gray-800 tracking-tight">
         Complaint Group Flow
       </h1>

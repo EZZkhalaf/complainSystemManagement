@@ -29,7 +29,7 @@ const GroupsListingForComplaints = () => {
         )
   
 return (
-  <div className="max-w-6xl mx-auto px-6 py-12">
+  <div className="max-w-full mx-auto px-6 py-12">
     <h1 className=" flex text-3xl font-bold text-center text-black mb-10 tracking-wide">
       Your Groups
     </h1>

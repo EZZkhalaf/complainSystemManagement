@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, HttpException, HttpStatus, Inject, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, HttpException, HttpStatus, Inject, Injectable, InternalServerErrorException, NotFoundException, Type, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './schemas/user.schema';
 import { isValidObjectId, Model, Types } from 'mongoose';
@@ -11,14 +11,16 @@ import * as bcrypt from 'bcrypt'
 import * as nodemailer from 'nodemailer';
 import * as jwt from 'jsonwebtoken';
 import { AdminEditUserInfoDto } from './dtos/admin-edit-user-info.dto';
+import { LogsService } from 'src/logs/logs.service';
 
 export interface UserWithRole {
-        user: any; // or better use your UserDocument or user type
+        user: any; 
         role: string;
     }
 @Injectable()
 export class UserService {
     constructor(
+        private readonly logsService : LogsService,
         @InjectModel(User.name) private userModel  :Model<UserDocument> ,
         @InjectModel(Group.name) private groupModel : Model<GroupDocument>,
         @InjectModel(Role.name) private roleModel : Model<RoleDocument> ,
@@ -301,15 +303,15 @@ export class UserService {
 
             const empUser = await this.userModel.findById(userId);
             const updatedUser = await this.userModel.findById(userId).select('-password');
-
+            const updatedUserId = (updatedUser?._id as Types.ObjectId).toString()
             // Log the action (assuming logAction accepts these params)
-            // await logAction(
-            // isAdmin,
-            // 'Change-Info',
-            // 'User',
-            // updatedUser._id,
-            // `Changed the user ${empUser.name} information`,
-            // );
+            await this.logsService.logAction(
+            isAdmin,
+            'Change-Info',
+            'User',
+            updatedUserId,
+            `Changed the user ${empUser?.name} information`,
+            );
 
             return {
             success: true,
@@ -364,13 +366,14 @@ export class UserService {
         })
 
         const user = await this.userModel.findById(_id)
-        // await logAction(
-            // user,
-            // 'User-Info',
-            // 'User',
-            // user._id,
-            // `Changed His User Email from ${oldEmail} to ${user.email}`,
-        // );
+        const userId = (user?._id as Types.ObjectId).toString()
+        await this.logsService.logAction(
+            user,
+            'User-Info',
+            'User',
+            userId,
+            `Changed His User Email from ${oldEmail} to ${user?.email}`,
+        );
 
         return `http://localhost:5173/email-verified?token=${token}`;
     }
@@ -383,7 +386,13 @@ export class UserService {
 
         await this.complaintModel.deleteMany({userId : userId})
         await this.roleModel.updateMany({user : userId} , {$pull : {user : userId}})
-
+        await this.logsService.logAction(
+            user,
+            'User-Delete',
+            'User',
+            userId,
+            `the user has deleted his account`,
+        );
         return { success: true, message: 'User and associated data deleted successfully.' }
     }
 }
