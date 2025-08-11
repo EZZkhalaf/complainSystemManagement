@@ -9,7 +9,8 @@ export const loginHook = async(email,password,navigate,login) =>{
         }
 
         const response = await fetch("http://localhost:5000/api/auth/login",{
-            method : "POST" , 
+            method : "POST" ,
+            credentials : "include", 
             headers : {
                 "Content-Type" : 'application/json'
             },
@@ -20,13 +21,14 @@ export const loginHook = async(email,password,navigate,login) =>{
         })
 
         const data = await response.json();
+        console.log(data)
         if(!data.success) {
             toast.error(data.message)
             return 
         }
         if(data.success){
             toast.success("logged in successfully ")
-            login(data)
+            login(data.user)
             if(data.user.role === "admin"){
                 navigate('/adminPage')
             }else{

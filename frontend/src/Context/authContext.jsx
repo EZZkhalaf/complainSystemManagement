@@ -9,37 +9,50 @@ export const AuthProvider = ({ children }) => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const storedUser = localStorage.getItem("user");
-        const token = localStorage.getItem("token");
+        async function fetchUser(){
+            try {
+                const res = await fetch("http://localhost:5000/api/auth/me", {
+                    method : "GET",
+                    credentials: "include",  
+                });
 
-        if (storedUser && token) {
-            const parsedUser = JSON.parse(storedUser);
-            parsedUser.token = token;
-            setUser(parsedUser);
-        } else {
-            navigate('/login');
+                if (!res.ok) {
+                    navigate("/login");
+                    setLoading(false);
+                    return;
+                }
+
+                const data = await res.json();
+                console.log(data)
+                setUser(data.user);
+            }  catch (err) {
+                console.error(err);
+                navigate("/login");
+            } finally {
+                setLoading(false);
+            }
         }
-        setLoading(false);
+
+        fetchUser()
     }, []);
 
     const login = (data) => {
-        const userWithToken = { ...data.user, token: data.token };
-        setUser(userWithToken);
-        localStorage.setItem("user", JSON.stringify(data.user));
-        localStorage.setItem("token", data.token);
+        setUser(data)
+        
     };
 
     const setUserNewData = (data)=>{
         setUser(data)
-        localStorage.setItem("user", JSON.stringify(data));
-
     }
 
     const logout = () => {
-        setUser(null);
-        localStorage.removeItem("user");
-        localStorage.removeItem("token");
-        navigate('/login'); // optional
+        fetch("http://localhost:5000/api/auth/logout", {
+            method: "POST",
+            credentials: "include",
+        }).finally(() => {
+            setUser(null);
+            navigate("/login");
+        });
     };
 
     if (loading) return <div>Loading...</div>;

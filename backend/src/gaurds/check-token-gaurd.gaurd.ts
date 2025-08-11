@@ -17,11 +17,7 @@ export class CheckTokenGaurd implements CanActivate{
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const req = context.switchToHttp().getRequest()
-        const authHeader = req.headers.authorization;
-        if(!authHeader)
-            throw new UnauthorizedException("no token provided ")
-
-        const token = authHeader.split(" ")[1];
+        const token = req.cookies?.access_token;
         if(!token)
             throw new UnauthorizedException("invalid token")
 

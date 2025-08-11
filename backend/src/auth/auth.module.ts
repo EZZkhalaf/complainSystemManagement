@@ -10,6 +10,8 @@ import { Group, GroupSchema } from 'src/groups/schemas/group.schema';
 import { LogsService } from 'src/logs/logs.service';
 import { Logs, LogsSchema } from 'src/logs/schemas/logs.schema';
 import { LogsModule } from 'src/logs/logs.module';
+import { Complaint, ComplaintSchema } from 'src/complaint/schemas/complaint.schema';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports : [
@@ -19,11 +21,12 @@ import { LogsModule } from 'src/logs/logs.module';
       {name : OTP.name , schema : OTPSchema} ,
       {name : TempSession.name , schema : TempSessionSchema},
       {name : Group.name , schema : GroupSchema},
-      {name : Logs.name , schema : LogsSchema}
+      {name : Logs.name , schema : LogsSchema},
+      {name : Complaint.name , schema : ComplaintSchema}
     ]) ,
     LogsModule
   ],
   controllers: [AuthController],
-  providers: [AuthService  ]
+  providers: [AuthService ,JwtService ]
 })
 export class AuthModule {}

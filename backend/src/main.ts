@@ -37,10 +37,23 @@ import { NestExpressApplication } from '@nestjs/platform-express'; // <-- add th
 import mongoose from 'mongoose';
 import { join } from 'path';
 import { ValidationPipe } from '@nestjs/common';
+const cookieParser = require("cookie-parser")
+const cookieSession =  require('cookie-session');
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule); // <-- change here
-  
+    app.use(cookieParser())
+
+    app.use(
+    cookieSession({
+      name: 'session',
+      keys: [process.env.COOKIE_SECRET || 'default_secret_key'],
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      httpOnly: true,  // better security
+      secure: process.env.NODE_ENV === 'production', // send only over HTTPS in prod
+    }),
+  );
+
   app.setGlobalPrefix("/api");
   app.enableCors({
     origin : ['http://localhost:5173'],

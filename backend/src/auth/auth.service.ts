@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
 import { User, UserDocument } from 'src/user/schemas/user.schema';
 import { RegisterDto } from './dtos/register.dto';
@@ -16,6 +16,20 @@ import { TempSession, TempSessionDocument } from './schemas/tempSession.schema';
 import { v4 as uuidv4 } from 'uuid';
 import { ChangeOtpPasswordDto } from './dtos/change-otp-password.dto';
 import { LogsService } from 'src/logs/logs.service';
+import { Response } from 'express';
+import { Complaint, ComplaintDocument } from 'src/complaint/schemas/complaint.schema';
+
+
+interface interfaceUser {
+                    _id: string
+                    name: string
+                    email: string
+                    password : string
+                    role: string
+                    group: string
+                    profilePicture: string
+                    permissions: Object[]
+                }
 
 @Injectable()
 export class AuthService {
@@ -25,7 +39,8 @@ export class AuthService {
         @InjectModel(Role.name) private roleModel = Model<RoleDocument> ,
         @InjectModel(Group.name) private groupModel = Model<GroupDocument> ,
         @InjectModel(OTP.name) private otpModel = Model<OTPDocument> , 
-        @InjectModel(TempSession.name) private tempSessionModel = Model<TempSessionDocument>
+        @InjectModel(TempSession.name) private tempSessionModel = Model<TempSessionDocument>,
+        @InjectModel(Complaint.name) private complaintModel = Model<ComplaintDocument>
     ){}
 
     async register(registerDto : RegisterDto) : Promise<{message : string }>{
@@ -118,11 +133,11 @@ export class AuthService {
     }
     
 
-    async login (loginDto : LoginDto) : Promise<any>{
+    async login (loginDto : LoginDto ) : Promise<any>{
         try {
             const {email , password} = loginDto;
 
-            const user = await this.userModel.findOne({email:email});
+            const user = await this.userModel.findOne({email:email}).lean() as interfaceUser | null;
             if(!user)
                 throw new NotFoundException("user not found ")
 
@@ -143,6 +158,7 @@ export class AuthService {
             const group = await this.groupModel.find({users : user._id});
 
             const token = jwt.sign({_id : user._id , role : tempRole.role} , process.env.JWT_SECRET || "jsonwebtokensecret", {expiresIn : "10d"})
+            
             
 
             await this.logsService.logAction(
@@ -170,6 +186,19 @@ export class AuthService {
         }catch (error) {
             console.log(error)
             throw new BadRequestException('error cant login');
+        }
+    }
+
+    async logout (res : Response){
+        res.clearCookie('token',{
+            httpOnly : true ,
+            secure : process.env.NODE_ENV === 'production',
+            sameSite : 'lax'
+        })
+
+        return { 
+            success : true ,
+            message : "logged out successfully "
         }
     }
     
@@ -246,5 +275,37 @@ export class AuthService {
 
         return { success: true, message: "Password changed successfully" }
     }
+
+    async fetchLoggedInUser(userId: string) {
+        const user = await this.userModel.findById(userId).select('-password');
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        const role = await this.roleModel
+            .findOne({ user: userId })
+            .select('-user')
+            .populate('permissions', '-description')
+
+        const groups = await this.groupModel.find({ users: userId });
+
+        const complaints = await this.complaintModel.find({ userId: userId });
+
+        return {
+            success: true,
+            message: 'User data fetched successfully',
+            user: {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            profilePicture: user.profilePicture,
+            role: role?.role || null,
+            permissions: role?.permissions || [],
+            group: groups || [],
+            complaints: complaints || [],
+            },
+        };
+        }
+
 }
 

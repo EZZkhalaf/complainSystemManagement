@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Put, Query, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Query, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dtos/register.dto';
 import { LoginDto } from './dtos/login.dto';
@@ -6,6 +6,7 @@ import { SendOtpDto } from './dtos/send-otp.dto';
 import { VerifyOtpDto } from './dtos/verify-otp.dto';
 import { ChangeOtpPasswordDto } from './dtos/change-otp-password.dto';
 import type { Response } from 'express';
+import { CheckTokenGaurd } from 'src/gaurds/check-token-gaurd.gaurd';
 
 @Controller('auth')
 export class AuthController {
@@ -22,8 +23,45 @@ export class AuthController {
     }
 
     @Post("login")
-    async login(@Body() loginDto : LoginDto){
-        return this.authService.login(loginDto)
+    async login(@Body() loginDto : LoginDto , @Res({passthrough : true}) res : Response , @Req() req : any){
+        const {token , user} = await  this.authService.login(loginDto)
+        
+        
+        res.cookie("access_token", token, {
+            httpOnly: true,
+            secure: false, // true if HTTPS in prod
+            sameSite: "lax",
+            maxAge: 10 * 24 * 60 * 60 * 1000, // 10 days
+        });
+
+        // If you want to use cookie-session too:
+        req.session = req.session || {};
+        req.session.token = token;
+        
+        
+        return  {
+            success: true,
+            message: 'Login successful',
+            user: user,
+            
+        }
+
+    }
+
+    @Get("me")
+    @UseGuards(CheckTokenGaurd)
+    async  getLoggedInUser(@Req() req : any) {
+        if (!req.user) {
+            throw new UnauthorizedException('User not found on request');
+        }
+        const userId = req.user._id
+        return  this.authService.fetchLoggedInUser(userId);
+       
+    }
+
+    @Post("logout")
+    async logout(@Res() res : Response){
+        return this.authService.logout(res);
     }
 
 

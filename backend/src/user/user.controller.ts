@@ -46,8 +46,8 @@ export class UserController {
     }
 
     @Get("getSummary/:id")
-    @UseGuards(CheckTokenGaurd,CheckPermissionGaurd)
-    @Permission("view_dashboard_summary")
+    // @UseGuards(CheckTokenGaurd,CheckPermissionGaurd)
+    // @Permission("view_dashboard_summary")
     async getSummary(@Param("id") id : string){
         return this.userService.getSummary(id);
     }
