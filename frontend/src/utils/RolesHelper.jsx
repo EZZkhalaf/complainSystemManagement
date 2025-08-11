@@ -5,13 +5,10 @@ export const fetchRolesHook = async() => {
     try {
         const response = await fetch(`http://localhost:5000/api/role/` , {
             method : "GET",
-            headers : {
-                "Authorization": `Bearer ${localStorage.getItem('token')}` , 
-            }
+            credentials:"include"
         })
 
         const data = await response.json();
-        console.log(data)
         if(data.success){
             return data.roles;
         }else{
@@ -30,8 +27,8 @@ export const addnewRoleHook = async(newRole) => {
     try {
         const response = await fetch(`http://localhost:5000/api/role/` , {
             method : "POST",
+            credentials:"include",
             headers : {
-                "Authorization": `Bearer ${localStorage.getItem('token')}` , 
                 'Content-Type' : 'application/json'
             },
             body : JSON.stringify({
@@ -60,9 +57,7 @@ export const fetchPermissionsHook = async() =>{
     try {
         const response = await fetch(`http://localhost:5000/api/role/getPermissions` , {
             method : "GET",
-            headers : {
-                "Authorization": `Bearer ${localStorage.getItem('token')}` 
-            }
+            credentials:"include"
         })
 
         const data = await response.json();
@@ -85,8 +80,8 @@ export const addPErmissionsToRoleHook = async(roleId , permissionsIds) =>{
     try {
         const response = await fetch(`http://localhost:5000/api/role/addPermissionsToRole` , {
             method : "POST",
+            credentials : "include",
             headers : {
-                "Authorization": `Bearer ${localStorage.getItem('token')}` ,
                 'Content-Type' : 'application/json'
             },
             body : JSON.stringify({
@@ -108,9 +103,7 @@ export const addPErmissionsToRoleHook = async(roleId , permissionsIds) =>{
 export const getRoleByIdHook = async(id) => {
     try {
         const response = await fetch(`http://localhost:5000/api/role/${id}` , {
-            headers : {
-                'Authorization' : `Bearer ${localStorage.getItem("token")}`
-            }
+            credentials : "include",
         })
 
         const data = await response.json();
@@ -125,13 +118,10 @@ export const deleteRoleHook = async(roleId)=>{
     try {
         const response = await fetch(`http://localhost:5000/api/role/${roleId}` , {
             method : "DELETE",
-            headers : {
-                'Authorization' : `Bearer ${localStorage.getItem("token")}`
-            }
+            credentials : "include"
         })
 
         const data = await response.json();
-        console.log(data)
         if(data.success){
             toast.success(data.message)
             return data
@@ -150,8 +140,8 @@ export const createPermissionHook = async (permissions) => {
   try {
     const response = await fetch('http://localhost:5000/api/role/addPermissions', {
       method: 'POST',
+      credentials:"include",
       headers: {
-        "Authorization": `Bearer ${localStorage.getItem("token")}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(permissions), 
@@ -173,8 +163,8 @@ export const deletePermissionHook = async (id) => {
   try {
     const response = await fetch(`http://localhost:5000/api/role/deletePermission/${id}`, {
       method: 'DELETE',
+      credentials:"include",
       headers: {
-        "Authorization": `Bearer ${localStorage.getItem("token")}`,
         'Content-Type': 'application/json',
       }
     });

@@ -9,13 +9,14 @@ import { OrbitProgress } from 'react-loading-indicators';
 const EmpCard = ({ emp }) => {
   const { user } = useAuthContext();
   const navigate = useNavigate();
-
   return (
     <div
-      onClick={() =>
+      onClick={() =>{
         navigate(`/${user.role === 'admin' ? "adminPage" : "userPage"}/listEmployees/employee/${emp?.user?._id}`)
+        }
       }
       className="bg-white rounded-3xl shadow-md p-6 border border-gray-100 hover:shadow-xl hover:border-blue-200 transition duration-200 flex flex-col items-center cursor-pointer group"
+      key={emp.user._id}
     >
       <img
         src={emp.user.profilePicture ? `http://localhost:5000${emp?.user?.profilePicture}` : defaultPhoto}
@@ -106,7 +107,7 @@ const ManageEmployees = () => {
         {filteredEmployees && filteredEmployees.length > 0 ? (
           <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {filteredEmployees.map((emp) => (
-              <EmpCard key={emp.user._id} emp={emp} />
+              <EmpCard  emp={emp} />
             ))}
           </div>
         ) : (

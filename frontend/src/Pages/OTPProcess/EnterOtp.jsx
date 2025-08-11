@@ -9,8 +9,8 @@ const EnterOtp = () => {
   const navigate = useNavigate()
   const query = new URLSearchParams(useLocation().search);
   const email =query.get('email')
+  const [ buttonLoading , setButtonLoading] = useState(false)
 
-  console.log(email)
   const handleChange = (value, index) => {
     if (/^[0-9]?$/.test(value)) {
       const newOtp = [...otp];
@@ -31,9 +31,12 @@ const EnterOtp = () => {
 
   const handleSubmit = async(e) => {
     e.preventDefault()
+    setButtonLoading(true)
     const code = otp.join('');
     if (code.length === 6) {
       const data = await verifyOTPHook(email , code );
+      console.log(data)
+      setButtonLoading(false)
       if(data.success){
         toast.success("OTP verified ");
         navigate(`/change-pass-otp?email=${encodeURIComponent(email)}&token=${data.token}`)
@@ -67,8 +70,9 @@ const EnterOtp = () => {
       <button
         onClick={handleSubmit}
         className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+        disabled={buttonLoading}
       >
-        Verify OTP
+       {buttonLoading ? (<p>loading</p>): (<p>Verify OTP</p>)} 
       </button>
     </div>
   );

@@ -4,9 +4,7 @@ import { toast } from "react-toastify";
 export const  getUserGroupsHook = async(userId) =>{
     try {
       const res = await fetch(`http://localhost:5000/api/group/user/${userId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+        credentials:"include"
       });
       const data = await res.json();
       if (data.success) {
@@ -24,8 +22,8 @@ export const searchGroupsHook = async(search , userId) =>{
   try {
       const res = await fetch(`http://localhost:5000/api/group/searchGroups/${userId}`, {
         method : "POST" ,
+        credentials:"include",
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type' : 'application/json'
         },
         body : JSON.stringify({
@@ -48,9 +46,7 @@ export const searchGroupsHook = async(search , userId) =>{
 export const getRulesHook = async(userId)=>{
   try {
       const res = await fetch(`http://localhost:5000/api/group/getRules/${userId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+        credentials:"include"
       });
       const data = await res.json();
       // console.log(data)s
@@ -70,8 +66,8 @@ export const removeGroupFromRuleHook = async(groupId , userId)=>{
     try {
       const res = await fetch(`http://localhost:5000/api/group/removeGroupFromRule/${userId}`, {
         method : "DELETE" ,
+        credentials:"include",
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type' : 'application/json'
         },
         body : JSON.stringify({
@@ -96,8 +92,8 @@ export const addGroupToRuleHook = async(groupId , userId)=>{
     try {
       const res = await fetch(`http://localhost:5000/api/group/addGroupToRule/${userId}`, {
         method : "POST" ,
+        credentials : "include",
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type' : 'application/json'
         },
         body : JSON.stringify({
@@ -120,9 +116,7 @@ export const addGroupToRuleHook = async(groupId , userId)=>{
 export const listGroupsHook = async(id) =>{
     try {
       const res = await fetch(`http://localhost:5000/api/group/admin/${id}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+        credentials:"include"
       });
       const data = await res.json();
       console.log(data)
@@ -146,8 +140,8 @@ export const listGroupComplaintsHook = async(groupId , userId,
     try {
       const res = await fetch(`http://localhost:5000/api/group/groupcomplaints/${groupId}`, {
         method : "POST",
+        credentials:"include",
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type' : 'application/json'
         } ,
         body :JSON.stringify({
@@ -175,8 +169,8 @@ export const addGroupHook = async(userId , name , description , navigate) =>{
     try {
       const res = await fetch(`http://localhost:5000/api/group/${userId}`, {
         method : "POST",
+        credentials : "include",
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type' : 'application/json'
         } , 
         body : JSON.stringify({
@@ -202,9 +196,7 @@ export const getGroupInfoHook = async(groupId)=>{
         try {
       const res = await fetch(`http://localhost:5000/api/group/${groupId}`, {
         method : "GET",
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        } 
+        credentials:"include"
       });
       const data = await res.json();
       // console.log(data)
@@ -223,9 +215,7 @@ export const deleteGroupHook = async(groupId , navigate) =>{
   try {
       const res = await fetch(`http://localhost:5000/api/group/${groupId}`, {
         method : "Delete",
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        } 
+        credentials:"include"
       });
       const data = await res.json();
       if (data.success) {

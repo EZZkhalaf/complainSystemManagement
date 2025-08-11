@@ -13,7 +13,7 @@ const SignIn = () => {
     const handleSubmit = async(e) =>{
         e.preventDefault()
         // console.log(email,password)
-        const data = await loginHook(email , password , navigate,login)
+         await loginHook(email , password , navigate,login)
 
     }
   return (

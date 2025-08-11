@@ -4,8 +4,8 @@ export const getLogsHook = async(page , logsPerPage , {action , resource , user}
     try {
         const res = await fetch(`http://localhost:5000/api/logs/`, {
                 method : "POST",
+                credentials : "include",
                 headers: {
-                  'Authorization': `Bearer ${localStorage.getItem('token')}`,
                   'Content-Type' : 'application/json'
                 } ,
                 body :JSON.stringify({

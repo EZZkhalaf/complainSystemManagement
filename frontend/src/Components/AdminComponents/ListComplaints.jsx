@@ -59,21 +59,30 @@ const ListComplaints = () => {
   const [complaints, setComplaints] = useState([]);
   const { user } = useAuthContext();
   const [loading , setLoading] = useState(false)
+
+
+  const [currentPage , setCurrentPage] = useState(1)
+  const [ totalPages , setTotalPages] = useState(1)
+
+
   const fetchComplaints = async () => {
     setLoading(true)
     try {
 
-      const data = await listComplaintsHook(user._id);
+      const data = await listComplaintsHook(user._id , currentPage , 9);
+      setCurrentPage(data.currentPage)
+      setTotalPages(data.totalPages)
       setComplaints(data.complaints);
       setLoading(false)
     } catch (error) {
       console.error('Error fetching complaints:', error);
     }
   };
+  console.log(currentPage)
 
   useEffect(() => {
     fetchComplaints();
-  }, []);
+  }, [currentPage]);
 
   const filteredComplaints = complaints
     .filter((comp) => comp.userId._id !== user._id)
@@ -99,12 +108,44 @@ const ListComplaints = () => {
       {filteredComplaints.length === 0 ? (
         <p className="text-center text-gray-500">No complaints found.</p>
       ) : (
-        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 grid-cols-3 sm:grid-cols-2 lg:grid-cols-3">
           {filteredComplaints.map((complaint) => (
             <ComplaintCard key={complaint._id} complaint={complaint} />
           ))}
         </div>
       )}
+      <div className="flex justify-center mt-8 space-x-2">
+      <button
+        disabled={currentPage === 1}
+        onClick={() => setCurrentPage((prev) => prev - 1)}
+        className="px-4 py-2 border rounded-lg bg-gray-100 disabled:opacity-50"
+      >
+        Prev
+      </button>
+
+      {[...Array(totalPages)].map((_, index) => (
+        <button
+          key={index}
+          onClick={() => setCurrentPage(index + 1)}
+          className={`px-4 py-2 border rounded-lg ${
+            currentPage === index + 1
+              ? 'bg-blue-500 text-white'
+              : 'bg-gray-100 hover:bg-gray-200'
+          }`}
+        >
+          {index + 1}
+        </button>
+      ))}
+
+      <button
+        disabled={currentPage > totalPages - 1}
+        onClick={() => setCurrentPage((prev) => prev + 1)}
+        className="px-4 py-2 border rounded-lg bg-gray-100 disabled:opacity-50"
+      >
+        Next
+      </button>
+    </div>
+
     </div>
   );
 };
