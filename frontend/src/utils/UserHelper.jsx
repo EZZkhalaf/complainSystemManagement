@@ -185,22 +185,20 @@ export const changeUserRoleHook = async(userId , newRole) =>{
     }
 }
 
-export const adminUpdateUserInfoHook = async(adminId , userId , newName , newEmail ,newPassword , mappedPermissions)=>{
+export const adminUpdateUserInfoHook = async(adminId , userId , newName , newEmail ,newPassword)=>{
     try {
+        const payload = { userId , newName , newEmail ,newPassword}
+        Object.keys(payload).forEach(key => {
+            if (!payload[key]) delete payload[key]; // removes empty strings, null, undefined
+        });
 
-        const response = await fetch(`http://localhost:5000/api/user/editInfo/admin/${adminId}` , {
-            method : "PUT",
+        const response = await fetch(`http://localhost:5000/api/user/editInfoAdmin/${adminId}` , {
+            method : "POST",
             headers : {
                 "Authorization": `Bearer ${localStorage.getItem('token')}` , 
                 'Content-Type' : 'application/json'
             },
-            body : JSON.stringify({
-                userId ,
-                newName , 
-                newEmail ,
-                newPassword ,
-                newPermissions: mappedPermissions
-            }) 
+            body : JSON.stringify(payload) 
         })
 
         const data =await response.json();

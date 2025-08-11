@@ -64,17 +64,20 @@ export class UserController {
         return this.userService.editUserInfo(id, body, file, req.user)
     }
 
-    @Put("editInfo/admin/:id")
+    @Post("editInfoAdmin/:id")
     @UseGuards(CheckTokenGaurd,CheckPermissionGaurd)
     @Permission("edit_employee")
     async adminEditUserInfo(
         @Param("id") id : string ,
         @Body() dto : AdminEditUserInfoDto
     ){
+        console.log("testinggggggggggggggggg")
         return this.userService.adminEditUserInfo(id, dto)
     }
 
     @Get("getUser/:id")
+    @UseGuards(CheckTokenGaurd,CheckPermissionGaurd)
+    @Permission("view_employees")
     async  getUserById(@Param("id") id : string){
         return this.userService.getUserById(id)
     }

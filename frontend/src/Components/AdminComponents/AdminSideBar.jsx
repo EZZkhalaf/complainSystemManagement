@@ -13,7 +13,7 @@ const AdminSideBar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const navLinkBase =
-  'flex items-center  gap-2 text-slate-300 px-3 py-2 text-sm rounded-md transition-colors duration-200 hover:bg-blue-700 truncate';
+  'flex items-center  gap-2 text-slate-300 px-3 py-2 text-sm rounded-md transition-colors duration-200 hover:bg-blue-700 truncate mt-5 w-full';
 
   const activeLinkStyles = 'bg-blue-800 text-white shadow-inner';
 
@@ -90,10 +90,17 @@ const AdminSideBar = () => {
       
 
       {/* <aside className="md:flex w-[10vw] min-w-[190px] max-w-[400px] bg-slate-900 min-h-screen flex-col p-3 space-y-2 shadow-lg"> */}
-      <aside className="md:flex w-[15vw] min-w-[190px] max-w-[400px] bg-slate-900 min-h-screen flex-col p-3 space-y-2 shadow-lg overflow-y-auto ">
-
+      {/* <aside className="md:flex w-[15vw] min-w-[190px] max-w-[400px] bg-slate-900 min-h-screen flex-col p-3 space-y-2 shadow-lg overflow-y-auto "> */}
+      <aside
+          className="
+            bg-slate-900 min-h-screen flex-col p-3 space-y-2 shadow-lg overflow-y-auto
+            min-w-[150px] max-w-[250px]
+            w-full sm:w-44 md:w-48 lg:w-[14vw] xl:w-[12vw]
+          "
+        >
           {navLinks}
-      </aside>
+        </aside>
+
 
       
     </>

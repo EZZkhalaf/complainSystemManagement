@@ -60,7 +60,6 @@ const EmployeeInfo = () => {
 
     const navigate = useNavigate();
 
-    console.log("id::", id)
 
 
     const [editing, setEditing] = useState(false);
@@ -135,7 +134,6 @@ const EmployeeInfo = () => {
         if (!data || !data.user || data.user.length === 0) return;
 
         const user1 = data.user; 
-
         setEmployee(user1);
         setGroups(data.groups);
         setComplaints(data.complaints);
@@ -259,8 +257,8 @@ const EmployeeInfo = () => {
               </div>
              
             <div className='flex items-center'>
-              <p className="text-m text-gray-500">Joined :</p>
-              <p className="text-gray-700 font-medium ml-2">{employee?.createdAt?.slice(0, 10) || 'N/A'}</p>
+              <p className="text-m text-gray-500">Last Action :</p>
+              <p className="text-gray-700 font-medium ml-2">{employee?.updatedAt?.slice(0, 10) || 'N/A'}</p>
             </div>
           </div>
         </div>

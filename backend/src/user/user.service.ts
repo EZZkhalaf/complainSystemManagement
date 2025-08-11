@@ -272,56 +272,48 @@ export class UserService {
     }
     
 
-    async adminEditUserInfo(id:string , dto : AdminEditUserInfoDto ){
-            const { userId, newName, newEmail, newPassword } = dto;
-
-            // Check if admin
-            const isAdmin = await this.roleModel.findOne({ user: id });
-            if (!isAdmin || isAdmin.role !== 'admin') {
-            throw new HttpException(
-                'Only the admin can edit user info',
-                HttpStatus.UNAUTHORIZED,
-            );
-            }
-
-            // Find the user to update
-            const user = await this.userModel.findById(userId);
-            if (!user) {
-            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-            }
-
-            // Prepare update object
-            const updatedFields: Partial<typeof user> = {
-            name: newName,
-            email: newEmail,
-            };
-
-            if (newPassword) {
-            const newHashedPassword = await bcrypt.hash(newPassword, 10);
-            updatedFields.password = newHashedPassword;
-            }
-
-            // Update user
-            await this.userModel.findByIdAndUpdate(userId, updatedFields);
-
-            const empUser = await this.userModel.findById(userId);
-            const updatedUser = await this.userModel.findById(userId).select('-password');
-            const updatedUserId = (updatedUser?._id as Types.ObjectId).toString()
-            // Log the action (assuming logAction accepts these params)
-            await this.logsService.logAction(
-            isAdmin,
-            'Change-Info',
-            'User',
-            updatedUserId,
-            `Changed the user ${empUser?.name} information`,
-            );
-
-            return {
-            success: true,
-            message: 'User updated successfully',
-            updatedUser,
-            };
+    async adminEditUserInfo(id: string, dto: AdminEditUserInfoDto) {
+    const { userId, newName, newEmail, newPassword } = dto;
+    const adminRole = await this.roleModel.findOne({ user: id });
+    const userAdmin = await this.userModel.findById(id)
+    if (!adminRole || adminRole.role !== 'admin') {
+        throw new HttpException('Only the admin can edit user info', HttpStatus.UNAUTHORIZED);
     }
+
+    const updatedFields: Partial<User> = {};
+    if (newName !== undefined) updatedFields.name = newName;
+    if (newEmail !== undefined) updatedFields.email = newEmail;
+    if (newPassword !== undefined) {
+        updatedFields.password = await bcrypt.hash(newPassword, 10);
+    }
+
+    const updatedUser = await this.userModel.findByIdAndUpdate(
+        userId,
+        { $set: updatedFields },
+        { new: true, runValidators: true, select: '-password' }
+    );
+
+    if (!updatedUser) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    
+
+    await this.logsService.logAction(
+        userAdmin,
+        'Change-Info',
+        'User',
+        userId,
+        `Changed the user ${updatedUser.name} information`
+    );
+
+    return {
+        success: true,
+        message: 'User updated successfully',
+        updatedUser
+    };
+}
+
 
     async getUserById(id : string){
         if(!isValidObjectId(id))

@@ -70,15 +70,15 @@ const ListComplaints = () => {
     try {
 
       const data = await listComplaintsHook(user._id , currentPage , 9);
-      console.log(data)
       setCurrentPage(data.currentPage)
-      setTotalPages(data.totlaPages)
+      setTotalPages(data.totalPages)
       setComplaints(data.complaints);
       setLoading(false)
     } catch (error) {
       console.error('Error fetching complaints:', error);
     }
   };
+  console.log(currentPage)
 
   useEffect(() => {
     fetchComplaints();
@@ -138,7 +138,7 @@ const ListComplaints = () => {
       ))}
 
       <button
-        disabled={currentPage === totalPages}
+        disabled={currentPage > totalPages - 1}
         onClick={() => setCurrentPage((prev) => prev + 1)}
         className="px-4 py-2 border rounded-lg bg-gray-100 disabled:opacity-50"
       >
