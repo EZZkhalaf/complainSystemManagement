@@ -49,7 +49,7 @@ A powerful, secure, and user-friendly system for submitting, tracking, and manag
 | Layer        | Technologies                                    |
 | ------------ | ----------------------------------------------- |
 | **Frontend** | React.js, Tailwind CSS, React Router DOM        |
-| **Backend**  | Node.js, Express.js                             |
+| **Backend**  | Node.js, Nest.js                             |
 | **Database** | MongoDB (Mongoose ODM)                          |
 | **Auth**     | JWT-based authentication                        |
 | **Email**    | Nodemailer                                      |
