@@ -5,6 +5,7 @@ import { AddPermissionsToRoleDto } from './dtos/add-permissions-to-role.dto';
 import { CreateRoleDto } from './dtos/create-role.dto';
 import { CheckTokenGaurd } from 'src/gaurds/check-token-gaurd.gaurd';
 import { CheckPermissionGaurd, Permission } from 'src/gaurds/check-permission.gaurd';
+import { PermissionEntity } from './entities/permission.entity';
 
 @Controller('role')
 export class RolesController {
@@ -65,4 +66,14 @@ export class RolesController {
     async deleteRole(@Param("roleId") roleId : string){
         return this.rolesService.deleteRole(roleId)
     }
+
+
+
+
+
+    @Post("testingnewRole")
+    async createRole(@Body() body : {roleName : string , permissionIds : []}){
+        return this.rolesService.createRoleWithPermissions(body.roleName , body.permissionIds)
+    }
+    
 }

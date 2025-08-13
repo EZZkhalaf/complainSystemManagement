@@ -10,6 +10,9 @@ import { Role, RoleSchema } from 'src/roles/schemas/role.schema';
 import { LogsModule } from 'src/logs/logs.module';
 import { CheckTokenGaurd } from 'src/gaurds/check-token-gaurd.gaurd';
 import { JwtService } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ComplaintEntity } from './entities/complaint.entity';
+import { ComplaintGroupsRuleEntity } from './entities/complaint-groups-rule.entity';
 
 @Module({
     imports:[
@@ -20,9 +23,14 @@ import { JwtService } from '@nestjs/jwt';
             {name :Group.name , schema : GroupSchema} , 
             {name : Role.name , schema : RoleSchema}
         ]),
-        LogsModule
+        LogsModule ,
+        TypeOrmModule.forFeature([
+            ComplaintEntity ,
+            ComplaintGroupsRuleEntity
+        ])
     ],
     controllers:[ComplaintController],
-    providers : [ComplaintService , JwtService]
+    providers : [ComplaintService , JwtService],
+    exports:[TypeOrmModule]
 })
 export class ComplaintModule {}

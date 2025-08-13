@@ -12,7 +12,8 @@ import { RolesModule } from './roles/roles.module';
 import { DatabaseService } from './database.service';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 @Module({
   imports: [
@@ -27,11 +28,29 @@ import { join } from 'path';
     ServeStaticModule.forRoot({
       rootPath : join(__dirname,"..","public","uploads"),
       serveRoot:"/uploads"
+    }) ,
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: 'localhost',
+      port: 5434,
+      username: 'postgres',
+      password: '1234',
+      database: 'postgres',
+      autoLoadEntities: true,
+      synchronize: true, // only for dev
     })
   ],
   controllers: [AppController],
   providers: [AppService , DatabaseService],
 })
 export class AppModule {
-  
+  constructor(private dataSource : DataSource){}
+
+  async onApplicationBootstrap(){
+    if (this.dataSource.isInitialized) {
+      console.log('✅ Connected to Postgres database');
+    } else {
+      console.error('❌ Failed to connect to Postgres database');
+    }
+  }
 }

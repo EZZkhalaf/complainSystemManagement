@@ -12,6 +12,12 @@ import { Logs, LogsSchema } from 'src/logs/schemas/logs.schema';
 import { LogsModule } from 'src/logs/logs.module';
 import { Complaint, ComplaintSchema } from 'src/complaint/schemas/complaint.schema';
 import { JwtService } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { OTPEntity } from './entities/OTP.entity';
+import { TempSessionEntity } from './entities/tempSession.entity';
+import { UserModule } from 'src/user/user.module';
+import { GroupsModule } from 'src/groups/groups.module';
+import { RolesModule } from 'src/roles/roles.module';
 
 @Module({
   imports : [
@@ -24,9 +30,13 @@ import { JwtService } from '@nestjs/jwt';
       {name : Logs.name , schema : LogsSchema},
       {name : Complaint.name , schema : ComplaintSchema}
     ]) ,
-    LogsModule
+    LogsModule,UserModule , GroupsModule,RolesModule,
+    TypeOrmModule.forFeature([
+      OTPEntity , TempSessionEntity
+    ])
   ],
   controllers: [AuthController],
-  providers: [AuthService ,JwtService ]
+  providers: [AuthService ,JwtService ],
+  exports : [TypeOrmModule]
 })
 export class AuthModule {}

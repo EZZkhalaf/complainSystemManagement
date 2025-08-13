@@ -40,9 +40,12 @@ const changeComaplaintStatus = async(Decision) =>{
     setLoading(true);
     let complaintId = id 
     let userId = user._id
-    // console.log(newStatus)
     const data = await handleComplaintInGroupHook(complaintId , userId , Decision)
-    setLoading(false)
+    if(data.success){
+      
+      setLoading(false)
+      navigate(-1)
+    }
     if(data.success){
         navigate(`/${user.role === 'admin' ? 'adminPage' : 'userPage'}/groupsForComplaints`)
     }

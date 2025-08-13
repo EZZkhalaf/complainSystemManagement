@@ -9,6 +9,13 @@ import { NotFoundError } from 'rxjs';
 import { LogsService } from 'src/logs/logs.service';
 import { User, UserDocument } from 'src/user/schemas/user.schema';
 import { CreatePermissionDto } from './dtos/create-permissions.dto';
+import { RoleRepository } from './roles.repository';
+import { RolesEntity } from './entities/roles.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { PermissionEntity } from './entities/permission.entity';
+import { PermissionRepository } from './permission.repository';
+// import { RolePaermissionEntity } from './entities/role-permission.entity';
 
 @Injectable()
 export class RolesService {
@@ -16,7 +23,15 @@ export class RolesService {
         private readonly logsService : LogsService,
         @InjectModel(Role.name) private roleModel : Model<RoleDocument> ,
         @InjectModel(Permission.name) private permissionModel : Model<PermissionDocument>,
-        @InjectModel(User.name) private userModel : Model<UserDocument>
+        @InjectModel(User.name) private userModel : Model<UserDocument> ,
+
+
+
+        @InjectRepository(RolesEntity) private readonly rolesRepo : Repository<RolesEntity>,
+        @InjectRepository(PermissionEntity) private readonly permissionRepo1 : Repository<PermissionEntity>,
+        private readonly permissionRepo : PermissionRepository ,
+        // @InjectRepository(RolePaermissionEntity) private readonly rolePermissionRepo : Repository<RolePaermissionEntity>
+
     ){}
 
 
@@ -211,4 +226,47 @@ export class RolesService {
             roles,
         };
     }
+
+
+    
+    async createPermissionAlone(permissionName: string, permissionDescription: string) {
+        const permission = this.permissionRepo1.create({
+            permission_name: permissionName,
+            permission_description: permissionDescription,
+        });
+
+        return this.permissionRepo1.save(permission);
+        }
+
+
+    async createRoleWithPermissions(roleName : string , permissionIds : number[] ){
+        const permissions = await this.permissionRepo1.findByIds(permissionIds);
+
+            const role = this.rolesRepo.create({
+            role_name: roleName,
+            permissions: permissions,
+            });
+
+            return this.rolesRepo.save(role);
+    }
+
+    async addPermissionToRole(roleId : number , permissionId : number ){
+        const role = await this.rolesRepo.findOne({where : {role_id : roleId}})
+        if(!role)
+            throw new NotFoundException("role not found ")
+
+        const permission = await this.permissionRepo1.findOne({where : {permission_id : permissionId}})
+        if(!permission)
+            throw new NotFoundException("permission not found")
+
+        role.permissions.push(permission);
+        return this.rolesRepo.save(role);
+    }
+
+    async findRoleWithPermissions(roleId: number) {
+    return this.rolesRepo.findOne({
+      where: { role_id: roleId },
+      relations: ['permissions'],
+    });
+  }
 }

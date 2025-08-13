@@ -12,6 +12,12 @@ import * as nodemailer from 'nodemailer';
 import * as jwt from 'jsonwebtoken';
 import { AdminEditUserInfoDto } from './dtos/admin-edit-user-info.dto';
 import { LogsService } from 'src/logs/logs.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UserEntity } from './entities/user.entity';
+import { Repository } from 'typeorm';
+import { RolesEntity } from 'src/roles/entities/roles.entity';
+import { GroupEntity } from 'src/groups/entities/group.entity';
+import { ComplaintEntity } from 'src/complaint/entities/complaint.entity';
 
 export interface UserWithRole {
         user: any; 
@@ -24,36 +30,100 @@ export class UserService {
         @InjectModel(User.name) private userModel  :Model<UserDocument> ,
         @InjectModel(Group.name) private groupModel : Model<GroupDocument>,
         @InjectModel(Role.name) private roleModel : Model<RoleDocument> ,
-        @InjectModel(Complaint.name) private complaintModel : Model<ComplaintDocument>
+        @InjectModel(Complaint.name) private complaintModel : Model<ComplaintDocument>,
+
+
+
+        @InjectRepository(UserEntity) private readonly userRepo : Repository<UserEntity>,
+        @InjectRepository(RolesEntity) private readonly rolesRepo : Repository<RolesEntity> ,
+        @InjectRepository(GroupEntity) private readonly groupRepo : Repository<GroupEntity> ,
+        @InjectRepository(ComplaintEntity) private readonly complaintRepo : Repository<ComplaintEntity>
     ){}
 
 
-    async changeUserRole(dto : ChangeUserRoleDto){
+    // async changeUserRole(dto : ChangeUserRoleDto){
+    //     try{
+    //         const { userId, newRole } = dto;
+
+    //         const objectUserId = new Types.ObjectId(userId)
+    //         const user = await this.userModel.findById(userId);
+    //         if (!user) {
+    //             throw new NotFoundException('User not found');
+    //         }
+
+    //         // Remove user from all roles that include them
+    //         await this.roleModel.updateMany(
+    //             { user: userId },
+    //             { $pull: { user: userId } },
+    //         );
+
+    //         // Find new role
+    //         const role = await this.roleModel.findOne({ role: newRole });
+    //         if (!role) {
+    //             throw new NotFoundException('Role not found');
+    //         }
+
+    //         // Add user to new role if not already present
+    //         if (!role.user.includes(objectUserId)) {
+    //             role.user.push(objectUserId);
+    //             await role.save();
+    //         }
+
+    //         // await logAction(
+    //         //     user,
+    //         //     'Role',
+    //         //     'User',
+    //         //     user._id,
+    //         //     `Changed The User Role to ${role.role}`,
+    //         // );
+
+    //         return {
+    //             success: true,
+    //             message: 'User role updated successfully',
+    //             role,
+    //         };
+    //     } catch (error) {
+    //         console.error(error);
+    //         throw new InternalServerErrorException('Server error');
+    //     }
+    // }
+
+        async changeUserRole(dto : ChangeUserRoleDto){
         try{
             const { userId, newRole } = dto;
 
-            const objectUserId = new Types.ObjectId(userId)
-            const user = await this.userModel.findById(userId);
+            const userIdNumber  = Number(userId)
+            const user = await this.userRepo.findOne({ where : {user_id : userIdNumber}});
             if (!user) {
                 throw new NotFoundException('User not found');
             }
 
-            // Remove user from all roles that include them
-            await this.roleModel.updateMany(
-                { user: userId },
-                { $pull: { user: userId } },
-            );
+
+            //remove from the prev roles
+            const roles = await this.rolesRepo.createQueryBuilder("role_info")
+                .leftJoin("role_info.users" , 'user_info')
+                .where("user_info.user_id ' :userId" , {userId : userIdNumber})
+                .getMany()
+
+            for (const role of roles){
+                role.users = role.users.filter( u => u.user_id !== userIdNumber)
+                await this.rolesRepo.save(role)
+            }
+
 
             // Find new role
-            const role = await this.roleModel.findOne({ role: newRole });
-            if (!role) {
+            const newRoleEntity = await this.rolesRepo.findOne({
+                where : {role_name : newRole},
+                relations : ['users']
+            })
+            if (!newRoleEntity) {
                 throw new NotFoundException('Role not found');
             }
 
             // Add user to new role if not already present
-            if (!role.user.includes(objectUserId)) {
-                role.user.push(objectUserId);
-                await role.save();
+            if (!newRoleEntity.users.some( u => u.user_id === userIdNumber)) {
+                newRoleEntity.users.push(user);
+                await this.rolesRepo.save(newRoleEntity)
             }
 
             // await logAction(
@@ -67,7 +137,7 @@ export class UserService {
             return {
                 success: true,
                 message: 'User role updated successfully',
-                role,
+                role : newRoleEntity,
             };
         } catch (error) {
             console.error(error);
@@ -75,19 +145,45 @@ export class UserService {
         }
     }
 
+    // async fetchUsers(){
+    //     try{
+    //         const rolesWithUsers = await this.roleModel.find().populate("user" , '-password')
+
+    //         const nonAdminUsers = rolesWithUsers
+    //             .filter( role => role.role !== "admin" && role.user)
+    //             .map( role => ({
+    //                 user : role.user ,
+    //                 role : role.role ,
+    //                 roleId : role._id
+    //             }))
+
+    //             const roles = await this.roleModel.find()
+    //             return {
+    //                 success: true,
+    //                 users: nonAdminUsers,
+    //                 roles2: roles
+    //             }
+    //         } catch (error) {
+    //         console.error(error);
+    //         throw new InternalServerErrorException('Server error');
+    //     }
+    // }
+
     async fetchUsers(){
         try{
-            const rolesWithUsers = await this.roleModel.find().populate("user" , '-password')
-
+            // const rolesWithUsers = await this.roleModel.find().populate("user" , '-password')
+            const rolesWithUsers = await this.rolesRepo.find({
+                relations : ["users"]
+            })  
             const nonAdminUsers = rolesWithUsers
-                .filter( role => role.role !== "admin" && role.user)
+                .filter( role => role.role_name !== "admin" && role.users)
                 .map( role => ({
-                    user : role.user ,
-                    role : role.role ,
-                    roleId : role._id
+                    users : role.users ,
+                    role : role.role_name ,
+                    roleId : role.role_id
                 }))
 
-                const roles = await this.roleModel.find()
+                const roles = await this.rolesRepo.find()
                 return {
                     success: true,
                     users: nonAdminUsers,
@@ -100,22 +196,64 @@ export class UserService {
     }
 
     
+    // async fetchUsersRoleEdition(){
+    //     try{
+    //         const roles = await this.roleModel.find().populate('user', '-password');
+
+    //         // Map users with roles
+    //         let usersWithRoles : UserWithRole[] = []
+    //         roles.forEach(role => {
+    //             role?.user?.forEach(user => {
+    //                 usersWithRoles.push({
+    //                 user,
+    //                 role: role.role
+    //                 });
+    //             });
+    //         });
+    //         const roles2 = await this.roleModel.find().select("-permissions");
+
+    //         return {
+    //             success: true,
+    //             users: usersWithRoles , 
+    //             roles2
+    //         }
+    //     } catch (error) {
+    //         console.error(error);
+    //         throw new InternalServerErrorException('Server error');
+    //     }
+    // }
+    
     async fetchUsersRoleEdition(){
         try{
-            const roles = await this.roleModel.find().populate('user', '-password');
+            const roles = await this.rolesRepo.find({
+                relations: {
+                    users: true,
+                },
+                select: {
+                    users: {
+                    user_id: true,
+                    user_name: true,
+                    user_email: true,
+                    profilePicture: true,
+                    // don't include user_password here
+                    },
+                    role_name: true,
+                    role_id: true,
+                },
+            });
 
             // Map users with roles
             let usersWithRoles : UserWithRole[] = []
             roles.forEach(role => {
-                role?.user?.forEach(user => {
+                role?.users?.forEach(user => {
                     usersWithRoles.push({
                     user,
-                    role: role.role
+                    role: role.role_name
                     });
                 });
             });
-            const roles2 = await this.roleModel.find().select("-permissions");
-
+            // const roles2 = await this.roleModel.find().select("-permissions");
+            const roles2 = roles.map(({ permissions, ...rest }) => rest)
             return {
                 success: true,
                 users: usersWithRoles , 
@@ -126,6 +264,7 @@ export class UserService {
             throw new InternalServerErrorException('Server error');
         }
     }
+
 
     async addUserToGroup(dto : AddUserToGroupDto){
         try{
@@ -153,17 +292,45 @@ export class UserService {
 
     }
 
+    // async getSummary(id : string){
+    //     try {
+    //         const userRole = await this.roleModel.findOne({ user: id });
+
+    //         if (!userRole || userRole.role !== 'admin') {
+    //             throw new UnauthorizedException('Only the admin can get the system summary');
+    //         }
+
+    //         const usersCount = await this.userModel.countDocuments();
+    //         const groupsCount = await this.groupModel.countDocuments();
+    //         const complaintsCount = await this.complaintModel.countDocuments();
+
+    //         return {
+    //             success: true,
+    //             users: usersCount,
+    //             groups: groupsCount,
+    //             complaints: complaintsCount,
+    //     };
+    //     } catch (error) {
+    //         console.error(error);
+    //         throw new InternalServerErrorException('Server error');
+    //     }
+    // }
+
     async getSummary(id : string){
         try {
-            const userRole = await this.roleModel.findOne({ user: id });
+            // const userRole = await this.roleModel.findOne({ user: id });
+            const userRole = await this.rolesRepo.createQueryBuilder("role_info")
+                .innerJoin("role_info.users" , "user_info")
+                .where("user_info.user_id = :userId" , {userId : id})
+                .getOne()
 
-            if (!userRole || userRole.role !== 'admin') {
+            if (!userRole || userRole.role_name !== 'admin') {
                 throw new UnauthorizedException('Only the admin can get the system summary');
             }
 
-            const usersCount = await this.userModel.countDocuments();
-            const groupsCount = await this.groupModel.countDocuments();
-            const complaintsCount = await this.complaintModel.countDocuments();
+            const usersCount = await this.userRepo.count();
+            const groupsCount = await this.groupRepo.count();
+            const complaintsCount = await this.complaintRepo.count();
 
             return {
                 success: true,
@@ -392,4 +559,8 @@ export class UserService {
         );
         return { success: true, message: 'User and associated data deleted successfully.' }
     }
+
+
+
+    
 }

@@ -9,6 +9,8 @@ import { ComplaintGroupsRule, ComplaintGroupsRuleSchema } from 'src/complaint/sc
 import { LogsModule } from 'src/logs/logs.module';
 import { JwtService } from '@nestjs/jwt';
 import { Role, RoleSchema } from 'src/roles/schemas/role.schema';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { GroupEntity } from './entities/group.entity';
 
 @Module({
   imports : [
@@ -19,9 +21,13 @@ import { Role, RoleSchema } from 'src/roles/schemas/role.schema';
       {name :Complaint.name , schema : ComplaintSchema} ,
       {name : ComplaintGroupsRule.name , schema : ComplaintGroupsRuleSchema}
     ]) ,
-    LogsModule
+    LogsModule,
+    TypeOrmModule.forFeature([
+      GroupEntity
+    ])
   ],
   controllers: [GroupsController],
-  providers: [GroupsService , JwtService]
+  providers: [GroupsService , JwtService],
+  exports:[TypeOrmModule]
 })
 export class GroupsModule {}

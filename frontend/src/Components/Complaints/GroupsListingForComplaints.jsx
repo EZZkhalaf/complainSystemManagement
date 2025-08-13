@@ -48,7 +48,7 @@ return (
                 `/${user.role === 'admin' ? 'adminPage' : 'userPage'}/groupsForComplaints/${group._id}`
               )
             }
-            className="bg-white rounded-2xl shadow hover:shadow-xl border border-gray-100 transition duration-300 cursor-pointer p-6 flex flex-col justify-between"
+            className="bg-white rounded-2xl shadow hover:shadow-xl border border-gray-300 transition duration-300 cursor-pointer p-6 flex flex-col justify-between"
           >
             <div>
               <h2 className="text-2xl font-semibold text-gray-800 mb-2">

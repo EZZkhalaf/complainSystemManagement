@@ -18,6 +18,11 @@ import { ChangeOtpPasswordDto } from './dtos/change-otp-password.dto';
 import { LogsService } from 'src/logs/logs.service';
 import { Response } from 'express';
 import { Complaint, ComplaintDocument } from 'src/complaint/schemas/complaint.schema';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UserEntity } from 'src/user/entities/user.entity';
+import { Repository } from 'typeorm';
+import { GroupEntity } from 'src/groups/entities/group.entity';
+import { RolesEntity } from 'src/roles/entities/roles.entity';
 
 
 interface interfaceUser {
@@ -40,13 +45,61 @@ export class AuthService {
         @InjectModel(Group.name) private groupModel = Model<GroupDocument> ,
         @InjectModel(OTP.name) private otpModel = Model<OTPDocument> , 
         @InjectModel(TempSession.name) private tempSessionModel = Model<TempSessionDocument>,
-        @InjectModel(Complaint.name) private complaintModel = Model<ComplaintDocument>
+        @InjectModel(Complaint.name) private complaintModel = Model<ComplaintDocument>,
+
+
+        @InjectRepository(UserEntity) private userRepo : Repository<UserEntity>,
+        @InjectRepository(GroupEntity) private groupRepo : Repository<GroupEntity> ,
+        @InjectRepository(RolesEntity) private readonly rolesRepo : Repository<RolesEntity>
     ){}
 
+    // async register(registerDto : RegisterDto) : Promise<{message : string }>{
+    //     const {name , email , password} = registerDto;
+
+    //     const userExists = await this.userModel.findOne({email : email})
+    //     if(userExists)
+    //         throw new BadRequestException("user already exists")
+        
+    //     const hashedPassword = await bcrypt.hash(password , 10);
+    //     const role = "user"
+
+    //     const token = jwt.sign(
+    //         {name , email , password : hashedPassword , role} ,
+    //         process.env.JWT_SECRET || "jsonwebtokensecret",
+    //         {expiresIn  :'1h'}
+    //     )
+
+    //     const verificationLink = `http://localhost:5000/api/auth/verify-email?token=${token}`;
+
+    //     const transporter = nodemailer.createTransport({
+    //         service: 'gmail',
+    //         auth: {
+    //             user: process.env.EMAIL_USER,
+    //             pass: process.env.EMAIL_PASS,
+    //         },
+    //     });
+
+    //     await transporter.sendMail({
+    //         from: `"No Reply" <${process.env.EMAIL_USER}>`,
+    //         to: email,
+    //         subject: 'Verify your email',
+    //         html: `
+    //             <h2>Welcome, ${name}!</h2>
+    //             <p>Please verify your email by clicking the link below:</p>
+    //             <a href="${verificationLink}">${verificationLink}</a>
+    //             <p>This link will expire in 1 hour.</p>
+    //         `,
+    //     });
+
+    //     return { message: 'Verification email sent.' };
+
+    // }
+
+    
     async register(registerDto : RegisterDto) : Promise<{message : string }>{
         const {name , email , password} = registerDto;
 
-        const userExists = await this.userModel.findOne({email : email})
+        const userExists = await this.userRepo.findOne({ where : {user_email : email}})
         if(userExists)
             throw new BadRequestException("user already exists")
         
@@ -96,35 +149,36 @@ export class AuthService {
             }
 
             const {name , email , password , role } = decoded;
-            const userExists = await this.userModel.findOne({email : email})
+            const userExists = await this.userRepo.findOne({where : {user_email : email}})
             if(userExists)
                 throw new BadRequestException("user already verified")
 
-            const newUser = await this.userModel.create({
-                name,
-                email,
-                password,
-                profilePicture: '',
-            });
 
-            await newUser.save();
 
-            let roleDoc = await this.roleModel.findOne({ role });
+            const newUser =  this.userRepo.create({
+                user_name : name ,
+                user_email : email ,
+                user_password : password ,
+                profilePicture : ""
+            })
+            await this.userRepo.save(newUser)
+
+            let roleDoc = await this.rolesRepo.findOne({where :{role_name : role} , relations : ['users']})
 
             if (roleDoc) {
-            if (!roleDoc.user.includes(newUser._id)) {
-                roleDoc.user.push(newUser._id);
-                await roleDoc.save();
+            if (!roleDoc.users.some(user => user.user_id === newUser.user_id)) {
+                roleDoc.users.push(newUser);
+                await this.rolesRepo.save(roleDoc);
             }
             } else {
-            const newRole = await this.roleModel.create({
-                role,
-                user: [newUser._id],
-            });
-            await newRole.save();
+                const newRole =  this.rolesRepo.create({
+                    role_name : role,
+                    users: [newUser],
+                });
+                await this.rolesRepo.save(newRole)
             }
 
-            await this.logsService.logAction(newUser , "Register" , "User" , newUser._id , "Created A New Account")
+            // await this.logsService.logAction(newUser , "Register" , "User" , newUser._id , "Created A New Account")
 
             return { message: 'Account verified and created successfully' };
         } catch (error) {
@@ -137,47 +191,57 @@ export class AuthService {
         try {
             const {email , password} = loginDto;
 
-            const user = await this.userModel.findOne({email:email}).lean() as interfaceUser | null;
+            // const user = await this.userModel.findOne({email:email}).lean() as interfaceUser | null;
+            const user = await this.userRepo.findOne({where : {user_email : email}})
             if(!user)
                 throw new NotFoundException("user not found ")
 
-            const passIsValid = await bcrypt.compare(password, user.password);
+            const passIsValid = await bcrypt.compare(password, user.user_password);
             if (!passIsValid) {
                 throw new BadRequestException("password incorrect");
             }
 
 
-            const tempRole = await this.roleModel
-                .findOne({ user: user._id })
-                .select("-user")
-                .populate("permissions", "-description");
+
+            const tempRole = await this.rolesRepo.createQueryBuilder("role_info")
+                .leftJoinAndSelect('role_info.permissions' , 'permission_info')
+                .leftJoin("role_info.users" , "user_info")
+                .where("user_info.user_id = :userId" , {userId : user.user_id})
+                .select([
+                    "role_info.role_id" ,
+                    "role_info.role_name" ,
+
+                    "permission_info.permission_name"
+                ]).getOne()
 
             if (!tempRole) {
                 throw new NotFoundException("Role not found for user");
             }
-            const group = await this.groupModel.find({users : user._id});
-
-            const token = jwt.sign({_id : user._id , role : tempRole.role} , process.env.JWT_SECRET || "jsonwebtokensecret", {expiresIn : "10d"})
+            const group = await this.groupRepo.createQueryBuilder("group_info")
+                .leftJoin("group_info.users" , "user_info")
+                .where("user_info.user_id = :userId" , {userId : user.user_id})
+                .getMany()
+            const token = jwt.sign({_id : user.user_id , role : tempRole.role_name} , process.env.JWT_SECRET || "jsonwebtokensecret", {expiresIn : "10d"})
             
             
 
-            await this.logsService.logAction(
-                user ,
-                "Login" 
-                , "User" , 
-                user._id , 
-                "Logged In"
-            )
+            // await this.logsService.logAction(
+            //     user ,
+            //     "Login" 
+            //     , "User" , 
+            //     user._id , 
+            //     "Logged In"
+            // )
 
             return {
                 success: true,
                 message: 'Login successful',
                 token,
                 user: {
-                    _id: user._id,
-                    name: user.name,
-                    email: user.email,
-                    role: tempRole.role,
+                    _id: user.user_id,
+                    name: user.user_name,
+                    email: user.user_email,
+                    role: tempRole.role_name,
                     group: group,
                     profilePicture: user.profilePicture,
                     permissions: tempRole.permissions,

@@ -23,6 +23,7 @@ export class ComplaintController {
     @Post('handleComplaintInGroup/:id')
     @UseGuards(CheckTokenGaurd)
     async handleComplaintInGroup(@Param("id") id : string , @Body() handleComplaintInGroupDto : HandleComplaintInGroupDto){
+        
         return this.complaintService.handleComplaintInGroup(id , handleComplaintInGroupDto)
     }
 

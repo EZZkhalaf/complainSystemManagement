@@ -163,16 +163,17 @@ export class ComplaintService {
         }
 
         if (status === 'reject') {
-        complaint.status = 'rejected';
-        complaint.groupsQueue.push(currentGroup);
-        await complaint.save();
-        await sendComplaintEmail(userDoc.email, 'rejected', userDoc.name);
-        const complaintId = (complaint._id as Types.ObjectId).toString()
-        await this.logsService.logAction(user, 'Reject', 'Complaint', complaintId, `Complaint Rejected by group ${currentGroup}.`);
-        return {
-            status: 200,
-            body: { success: true, message: 'Rejected and notified the user.', complaint },
-        };
+            complaint.status = 'rejected';
+            complaint.groupsQueue.push(currentGroup);
+            await complaint.save();
+            await sendComplaintEmail(userDoc.email, 'rejected', userDoc.name);
+            const complaintId = (complaint._id as Types.ObjectId).toString()
+            await this.logsService.logAction(user, 'Reject', 'Complaint', complaintId, `Complaint Rejected by group ${currentGroup}.`);
+            return {
+                success : true ,
+                status: 200,
+                body: { success: true, message: 'Rejected and notified the user.', complaint },
+            };
         }
 
         return {
