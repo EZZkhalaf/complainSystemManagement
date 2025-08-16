@@ -32,7 +32,7 @@ export class GroupsController {
     @UseGuards(CheckTokenGaurd , CheckPermissionGaurd)
     @Permission("delete_group")
     async deleteGroup(@Param("groupId") groupId: string, @Req() req : any){
-        
+        console.log("tetinggggggggggggg")
         return this.groupsService.deleteGroup(req.user , groupId)
     }
 

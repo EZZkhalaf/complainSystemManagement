@@ -77,14 +77,14 @@ export const hasPermission = (user ,name) =>{
     // const {user} = useAuthContext();
     const permissions = user?.permissions || []
 
-    return permissions.some( p=> p.name === name);
+    return permissions.some( p=> p.permission_name === name);
 }
 
 
 export const sendOtpToEmailHook = async(email,navigate) =>{
     try {
         const response = await fetch("http://localhost:5000/api/auth/send-otp-to-email",{
-            method : "POST" , 
+            method : "POST" ,
             headers : {
                 "Content-Type" : 'application/json'
             },

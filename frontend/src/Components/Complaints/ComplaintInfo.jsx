@@ -35,14 +35,19 @@ const ComplaintInfo = () => {
     }
 };
 
+console.log(complaint)
 
 const changeComaplaintStatus = async(Decision) =>{
     setLoading(true);
     let complaintId = id 
     let userId = user._id
-    // console.log(newStatus)
     const data = await handleComplaintInGroupHook(complaintId , userId , Decision)
-    setLoading(false)
+    console.log(data)
+    if(data.success){
+      
+      setLoading(false)
+      navigate(-1)
+    }
     if(data.success){
         navigate(`/${user.role === 'admin' ? 'adminPage' : 'userPage'}/groupsForComplaints`)
     }
@@ -53,7 +58,7 @@ const changeComaplaintStatus = async(Decision) =>{
 
 const handleDeleteComplaint = async () => {
   if (!window.confirm("Are you sure you want to delete this complaint?")) return; 
-  await deleteComplaintHook(complaint._id, user._id , navigate);
+  await deleteComplaintHook(complaint.complaint_id, user._id , navigate);
 };
 
 useEffect(() => {
@@ -105,14 +110,14 @@ return (
         <p className="text-gray-600 font-medium mb-1">User:</p>
         {hasPermission(user, "view_employees") ? (
           <span
-            onClick={() => navigate(`/${user.role === 'admin' ? "adminPage" : "userPage"}/listEmployees/employee/${complaint?.userId?._id}`)}
+            onClick={() => navigate(`/${user.role === 'admin' ? "adminPage" : "userPage"}/listEmployees/employee/${complaint?.creator_user?.user_id}`)}
             className="inline-block cursor-pointer px-3 py-1 rounded-full bg-gray-200 text-gray-900 hover:bg-gray-800 hover:text-white transition"
           >
-            {complaint?.userId?.name || 'Unknown'}
+            {complaint?.creator_user?.user_name || 'Unknown'}
           </span>
         ) : (
           <span className="inline-block px-3 py-1 rounded-full bg-gray-200 text-gray-900">
-            {complaint?.userId?.name || 'Unknown'}
+            {complaint?.creator_user?.user_name || 'Unknown'}
           </span>
         )}
       </div>
@@ -120,7 +125,7 @@ return (
       {/* Type */}
       <div>
         <p className="text-gray-600 font-medium mb-1">Type:</p>
-        <span className="capitalize text-gray-800">{complaint.type}</span>
+        <span className="capitalize text-gray-800">{complaint.complaint_type}</span>
       </div>
 
       {/* Description */}
@@ -131,12 +136,12 @@ return (
 
       {/* Status */}
       <div>
-        <p className="text-gray-600 font-medium mb-2">Status: {complaint.status}</p>
-        {(complaint.status === "pending" || complaint.status === "in-progress") ? (
+        <p className="text-gray-600 font-medium mb-2">Status: {complaint.complaint_status}</p>
+        {(complaint?.complaint_status === "pending" || complaint?.complaint_status === "in-progress") ? (
           <div>
             {/* <p className="text-gray-600 font-medium mb-2">Status: {complaint.status}</p> */}
 
-            {(complaint.status === "pending" || complaint.status === "in-progress") ? (
+            {(complaint.complaint_status === "pending" || complaint.complaint_status === "in-progress") ? (
                 <div className="flex  sm:flex-row sm:items-center gap-4">
 
                 <button
@@ -156,18 +161,18 @@ return (
                 </div>
             ) : (
                 <span
-                className={`inline-block mt-1 px-3 py-1 rounded-full text-sm font-semibold ${getStatusStyle(complaint.status)}`}
+                className={`inline-block mt-1 px-3 py-1 rounded-full text-sm font-semibold ${getStatusStyle(complaint.complaint_status)}`}
                 >
-                {complaint.status}
+                {complaint.complaint_status}
                 </span>
             )}
             </div>
 
         ) : (
           <span
-            className={`inline-block mt-1 px-3 py-1 rounded-full text-sm font-semibold ${getStatusStyle(complaint.status)}`}
+            className={`inline-block mt-1 px-3 py-1 rounded-full text-sm font-semibold ${getStatusStyle(complaint.complaint_status)}`}
           >
-            {complaint.status}
+            {complaint.complaint_status}
           </span>
         )}
       </div>

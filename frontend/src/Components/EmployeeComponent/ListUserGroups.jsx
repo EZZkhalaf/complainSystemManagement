@@ -10,6 +10,7 @@ const ListUserGroups = () => {
   const navigate = useNavigate();
   const fetchUserGroups = async () => {
     const data = await getUserGroupsHook(user._id);
+    console.log(data)
     setGroups(data)
     
   };
@@ -32,15 +33,15 @@ const ListUserGroups = () => {
           {groups?.map((group) => (
             <div 
               key={group._id} 
-              onClick={() =>navigate(`/userPage/current-group/${group._id}`) }
+              onClick={() =>navigate(`/userPage/current-group/${group.group_id}`) }
               className="bg-white shadow-md border rounded-2xl p-5 hover:shadow-lg transition">
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">{group.name}</h2>
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">{group.group_name}</h2>
                 <p className="text-sm text-gray-500 mb-3">Total Members: {group.users.length}</p>
 
                 <div className="flex flex-wrap gap-2">
                   {group.users.slice(0, 3).map((u) => (
                     <span key={u._id} className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                      {u.name}
+                      {u.user_name}
                     </span>
                   ))}
                   {group?.users.length > 3 && (

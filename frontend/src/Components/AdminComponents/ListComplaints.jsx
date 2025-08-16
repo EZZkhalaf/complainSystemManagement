@@ -25,15 +25,15 @@ const ComplaintCard = ({ complaint }) => {
       onClick={() => {
         const path =
           user.role === 'admin'
-            ? `/adminPage/complaint/${complaint._id}`
-            : `/userPage/otherComplaint/${complaint._id}`;
+            ? `/adminPage/complaint/${complaint.complaint_id}`
+            : `/userPage/otherComplaint/${complaint.complaint_id}`;
         navigate(path);
       }}
       className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg transition duration-200 cursor-pointer flex flex-col justify-between p-6"
     >
       <div>
         <h3 className="text-lg font-semibold text-gray-800 mb-1 capitalize">
-          {complaint.type} Complaint
+          {complaint.complaint_type} Complaint
         </h3>
         <p className="text-sm text-gray-600">{complaint.description}</p>
       </div>
@@ -44,11 +44,11 @@ const ComplaintCard = ({ complaint }) => {
             complaint.status
           )}`}
         >
-          {complaint.status}
+          {complaint.complaint_status}
         </span>
         <div className="text-right">
-          <p className="text-sm font-medium text-gray-700">{complaint.userId?.name}</p>
-          <p className="text-xs text-gray-500">{complaint.userId?.email}</p>
+          <p className="text-sm font-medium text-gray-700">{complaint.creator_user?.user_name}</p>
+          <p className="text-xs text-gray-500">{complaint.creator_user?.user_email}</p>
         </div>
       </div>
     </div>
@@ -85,7 +85,7 @@ const ListComplaints = () => {
   }, [currentPage]);
 
   const filteredComplaints = complaints
-    .filter((comp) => comp.userId._id !== user._id)
+    .filter((comp) => comp.creator_user.user_id !== user.user_id)
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     if(loading) return(
@@ -110,7 +110,7 @@ const ListComplaints = () => {
       ) : (
         <div className="grid gap-6 grid-cols-3 sm:grid-cols-2 lg:grid-cols-3">
           {filteredComplaints.map((complaint) => (
-            <ComplaintCard key={complaint._id} complaint={complaint} />
+            <ComplaintCard key={complaint.complaint_id} complaint={complaint} />
           ))}
         </div>
       )}

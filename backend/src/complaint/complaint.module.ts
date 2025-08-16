@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ComplaintController } from './complaint.controller';
 import { ComplaintService } from './complaint.service';
 import { Complaint, ComplaintSchema } from './schemas/complaint.schema';
@@ -10,6 +10,12 @@ import { Role, RoleSchema } from 'src/roles/schemas/role.schema';
 import { LogsModule } from 'src/logs/logs.module';
 import { CheckTokenGaurd } from 'src/gaurds/check-token-gaurd.gaurd';
 import { JwtService } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ComplaintEntity } from './entities/complaint.entity';
+import { ComplaintGroupsRuleEntity } from './entities/complaint-groups-rule.entity';
+import { UserModule } from 'src/user/user.module';
+import { RolesModule } from 'src/roles/roles.module';
+import { GroupsModule } from 'src/groups/groups.module';
 
 @Module({
     imports:[
@@ -20,9 +26,17 @@ import { JwtService } from '@nestjs/jwt';
             {name :Group.name , schema : GroupSchema} , 
             {name : Role.name , schema : RoleSchema}
         ]),
-        LogsModule
+        forwardRef(() => LogsModule),  
+        forwardRef(() => UserModule),
+        RolesModule, 
+        GroupsModule,
+        TypeOrmModule.forFeature([
+            ComplaintEntity ,
+            ComplaintGroupsRuleEntity
+        ])
     ],
     controllers:[ComplaintController],
-    providers : [ComplaintService , JwtService]
+    providers : [ComplaintService , JwtService],
+    exports:[TypeOrmModule]
 })
 export class ComplaintModule {}

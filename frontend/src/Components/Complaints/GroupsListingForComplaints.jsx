@@ -42,17 +42,17 @@ return (
       <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
         {groups.map((group) => (
           <div
-            key={group._id}
+            key={group.group_id}
             onClick={() =>
               navigate(
-                `/${user.role === 'admin' ? 'adminPage' : 'userPage'}/groupsForComplaints/${group._id}`
+                `/${user.role === 'admin' ? 'adminPage' : 'userPage'}/groupsForComplaints/${group.group_id}`
               )
             }
-            className="bg-white rounded-2xl shadow hover:shadow-xl border border-gray-100 transition duration-300 cursor-pointer p-6 flex flex-col justify-between"
+            className="bg-white rounded-2xl shadow hover:shadow-xl border border-gray-300 transition duration-300 cursor-pointer p-6 flex flex-col justify-between"
           >
             <div>
               <h2 className="text-2xl font-semibold text-gray-800 mb-2">
-                {group.name}
+                {group.group_name}
               </h2>
               <p className="text-sm text-gray-500 mb-4">
                 Total Members: {group.users.length}
@@ -65,7 +65,7 @@ return (
                   key={u._id}
                   className="text-sm bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full"
                 >
-                  {u.name}
+                  {u.user_name}
                 </span>
               ))}
               {group.users.length > 3 && (

@@ -5,6 +5,7 @@ import { AddPermissionsToRoleDto } from './dtos/add-permissions-to-role.dto';
 import { CreateRoleDto } from './dtos/create-role.dto';
 import { CheckTokenGaurd } from 'src/gaurds/check-token-gaurd.gaurd';
 import { CheckPermissionGaurd, Permission } from 'src/gaurds/check-permission.gaurd';
+import { PermissionEntity } from './entities/permission.entity';
 
 @Controller('role')
 export class RolesController {
@@ -28,7 +29,7 @@ export class RolesController {
     @Post("addPermissions")
     @UseGuards(CheckTokenGaurd,CheckPermissionGaurd)
     @Permission("manage_permissions")
-    async addPermissions(@Body() dto : CreatePermissionDto , @Req() req : any){
+    async addPermissions(@Body() dto : CreatePermissionDto[] , @Req() req : any){
         return this.rolesService.addPermissions(req.user , dto)
     }
 
@@ -49,8 +50,8 @@ export class RolesController {
     @Post("addPermissionsToRole")
     @UseGuards(CheckTokenGaurd,CheckPermissionGaurd)
     @Permission("manage_permissions")
-    async addPermissionsToRole(@Body() dto : AddPermissionsToRoleDto){
-        return this.rolesService.addPermissionsToRole(dto)
+    async addPermissionsToRole(@Body() dto : AddPermissionsToRoleDto , @Req() req : any){
+        return this.rolesService.addPermissionsToRole(dto , req)
     }
 
     @Get(":id")
@@ -62,7 +63,17 @@ export class RolesController {
     @Delete(":roleId")
     @UseGuards(CheckTokenGaurd,CheckPermissionGaurd)
     @Permission("manage_permissions")
-    async deleteRole(@Param("roleId") roleId : string){
-        return this.rolesService.deleteRole(roleId)
+    async deleteRole(@Param("roleId") roleId : string , @Req() req : any){
+        return this.rolesService.deleteRole(roleId , req)
     }
+
+
+
+
+
+    @Post("testingnewRole")
+    async createRole(@Body() body : {roleName : string , permissionIds : []}){
+        return this.rolesService.createRoleWithPermissions(body.roleName , body.permissionIds)
+    }
+    
 }

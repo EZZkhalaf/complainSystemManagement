@@ -1,35 +1,3 @@
-// import { NestFactory } from '@nestjs/core';
-// import { AppModule } from './app.module';
-// import mongoose from 'mongoose';
-// import { join } from 'path';
-
-// async function bootstrap() {
-//   const app = await NestFactory.create(AppModule);
-//   app.setGlobalPrefix("/api")
-//   app.enableCors({
-//     origin : ['http://localhost:5173'] ,
-//     credentials  : true ,
-//     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-//     allowedHeaders: 'Content-Type, Authorization',
-//   })
-
-//   app.useStaticAssets(join(__dirname, '..', 'uploads'), {
-//     prefix: '/uploads/',
-//   });
-
-//   mongoose.connection.on('connected', () => {
-//     console.log('Successfully connected to MongoDB');
-//   });
-
-//   mongoose.connection.on('error', (err) => {
-//     console.error('MongoDB connection error:', err);
-//   });
-//   let port = process.env.PORT || 3000
-//   await app.listen(process.env.PORT || 3000);
-//   console.log(`Server running on http://localhost:${port}/api`);
-// }
-// bootstrap();
-
 
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
@@ -39,12 +7,25 @@ import { join } from 'path';
 import { ValidationPipe } from '@nestjs/common';
 const cookieParser = require("cookie-parser")
 const cookieSession =  require('cookie-session');
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { DataSource } from 'typeorm';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule); // <-- change here
-    app.use(cookieParser())
+    
+  
+  const config = new DocumentBuilder()
+    .setTitle("Complaint Maagement System API Routes")
+    .setDescription("API Docs for complaints")
+    .setVersion("1.0")
+    .addBearerAuth()
+    .build()
 
-    app.use(
+    const document = SwaggerModule.createDocument(app,config)
+    SwaggerModule.setup("api-docs" , app,document)
+  
+  app.use(cookieParser())
+  app.use(
     cookieSession({
       name: 'session',
       keys: [process.env.COOKIE_SECRET || 'default_secret_key'],
@@ -67,7 +48,7 @@ async function bootstrap() {
 
   app.useGlobalPipes(
     new ValidationPipe({
-      transform: true, // <-- important!
+      transform: true, 
       transformOptions: { enableImplicitConversion: true }, // allow automatic string->number
     }),
   );
@@ -79,6 +60,15 @@ async function bootstrap() {
   mongoose.connection.on('error', (err) => {
     console.error('MongoDB connection error:', err);
   });
+
+  const dataSource = app.get(DataSource)
+  
+    if(dataSource.isInitialized){
+    console.log('✅ Connected to Postgres database');
+    }else{
+      console.log("postgres db is not initialized")
+    }
+
 
   const port = process.env.PORT || 3000;
   await app.listen(port);

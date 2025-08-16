@@ -23,7 +23,7 @@ const EmployeeSideBar = () => {
         <span>Home</span>
       </NavLink>
 
-      {hasPermission(user, 'add_complaint') && (
+      {/* {hasPermission(user, 'add_complaint') && ( */}
         <NavLink
           to="/userPage/add-complaint"
           className={({ isActive }) =>
@@ -32,7 +32,7 @@ const EmployeeSideBar = () => {
         >
           <span>Add Complaint</span>
         </NavLink>
-      )}
+      {/* )} */}
 
       <NavLink
         to={`/userPage/list-complaints/${user._id}`}

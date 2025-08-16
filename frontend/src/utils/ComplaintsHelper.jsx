@@ -131,6 +131,7 @@ export const ListUserComplaintsHook = async(id) =>{
 
 export const deleteComplaintHook = async(complaintId, userId , navigate) =>{
     try {
+        console.log(complaintId)
          const response = await fetch(`http://localhost:5000/api/complaints/delete/${userId}` , {
            method:"DELETE" ,
            credentials:"include",
@@ -158,6 +159,7 @@ export const deleteComplaintHook = async(complaintId, userId , navigate) =>{
 
 export const handleComplaintInGroupHook = async(complaintId , userId  ,status) =>{
     try {
+
        const response = await fetch(`http://localhost:5000/api/complaints/handleComplaintInGroup/${complaintId}` , {
            method:"POST" ,
            credentials:"include",
@@ -173,6 +175,7 @@ export const handleComplaintInGroupHook = async(complaintId , userId  ,status) =
         })
 
         const data= await response.json();
+        console.log(data)
         if(data.success){
             toast.success("complaint status changed successfully")
             return data

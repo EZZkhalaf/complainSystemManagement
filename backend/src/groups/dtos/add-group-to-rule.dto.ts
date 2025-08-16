@@ -1,9 +1,11 @@
-import { IsMongoId } from 'class-validator';
+import { IsMongoId, IsNotEmpty, IsNumberString } from 'class-validator';
 
 export class AddGroupToRuleDto {
   // @IsMongoId()
   // id: string;
 
-  @IsMongoId()
+  // @IsMongoId()
+  @IsNotEmpty()
+  @IsNumberString()
   groupId: string;
 }

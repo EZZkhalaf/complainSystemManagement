@@ -22,15 +22,15 @@ const ComplaintCard = ({ complaint }) => {
     <div
       onClick={() => {
         const path = user.role === 'admin'
-          ? `/adminPage/groupsForComplaints/complaint/${complaint._id}`
-          : `/userPage/groupsForComplaints/complaint/${complaint._id}`;
+          ? `/adminPage/groupsForComplaints/complaint/${complaint.complaint_id}`
+          : `/userPage/groupsForComplaints/complaint/${complaint.complaint_id}`;
         navigate(path);
       }}
       className="bg-white shadow-lg rounded-xl p-6 cursor-pointer hover:shadow-xl transition-all duration-200 flex flex-col justify-between border border-gray-100"
     >
       <div>
         <h3 className="text-xl font-semibold text-gray-800 mb-2 capitalize">
-          {complaint.type} Complaint
+          {complaint.complaint_type} Complaint
         </h3>
         <p className="text-sm text-gray-600 leading-relaxed">{complaint.description}</p>
       </div>
@@ -38,14 +38,14 @@ const ComplaintCard = ({ complaint }) => {
       <div className="flex justify-between items-center mt-6">
         <span
           className={`text-xs font-medium px-3 py-1 rounded-full ${getStatusStyles(
-            complaint.status
+            complaint.comaplint_status
           )}`}
         >
-          {complaint.status}
+          {complaint.complaint_status}
         </span>
         <div className="text-right">
-          <p className="text-sm font-medium text-gray-700">{complaint.userId?.name}</p>
-          <p className="text-xs text-gray-500">{complaint.userId?.email}</p>
+          <p className="text-sm font-medium text-gray-700">{complaint.creator_user?.user_name}</p>
+          <p className="text-xs text-gray-500">{complaint.creator_user?.user_email}</p>
         </div>
       </div>
     </div>
@@ -82,8 +82,8 @@ const ComplaintsList = () => {
   }, [typeFilter, statusFilter, page]);
 
   const filtered = complaints
-    .filter((comp) => comp.userId._id !== user._id)
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    .filter((comp) => comp?.creator_user?.user_id !== user._id)
+    .sort((a, b) => new Date(b?.created_at) - new Date(a?.created_at));
 
   return (
     <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -128,7 +128,7 @@ const ComplaintsList = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map((complaint) => (
-            <ComplaintCard key={complaint._id} complaint={complaint} />
+            <ComplaintCard key={complaint.complaint_id} complaint={complaint} />
           ))}
         </div>
       )}

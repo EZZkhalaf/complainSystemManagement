@@ -32,7 +32,7 @@ const UserComplaintInfo = () => {
     if (!window.confirm("Are you sure you want to delete this complaint?")) return;
   
     
-      await deleteComplaintHook(complaint._id, user._id , navigate);
+      await deleteComplaintHook(complaint.complaint_id, user._id , navigate);
       
     
   };
@@ -79,12 +79,12 @@ const UserComplaintInfo = () => {
         <div className="bg-white p-6 rounded-xl shadow-md space-y-4">
           <div>
             <span className="block font-medium text-gray-700">User:</span>
-            <span className="text-gray-900">{complaint.userId?.name || 'Unknown'}</span>
+            <span className="text-gray-900">{complaint.creator_user?.user_name || 'Unknown'}</span>
           </div>
   
           <div>
             <span className="block font-medium text-gray-700">Type:</span>
-            <span className="capitalize text-gray-800">{complaint.type}</span>
+            <span className="capitalize text-gray-800">{complaint.complaint_type}</span>
           </div>
   
           <div>
@@ -113,10 +113,10 @@ const UserComplaintInfo = () => {
               {/* ) : (  */}
                   <span
                   className={`inline-block mt-1 px-3 py-1 rounded-full text-sm font-medium ${getStatusStyle(
-                      complaint.status
+                      complaint.complaint_status
                   )}`}
                   >
-                  {complaint.status}
+                  {complaint.complaint_status}
                   </span>
                {/* )} */}
               </div>

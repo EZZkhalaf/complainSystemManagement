@@ -52,7 +52,7 @@ const changeComaplaintStatus = async(e , value) =>{
 
 const handleDeleteComplaint = async () => {
   if (!window.confirm("Are you sure you want to delete this complaint?")) return; 
-  await deleteComplaintHook(complaint._id, user._id , navigate);
+  await deleteComplaintHook(complaint.complaint_id, user._id , navigate);
 };
 
 useEffect(() => {
@@ -108,8 +108,8 @@ return (
           {hasPermission(user,"view_employees") ? (
             <div>
               <div 
-                  onClick={()=>navigate(`/${user.role === 'admin' ? "adminPage" : "userPage" }/listEmployees/employee/${complaint?.userId?._id}`)}>
-                  <span className="text-gray-900 bg-gray-400 p-1 rounded-full hover:bg-gray-600 hover:text-white ">{complaint?.userId?.name || 'Unknown'}</span>
+                  onClick={()=>navigate(`/${user.role === 'admin' ? "adminPage" : "userPage" }/listEmployees/employee/${complaint?.creator_user?.user_id}`)}>
+                  <span className="text-gray-900  p-1 rounded-full hover:bg-gray-600 hover:text-white ">{complaint?.creator_user?.user_name || 'Unknown'}</span>
                 </div>
             </div>
           ):(
@@ -127,7 +127,7 @@ return (
 
       <div>
         <span className="block font-medium text-gray-700">Type:</span>
-        <span className="capitalize text-gray-800">{complaint.type}</span>
+        <span className="capitalize text-gray-800">{complaint.complaint_type}</span>
       </div>
 
       <div>
@@ -161,10 +161,10 @@ return (
         ) : ( */}
           <span
             className={`inline-block mt-1 px-3 py-1 rounded-full text-sm font-medium ${getStatusStyle(
-              complaint.status
+              complaint.complaint_status
             )}`}
           >
-            {complaint.status}
+            {complaint.complaint_status}
           </span>
         {/* )} */}
       </div>

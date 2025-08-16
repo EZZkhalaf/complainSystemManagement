@@ -8,8 +8,6 @@ const RoleComponent = ({roles , setAddEmployee , setRoles}) => {
      const navigate = useNavigate();
 
      const deleteRole = async(roleId) => {
-        console.log(roleId)
-
         const data = await deleteRoleHook(roleId);
         if(data.success){
           setRoles(data.roles)
@@ -20,7 +18,7 @@ const RoleComponent = ({roles , setAddEmployee , setRoles}) => {
     <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
   {roles.map((role, index) => (
     <div
-      key={role._id}
+      key={role.role_id}
       className="relative bg-white shadow-md rounded-2xl p-4 border border-gray-200 hover:shadow-lg transition-shadow"
     >
       {/* 3 dots menu */}
@@ -42,7 +40,7 @@ const RoleComponent = ({roles , setAddEmployee , setRoles}) => {
               <Menu.Item>
                 {({ active }) => (
                   <button
-                    onClick={() => navigate(`/adminPage/manageRoles/role/adduser/${role._id}`)}
+                    onClick={() => navigate(`/adminPage/manageRoles/role/adduser/${role.role_id}`)}
                     className={`w-full text-left px-4 py-2 text-sm ${
                       active ? 'bg-blue-100 text-blue-800' : 'text-gray-800'
                     }`}
@@ -65,7 +63,7 @@ const RoleComponent = ({roles , setAddEmployee , setRoles}) => {
               <Menu.Item>
                 {({ active }) => (
                   <button
-                    onClick={() => navigate(`/adminPage/manageRoles/role/addPermission/${role._id}`)}
+                    onClick={() => navigate(`/adminPage/manageRoles/role/addPermission/${role.role_id}`)}
                     className={`w-full text-left px-4 py-2 text-sm ${
                       active ? 'bg-blue-100 text-blue-800' : 'text-gray-800'
                     }`}
@@ -77,7 +75,7 @@ const RoleComponent = ({roles , setAddEmployee , setRoles}) => {
               <Menu.Item>
                 {({ active }) => (
                   <button
-                    onClick={() => deleteRole(role._id)}
+                    onClick={() => deleteRole(role.role_id)}
                     className={`w-full text-left px-4 py-2 text-sm ${
                       active ? 'bg-blue-100 text-blue-800' : 'text-gray-800'
                     }`}
@@ -92,9 +90,9 @@ const RoleComponent = ({roles , setAddEmployee , setRoles}) => {
       </Menu>
 
       {/* Role Info */}
-      <h2 className="text-xl font-semibold text-blue-800 mb-2">{role.role}</h2>
+      <h2 className="text-xl font-semibold text-blue-800 mb-2">{role.role_name}</h2>
       <p className="text-gray-600">
-        Number of Employees: <span className="font-medium">{role.user.length}</span>
+        Number of Employees: <span className="font-medium">{role?.users?.length}</span>
       </p>
     </div>
   ))}

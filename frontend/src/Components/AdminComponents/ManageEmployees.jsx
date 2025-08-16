@@ -9,10 +9,11 @@ import { OrbitProgress } from 'react-loading-indicators';
 const EmpCard = ({ emp }) => {
   const { user } = useAuthContext();
   const navigate = useNavigate();
+  console.log(emp)
   return (
     <div
       onClick={() =>{
-        navigate(`/${user.role === 'admin' ? "adminPage" : "userPage"}/listEmployees/employee/${emp?.user?._id}`)
+        navigate(`/${user.role === 'admin' ? "adminPage" : "userPage"}/listEmployees/employee/${emp?.user?.user_id}`)
         }
       }
       className="bg-white rounded-3xl shadow-md p-6 border border-gray-100 hover:shadow-xl hover:border-blue-200 transition duration-200 flex flex-col items-center cursor-pointer group"
@@ -25,13 +26,13 @@ const EmpCard = ({ emp }) => {
       />
 
       <div className="mt-4 text-center">
-        <h3 className="text-lg sm:text-xl font-semibold text-gray-800 capitalize">{emp.user.name}</h3>
-        <p className="mt-1 text-sm text-gray-500">{emp.user.email}</p>
+        <h3 className="text-lg sm:text-xl font-semibold text-gray-800 capitalize">{emp.user.user_name}</h3>
+        <p className="mt-1 text-sm text-gray-500">{emp.user.user_email}</p>
       </div>
 
       <div className="mt-3">
         <span className="inline-block px-3 py-1 text-sm rounded-full bg-blue-100 text-blue-700 capitalize font-medium">
-          {emp.role}
+          {emp. role}
         </span>
       </div>
     </div>
@@ -50,8 +51,8 @@ const ManageEmployees = () => {
     try {
       const roles = await fetchUsersHook();
       console.log(roles)
-      let updatedUsers = roles.users.filter(emp => user._id !== emp.user._id)
-       .filter(emp => emp.role !== 'admin');
+      let updatedUsers = roles.users.filter(emp => user.user_id !== emp.user.user_id)
+       .filter(emp => emp.user_role !== 'admin');
       setEmployees(updatedUsers);
       setFilteredEmployees(updatedUsers);
       setLoading(false);
@@ -69,7 +70,7 @@ const ManageEmployees = () => {
     const lower = search.toLowerCase();
     setFilteredEmployees(
       employees.filter(emp =>
-        emp.user.name.toLowerCase().includes(lower) || emp.user.email.toLowerCase().includes(lower)
+        emp.user.user_name.toLowerCase().includes(lower) || emp.user.user_email.toLowerCase().includes(lower)
       )
     );
   }, [search, employees]);

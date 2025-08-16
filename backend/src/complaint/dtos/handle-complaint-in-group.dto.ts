@@ -6,7 +6,7 @@ export class HandleComplaintInGroupDto{
 
     @IsNotEmpty()
     @IsString()
-    @IsIn(['pending' , 'in-progress' , "resolved" , "rejected"], {
+    @IsIn(['pending' , 'in-progress' , "resolved" , "rejected" , 'accept' , "reject"], {
         message: "status must be either 'pending' , 'in-progress' , 'resolved' , 'rejected' ",
     })
     status: string;

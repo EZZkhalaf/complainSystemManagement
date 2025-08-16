@@ -15,21 +15,21 @@ const ComplaintCard = ({ complaint }) => {
   const navigate = useNavigate();
   return (
     <div 
-      // onClick={() => navigate(`/${user.role === 'admin' ?"adminPage" : 'userPage'}/complaint/${complaint._id}`)}
+      onClick={() => navigate(`/${user.role === 'admin' ?"adminPage" : 'userPage'}/complaint/${complaint.complaint_id}`)}
       className="bg-white rounded-2xl shadow-md p-6 border border-gray-200 hover:shadow-xl transition duration-200 flex flex-col justify-between">
       <div className="mb-3">
         <h3 className="text-xl font-semibold text-gray-900 mb-1 capitalize">
-          {complaint.type} Complaint
+          {complaint.complaint_type} Complaint
         </h3>
         <p className="text-gray-600">{complaint.description}</p>
       </div>
 
       <div className="flex justify-between items-center mt-4">
-        <span className={`text-sm px-3 py-1 rounded-full font-medium ${getStatusStyles(complaint.status)}`}>
-          {complaint.status}
+        <span className={`text-sm px-3 py-1 rounded-full font-medium ${getStatusStyles(complaint.complaint_status)}`}>
+          {complaint.complaint_status}
         </span>
         <div className="text-sm text-gray-500 text-right">
-          <p className="font-medium">{new Date(complaint.createdAt).toLocaleString()}</p>
+          <p className="font-medium">{new Date(complaint.created_at).toLocaleString()}</p>
         </div>
       </div>
     </div>
@@ -63,7 +63,7 @@ const EmployeeInfo = () => {
 
 
     const [editing, setEditing] = useState(false);
-    const [selectedRole, setSelectedRole] = useState(employee?.role || 'User');
+    const [selectedRole, setSelectedRole] = useState(employee?.user_role.role_name || 'User');
     const [editableName, setEditableName] = useState('');
     const [editableEmail, setEditableEmail] = useState('');
     const [newPassword, setNewPassword] = useState('');
@@ -128,6 +128,7 @@ const EmployeeInfo = () => {
         const data = await getUserByIdHook(id);
         console.log(data)
         const roles = await fetchRolesHook();
+        console.log(roles)
         setRoles(roles.map(({user , ...rest}) => rest))
 
 
@@ -190,8 +191,8 @@ const EmployeeInfo = () => {
         <div className="text-center sm:text-left">
           {!editing ? (
               <>
-                <h2 className="text-2xl font-bold text-blue-800 capitalize">{employee?.name}</h2>
-                <p className="text-gray-600 mt-1">{employee?.email}</p>
+                <h2 className="text-2xl font-bold text-blue-800 capitalize">{employee?.user_name}</h2>
+                <p className="text-gray-600 mt-1">{employee?.user_email}</p>
               </>
             ) : (
               <div className='flex flex-col'>
@@ -243,7 +244,7 @@ const EmployeeInfo = () => {
                         className="border rounded px-2 py-1 text-md"
                       >
                         {roles.map((role) => (
-                          <option key={role._id} value={role.role}>{role.role}</option>
+                          <option key={role.role_id} value={role.role_name}>{role.role_name}</option>
                         ))}
                       </select>
                     ):(
@@ -257,8 +258,8 @@ const EmployeeInfo = () => {
               </div>
              
             <div className='flex items-center'>
-              <p className="text-m text-gray-500">Last Action :</p>
-              <p className="text-gray-700 font-medium ml-2">{employee?.updatedAt?.slice(0, 10) || 'N/A'}</p>
+              <p className="text-m text-gray-500">Created At :</p>
+              <p className="text-gray-700 font-medium ml-2">{employee?.created_at?.slice(0, 10) || 'N/A'}</p>
             </div>
           </div>
         </div>
@@ -274,13 +275,13 @@ const EmployeeInfo = () => {
                     className="p-4 bg-white rounded-2xl shadow-md border border-gray-200 hover:shadow-lg transition"
                 >
                     <h3 className="text-lg font-semibold text-blue-800 mb-2 capitalize">
-                    {g.name}
+                    {g.group_name}
                     </h3>
-                    <p className="text-sm text-gray-600 mb-1">
-                    Members: {g.users?.length || 0}
-                    </p>
+                    {/* <p className="text-sm text-gray-600 mb-1">
+                      Members: {g.users?.length || 0}
+                    </p> */}
                     <p className="text-sm text-gray-600">
-                    Created at: {g.createdAt ? g.createdAt.slice(0, 10) : 'N/A'}
+                      Created at: {g.created_at ? g.created_at.slice(0, 10) : 'N/A'}
                     </p>
                 </div>
                 ))}
@@ -298,9 +299,9 @@ const EmployeeInfo = () => {
         {complaints.length > 0 ? (
           <div className='grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-3'>
             {[...complaints]
-              .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // Sort newest first
+              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) // Sort newest first
             .map((complaint)=>(
-              <ComplaintCard key={complaint._id} complaint={complaint}/>
+              <ComplaintCard key={complaint.complaint_id} complaint={complaint}/>
             ))}
           </div>
         ):(

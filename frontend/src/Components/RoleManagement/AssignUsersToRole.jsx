@@ -27,8 +27,9 @@ const fetchEmployees = async () => {
     const users = await fetchUsersHook();
     let roles2 = users.roles2;
 
+    console.log(users)
     // Find the target role by ID (use .find instead of .filter if you only want one)
-    const targetRole = roles2.find((r) => r._id === id);
+    const targetRole = roles2.find((r) => r.role_id === id);
     if (!targetRole) {
       console.warn("Role with the given ID not found");
       setEmployees([]);
@@ -41,7 +42,7 @@ const fetchEmployees = async () => {
     let user2 = users.users || [];
     user2 = user2.filter(
       (emp) =>
-        String(emp.user._id) !== String(user?._id) && emp.role !== targetRole.role
+        String(emp.user._id) !== String(user?.user_id) && emp.role_name !== targetRole.role_name
     );
 
     setEmployees(user2);
@@ -53,6 +54,7 @@ const fetchEmployees = async () => {
   }
 };
 
+console.log(employees)
 useEffect(() => {
   fetchEmployees();
 }, []);
@@ -71,9 +73,9 @@ useEffect(() => {
 
   const handleAddEmployee = async () => {
     const roles = await fetchRolesHook();
-    let filteredRoles = roles.filter((r) => r._id === id)
+    let filteredRoles = roles.filter((r) => r.role_id === id)
     // console.log(filteredRoles[0].role)
-    const data = await changeUserRoleHook (selectedEmployee , filteredRoles[0].role);
+    const data = await changeUserRoleHook (selectedEmployee , filteredRoles[0].role_name);
     if(data.success){
         toast.success("employee added successfully")
         navigate(-1)
@@ -115,16 +117,16 @@ useEffect(() => {
                 <div className='flex items-center justify-center'>
                     <div>
                         <div className='flex items-center gap-3'>
-                            <p className="font-semibold text-gray-800">{emp.user.name}</p>
-                            <p className='font-bold text-blue-500 mr-2'>{emp.role}</p>
+                            <p className="font-semibold text-gray-800">{emp.user.user_name}</p>
+                            <p className='font-bold text-blue-500 mr-2'>{emp.role_name}</p>
                         </div>
-                        <p className="text-sm text-gray-500">{emp.user.email}</p>
+                        <p className="text-sm text-gray-500">{emp.user.user_email}</p>
                     </div>
                 </div>
                     <input
                         type="radio"
-                        checked={selectedEmployee === emp.user._id}
-                        onChange={() => setSelectedEmployee(emp.user._id)}
+                        checked={selectedEmployee === emp.user.user_id}
+                        onChange={() => setSelectedEmployee(emp.user.user_id)}
                         className="w-5 h-5 text-blue-600"
                     />
                 

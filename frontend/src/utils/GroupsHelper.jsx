@@ -137,6 +137,7 @@ export const listGroupComplaintsHook = async(groupId , userId,
             page,
             limit}
         )=>{
+          console.log(groupId)
     try {
       const res = await fetch(`http://localhost:5000/api/group/groupcomplaints/${groupId}`, {
         method : "POST",

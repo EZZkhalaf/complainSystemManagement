@@ -1,10 +1,11 @@
-import { IsMongoId } from "class-validator";
+import { IsNotEmpty, IsNumberString } from "class-validator";
 
-export class AddUserToGroupDto{
-    @IsMongoId()
-    groupId : string ;
+export class AddUserToGroupDto {
+  @IsNotEmpty()
+  @IsNumberString({}, { message: 'groupId must be a number string' })
+  groupId: string;
 
-    
-    @IsMongoId()
-    userId :  string;
+  @IsNotEmpty()
+  @IsNumberString({}, { message: 'userId must be a number string' })
+  userId: string;
 }

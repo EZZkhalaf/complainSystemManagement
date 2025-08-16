@@ -20,6 +20,7 @@ export class TempSession extends Document{
     @Prop({default : true})
     valid : boolean
 
+    
 }
 export type TempSessionDocument = TempSession & Document;
 

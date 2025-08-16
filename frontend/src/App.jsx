@@ -99,7 +99,7 @@ const App = ()=> {
 
 
 
-          {hasPermission(user,"view logs") && <Route path='/adminPage/view-logs' element={<ViewLogs />}/>}
+          {hasPermission(user,"view_logs") && <Route path='/adminPage/view-logs' element={<ViewLogs />}/>}
 
           </Route>
         <Route path='/userPage' element={
@@ -114,7 +114,7 @@ const App = ()=> {
 
 
                   
-          {hasPermission(user,"add_complaint") && <Route path="/userPage/add-complaint" element = {<AddComplaint />}></Route>   }
+           <Route path="/userPage/add-complaint" element = {<AddComplaint />}></Route>   
           <Route path="/userPage/list-complaints/:id" element = {<ListUserComplaints />}></Route>        
           <Route path="/userPage/complaint/:id" element = {<UserComplaintInfo />}></Route>        
           {/* {hasPermission(user,"view_complaints") && (
@@ -143,7 +143,7 @@ const App = ()=> {
           <Route path="/userPage/groupsForComplaints/:id" element = {<ComplaintsList />}></Route> 
           <Route path="/userPage/groupsForComplaints/complaint/:id" element = {<ComplaintInfo />}></Route> 
   
-          {hasPermission(user,"view logs") && <Route path='/userPage/view-logs' element={<ViewLogs />}/>}
+          {hasPermission(user,"view_logs") && <Route path='/userPage/view-logs' element={<ViewLogs />}/>}
 
          
       
