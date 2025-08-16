@@ -4,6 +4,6 @@ import { PermissionDto } from './permissions.dto';
 
 
 export class CreatePermissionDto {
-    @IsArray()
-    permissions : PermissionDto[]
+    name: string;
+    description: string;
 }

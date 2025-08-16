@@ -1,8 +1,10 @@
 // dto/change-user-role.dto.ts
-import { IsMongoId, IsString, IsNotEmpty } from 'class-validator';
+import { IsMongoId, IsString, IsNotEmpty, IsNumberString } from 'class-validator';
 
 export class ChangeUserRoleDto {
-  @IsMongoId()
+  // @IsMongoId()
+  @IsNotEmpty()
+    @IsNumberString({}, { message: 'userId must be a number string' })
   userId: string;
 
   @IsString()

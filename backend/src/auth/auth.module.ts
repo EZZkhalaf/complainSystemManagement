@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -30,7 +30,7 @@ import { RolesModule } from 'src/roles/roles.module';
       {name : Logs.name , schema : LogsSchema},
       {name : Complaint.name , schema : ComplaintSchema}
     ]) ,
-    LogsModule,UserModule , GroupsModule,RolesModule,
+    forwardRef(()=>LogsModule),UserModule , GroupsModule, RolesModule,
     TypeOrmModule.forFeature([
       OTPEntity , TempSessionEntity
     ])

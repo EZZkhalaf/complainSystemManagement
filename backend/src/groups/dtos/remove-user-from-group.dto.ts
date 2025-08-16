@@ -1,9 +1,14 @@
-import { IsMongoId } from 'class-validator';
+import { IsInt, Min } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class RemoveUserFromGroupDto {
-  @IsMongoId({ message: 'Invalid groupId format' })
-  groupId: string;
+  @Type(() => Number) // Converts from string to number
+  @IsInt({ message: 'groupId must be an integer' })
+  @Min(1, { message: 'groupId must be greater than 0' })
+  groupId: number;
 
-  @IsMongoId({ message: 'Invalid userId format' })
-  userId: string;
+  @Type(() => Number)
+  @IsInt({ message: 'userId must be an integer' })
+  @Min(1, { message: 'userId must be greater than 0' })
+  userId: number;
 }

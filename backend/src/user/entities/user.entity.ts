@@ -1,5 +1,6 @@
 import { ComplaintEntity } from "src/complaint/entities/complaint.entity";
 import { GroupEntity } from "src/groups/entities/group.entity";
+import { LogsEntity } from "src/logs/entities/logs.entity";
 import { RolesEntity } from "src/roles/entities/roles.entity";
 import { Column, CreateDateColumn, Entity, ForeignKey, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, Timestamp, Unique } from "typeorm";
 
@@ -47,5 +48,8 @@ export class UserEntity{
 
     @OneToMany(()=> ComplaintEntity , complaint => complaint.creator_user)
     complaints : ComplaintEntity[]
+
+    @OneToMany(() => LogsEntity , (log) => log.user)
+    logs : LogsEntity[]
 
 }

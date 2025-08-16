@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { GroupsController } from './groups.controller';
 import { GroupsService } from './groups.service';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -11,6 +11,9 @@ import { JwtService } from '@nestjs/jwt';
 import { Role, RoleSchema } from 'src/roles/schemas/role.schema';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GroupEntity } from './entities/group.entity';
+import { UserModule } from 'src/user/user.module';
+import { RolesModule } from 'src/roles/roles.module';
+import { ComplaintModule } from 'src/complaint/complaint.module';
 
 @Module({
   imports : [
@@ -21,7 +24,10 @@ import { GroupEntity } from './entities/group.entity';
       {name :Complaint.name , schema : ComplaintSchema} ,
       {name : ComplaintGroupsRule.name , schema : ComplaintGroupsRuleSchema}
     ]) ,
-    LogsModule,
+    forwardRef(()=>LogsModule),
+    forwardRef(()=>UserModule),
+    forwardRef(()=>ComplaintModule),
+    RolesModule,
     TypeOrmModule.forFeature([
       GroupEntity
     ])

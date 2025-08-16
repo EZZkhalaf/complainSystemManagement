@@ -14,10 +14,12 @@
 //     newPassword :string
 // }
 
-import { IsEmail, IsMongoId, IsOptional, IsString, MinLength, IsArray } from "class-validator";
+import { IsEmail, IsMongoId, IsOptional, IsString, MinLength, IsArray, IsNumberString, IsNotEmpty } from "class-validator";
 
 export class AdminEditUserInfoDto {
-    @IsMongoId()
+    // @IsMongoId()
+    @IsNotEmpty()
+    @IsNumberString({}, { message: 'userId must be a number string' })
     userId: string;
 
     @IsString()

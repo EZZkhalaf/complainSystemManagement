@@ -7,9 +7,9 @@ import { toast } from 'react-toastify';
 const GroupCard = ({ group , index,setRuleGroups}) => {
     const {user}= useAuthContext()
     const removeGroup = async()=>{
-        const data = await removeGroupFromRuleHook(group._id , user._id)
+        const data = await removeGroupFromRuleHook(group.group_id , user._id)
         if(data.success)
-            setRuleGroups(data?.groupsSequence || data?.rule?.groupsSequence || [])
+            setRuleGroups(data?.groupsSequence || data?.rule?.groups || [])
     }
     return (
         <div className="bg-white border border-gray-200 shadow-sm rounded-lg px-5 py-4 w-64 flex justify-between items-start space-x-4 hover:shadow-md transition-shadow duration-200">
@@ -18,7 +18,7 @@ const GroupCard = ({ group , index,setRuleGroups}) => {
                 Group #{index + 1}
             </span>
             <span className="text-base font-medium text-gray-700 mt-1">
-                {group.name}
+                {group.group_name}
             </span>
             </div>
 
@@ -44,8 +44,8 @@ const ComplaintGroupsRule = () => {
   const { user } = useAuthContext();
 
   const addGroupToRule = async (group) => {
-    const groupId = group._id
-    if(ruleGroups.some(g => g._id === groupId)){
+    const groupId = group.group_id
+    if(ruleGroups.some(g => g.group_id === groupId)){
         toast.error("group already added ")
         return
     }
@@ -57,7 +57,8 @@ const ComplaintGroupsRule = () => {
 
   const fetchRule = async () => {
     const data = await getRulesHook(user._id);
-    setRuleGroups(data?.rule?.groupsSequence || []);
+    console.log(data)
+    setRuleGroups(data?.rule?.groups || []);
   };
 
   useEffect(() => {
@@ -107,11 +108,11 @@ const ComplaintGroupsRule = () => {
           <div className="mt-2 border border-gray-200 rounded-md bg-white shadow">
             {searchResults.map((group) => (
               <div
-                key={group._id}
+                key={group.group_id}
                 className="p-3 text-gray-700 hover:bg-gray-100 cursor-pointer border-b last:border-none"
                 onClick={() => addGroupToRule(group)}
               >
-                {group.name}
+                {group.group_name}
               </div>
             ))}
           </div>
@@ -127,7 +128,7 @@ const ComplaintGroupsRule = () => {
 
           <div className="flex flex-wrap gap-4 items-center justify-center">
             {ruleGroups.map((group, index) => (
-              <React.Fragment key={group._id}>
+              <React.Fragment key={group.group_id}>
                 <GroupCard
                   group={group}
                   index={index}

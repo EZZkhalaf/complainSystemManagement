@@ -32,7 +32,7 @@ export class CheckPermissionGaurd implements CanActivate {
         if(!user)
             throw new UnauthorizedException("user not found or provided")
 
-        const hasPermission = user.permissions?.some( (p : any) => p.name === requiredPermission)
+        const hasPermission = user.permissions?.some( (p : any) => p.permission_name === requiredPermission)
         if(!hasPermission)
             throw new ForbiddenException("permission denied ")
 

@@ -29,10 +29,12 @@ export class AuthController {
         
         res.cookie("access_token", token, {
             httpOnly: true,
-            secure: false, // true if HTTPS in prod
+            secure: process.env.NODE_ENV === 'production',
             sameSite: "lax",
-            maxAge: 10 * 24 * 60 * 60 * 1000, // 10 days
+            path: "/", // ensure full overwrite
+            maxAge: 10 * 24 * 60 * 60 * 1000,
         });
+
 
         // If you want to use cookie-session too:
         req.session = req.session || {};
@@ -54,7 +56,7 @@ export class AuthController {
         if (!req.user) {
             throw new UnauthorizedException('User not found on request');
         }
-        const userId = req.user._id
+        const userId = req.user.user_id
         return  this.authService.fetchLoggedInUser(userId);
        
     }

@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, ManyToMany, JoinTable, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { UserEntity } from "src/user/entities/user.entity";
+import { GroupEntity } from "src/groups/entities/group.entity";
 export enum ComplaintStatus {
   PENDING = "pending",
   IN_PROGRESS = "in-progress",
@@ -40,4 +41,16 @@ export class ComplaintEntity {
     default : ComplaintType.GENERAL
   })
   complaint_type: ComplaintType;
+
+
+  @ManyToMany(() => GroupEntity)
+  @JoinTable({ name: "complaint_groups_queue" })
+  groupsQueue: GroupEntity[];
+
+  @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
+  created_at: Date;
+
+  @UpdateDateColumn({ type: 'timestamp', name: 'updated_at' })
+  updated_at: Date;
+
 }

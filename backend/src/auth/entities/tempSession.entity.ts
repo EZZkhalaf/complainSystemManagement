@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, Index } from "typeorm";
 
 @Entity("temp_sessions")
 export class TempSessionEntity {
@@ -19,4 +19,9 @@ export class TempSessionEntity {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Column({ type: "timestamptz", nullable: false })
+  @Index() // index for expiration checks
+  expiresAt: Date;
+  
 }

@@ -33,7 +33,8 @@ const AddEmployeeToGroup = () => {
     // Combine both arrays into one list (you can adjust this as needed)
     let combinedUsers = [...data.users];
 
-    combinedUsers = combinedUsers.filter(emp => emp._id !== user._id)
+combinedUsers = combinedUsers.filter(emp => emp.user.user_id !== user.user_id);
+    console.log("combined users :  ",combinedUsers)
     setEmployees(combinedUsers);
     setFilteredEmployees(combinedUsers);
     setScreenLoading(false);
@@ -42,13 +43,14 @@ const AddEmployeeToGroup = () => {
   fetchEmployees();
 }, []);
 
+console.log(employees)
 
   useEffect(() => {
     const lower = search.toLowerCase();
     setFilteredEmployees(
       employees?.filter(emp =>
-        emp?.user.name.toLowerCase().includes(lower) ||
-        emp?.user.email.toLowerCase().includes(lower)
+        emp?.user.user_name.toLowerCase().includes(lower) ||
+        emp?.user.user_email.toLowerCase().includes(lower)
       )
     );
   }, [search, employees]);
@@ -86,20 +88,20 @@ const AddEmployeeToGroup = () => {
         ) : (
           filteredEmployees.map((emp) => (
             <div
-              key={emp?.user._id}
-              onClick={() => setSelectedEmployee(emp.user._id)}
+              key={emp?.user.user_id}
+              onClick={() => setSelectedEmployee(emp.user.user_id)}
               className={`flex items-center justify-between p-4 border rounded-xl cursor-pointer shadow-sm transition hover:shadow-md ${
                 selectedEmployee === emp._id ? 'bg-blue-100 border-blue-500' : 'bg-white'
               }`}
             >
               <div>
-                <p className="font-semibold text-gray-800">{emp.user.name}</p>
-                <p className="text-sm text-gray-500">{emp.user.email}</p>
+                <p className="font-semibold text-gray-800">{emp.user.user_name}</p>
+                <p className="text-sm text-gray-500">{emp.user.user_email}</p>
               </div>
               <input
                 type="radio"
-                checked={selectedEmployee === emp?.user._id}
-                onChange={() => setSelectedEmployee(emp?.user._id)}
+                checked={selectedEmployee === emp?.user.user_id}
+                onChange={() => setSelectedEmployee(emp?.user.user_id)}
                 className="w-5 h-5 text-blue-600"
               />
             </div>

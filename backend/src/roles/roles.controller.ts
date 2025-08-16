@@ -29,7 +29,7 @@ export class RolesController {
     @Post("addPermissions")
     @UseGuards(CheckTokenGaurd,CheckPermissionGaurd)
     @Permission("manage_permissions")
-    async addPermissions(@Body() dto : CreatePermissionDto , @Req() req : any){
+    async addPermissions(@Body() dto : CreatePermissionDto[] , @Req() req : any){
         return this.rolesService.addPermissions(req.user , dto)
     }
 
@@ -50,8 +50,8 @@ export class RolesController {
     @Post("addPermissionsToRole")
     @UseGuards(CheckTokenGaurd,CheckPermissionGaurd)
     @Permission("manage_permissions")
-    async addPermissionsToRole(@Body() dto : AddPermissionsToRoleDto){
-        return this.rolesService.addPermissionsToRole(dto)
+    async addPermissionsToRole(@Body() dto : AddPermissionsToRoleDto , @Req() req : any){
+        return this.rolesService.addPermissionsToRole(dto , req)
     }
 
     @Get(":id")
@@ -63,8 +63,8 @@ export class RolesController {
     @Delete(":roleId")
     @UseGuards(CheckTokenGaurd,CheckPermissionGaurd)
     @Permission("manage_permissions")
-    async deleteRole(@Param("roleId") roleId : string){
-        return this.rolesService.deleteRole(roleId)
+    async deleteRole(@Param("roleId") roleId : string , @Req() req : any){
+        return this.rolesService.deleteRole(roleId , req)
     }
 
 

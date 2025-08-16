@@ -73,12 +73,12 @@ const ListGroups = () => {
                   key={group._id}
                   onClick={() =>
                     navigate(
-                      `/${user.role === 'admin' ? 'adminPage' : 'userPage'}/current-group/${group._id}`
+                      `/${user.role === 'admin' ? 'adminPage' : 'userPage'}/current-group/${group.group_id}`
                     )
                   }
                   className="hover:bg-gray-50 cursor-pointer transition duration-200"
                 >
-                  <td className="px-6 py-4 font-medium text-gray-800">{group.name}</td>
+                  <td className="px-6 py-4 font-medium text-gray-800">{group.group_name}</td>
                   <td className="px-6 py-4 text-gray-600">{group.users.length}</td>
                   <td className="px-6 py-4">
                     <div className="flex flex-wrap gap-2">

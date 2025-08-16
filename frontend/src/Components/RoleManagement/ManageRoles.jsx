@@ -25,6 +25,7 @@ const ManageRoles = () => {
   const fetchRoles = async () => {
     setLoading(true);
     const data = await fetchRolesHook();
+    console.log(data)
     setRoles(data);
     setLoading(false);
   };

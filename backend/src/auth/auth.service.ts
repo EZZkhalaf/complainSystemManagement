@@ -20,9 +20,12 @@ import { Response } from 'express';
 import { Complaint, ComplaintDocument } from 'src/complaint/schemas/complaint.schema';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from 'src/user/entities/user.entity';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { GroupEntity } from 'src/groups/entities/group.entity';
 import { RolesEntity } from 'src/roles/entities/roles.entity';
+import { OTPEntity } from './entities/OTP.entity';
+import { TempSessionEntity } from './entities/tempSession.entity';
+import { Code } from 'typeorm/browser';
 
 
 interface interfaceUser {
@@ -50,50 +53,11 @@ export class AuthService {
 
         @InjectRepository(UserEntity) private userRepo : Repository<UserEntity>,
         @InjectRepository(GroupEntity) private groupRepo : Repository<GroupEntity> ,
-        @InjectRepository(RolesEntity) private readonly rolesRepo : Repository<RolesEntity>
+        @InjectRepository(RolesEntity) private readonly rolesRepo : Repository<RolesEntity>,
+        @InjectRepository(OTPEntity) private otpRepo : Repository<OTPEntity>,
+        @InjectRepository(TempSessionEntity) private tempSessionRepo : Repository<TempSessionEntity>
     ){}
 
-    // async register(registerDto : RegisterDto) : Promise<{message : string }>{
-    //     const {name , email , password} = registerDto;
-
-    //     const userExists = await this.userModel.findOne({email : email})
-    //     if(userExists)
-    //         throw new BadRequestException("user already exists")
-        
-    //     const hashedPassword = await bcrypt.hash(password , 10);
-    //     const role = "user"
-
-    //     const token = jwt.sign(
-    //         {name , email , password : hashedPassword , role} ,
-    //         process.env.JWT_SECRET || "jsonwebtokensecret",
-    //         {expiresIn  :'1h'}
-    //     )
-
-    //     const verificationLink = `http://localhost:5000/api/auth/verify-email?token=${token}`;
-
-    //     const transporter = nodemailer.createTransport({
-    //         service: 'gmail',
-    //         auth: {
-    //             user: process.env.EMAIL_USER,
-    //             pass: process.env.EMAIL_PASS,
-    //         },
-    //     });
-
-    //     await transporter.sendMail({
-    //         from: `"No Reply" <${process.env.EMAIL_USER}>`,
-    //         to: email,
-    //         subject: 'Verify your email',
-    //         html: `
-    //             <h2>Welcome, ${name}!</h2>
-    //             <p>Please verify your email by clicking the link below:</p>
-    //             <a href="${verificationLink}">${verificationLink}</a>
-    //             <p>This link will expire in 1 hour.</p>
-    //         `,
-    //     });
-
-    //     return { message: 'Verification email sent.' };
-
-    // }
 
     
     async register(registerDto : RegisterDto) : Promise<{message : string }>{
@@ -178,7 +142,7 @@ export class AuthService {
                 await this.rolesRepo.save(newRole)
             }
 
-            // await this.logsService.logAction(newUser , "Register" , "User" , newUser._id , "Created A New Account")
+            await this.logsService.logAction(newUser , "Register" , "User" , newUser.user_id , "Created A New Account")
 
             return { message: 'Account verified and created successfully' };
         } catch (error) {
@@ -187,6 +151,7 @@ export class AuthService {
     }
     
 
+    //done
     async login (loginDto : LoginDto ) : Promise<any>{
         try {
             const {email , password} = loginDto;
@@ -225,13 +190,13 @@ export class AuthService {
             
             
 
-            // await this.logsService.logAction(
-            //     user ,
-            //     "Login" 
-            //     , "User" , 
-            //     user._id , 
-            //     "Logged In"
-            // )
+            await this.logsService.logAction(
+                user ,
+                "Login" 
+                , "User" , 
+                user.user_id , 
+                "Logged In"
+            )
 
             return {
                 success: true,
@@ -253,8 +218,9 @@ export class AuthService {
         }
     }
 
+    
     async logout (res : Response){
-        res.clearCookie('token',{
+        res.clearCookie('access_token',{
             httpOnly : true ,
             secure : process.env.NODE_ENV === 'production',
             sameSite : 'lax'
@@ -266,17 +232,28 @@ export class AuthService {
         }
     }
     
+
+
+
+    //later
     async sendOtp(sendOtpDto: SendOtpDto): Promise<{ success: boolean; message: string }> {
         const { email } = sendOtpDto;
 
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
-        await this.otpModel.create({
-            email,
-            code: otp,
-            expiresAt,
-        });
+        // await this.otpModel.create({
+        //     email,
+        //     code: otp,
+        //     expiresAt,
+        // });
+
+        const tempOtp = this.otpRepo.create({
+            email ,
+            code : otp ,
+            expiresAt ,
+        })
+        await this.otpRepo.save(tempOtp)
 
         await sendEmail(email , "your OTP ", `Your OTP is: ${otp}`);
 
@@ -288,24 +265,42 @@ export class AuthService {
 
     async verifyOtp(email : string , otp : string ){
         // const isCorrect = await this.otpModel.findOne({email , code : otp , expiresAt : {$gt : new Date()}}).sort({createdAt : -1})
-        console.log(otp)
-        const isCorrect = await this.otpModel.findOne(
-            { email, code: otp, expiresAt: { $gt: new Date() } },
-            null,
-            { sort: { createdAt: -1 } }
-        );
+        // console.log(otp)
+        // const isCorrect = await this.otpModel.findOne(
+        //     { email, code: otp, expiresAt: { $gt: new Date() } },
+        //     null,
+        //     { sort: { createdAt: -1 } }
+        // );
+
+        const isCorrect = await this.otpRepo.findOne({
+            where :{
+                email ,
+                code : otp ,
+                expiresAt : MoreThan(new  Date())
+            } , 
+            order :{
+                createdAt : "DESC"
+            }
+        })
         if(!isCorrect){
             throw new BadRequestException("invalid or expired OTP")
         }
 
         const resetToken = uuidv4();
-        const f = await this.tempSessionModel.create({
-            email , 
+        // const f = await this.tempSessionModel.create({
+        //     email , 
+        //     token : resetToken ,
+        //     expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+        // })
+        const f =  this.tempSessionRepo.create({
+            email ,
             token : resetToken ,
-            expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+            expiresAt : new Date(Date.now() + 10 * 60 * 1000)
         })
 
-        const f2 = await this.otpModel.deleteMany({email})
+        await this.tempSessionRepo.save(f)
+        // const f2 = await this.otpModel.deleteMany({email})
+        await this.otpRepo.delete({email})
         return {
             success: true,
             message: 'OTP verified',
@@ -318,55 +313,74 @@ export class AuthService {
     async changeOTPPassword( changeOtpPasswordDto : ChangeOtpPasswordDto){
         const {email , newPassword , token } = changeOtpPasswordDto;
 
-        const session  = await this.tempSessionModel.findOne({email,token})
+        // const session  = await this.tempSessionModel.findOne({email,token})
+        const session = await this.tempSessionRepo.findOne({
+            where : {
+                email:email , 
+                token : token
+            }
+        })
         if(!session || session.expiresAt < new Date()){
             return { success: false, message: "Session expired or invalid" }
         }
 
-        const user = await this.userModel.findOne({email})
+        // const user = await this.userModel.findOne({email})
+        const user = await this.userRepo.findOne({
+            where : {
+                user_email : email
+            }
+        })
         if (!user) {
             return { success: false, message: "User not found" }
         }
 
         const hashedPassword = await bcrypt.hash(newPassword , 10)
 
-        user.password = hashedPassword;
-        await user.save()
+        user.user_password = hashedPassword;
+        await this.userRepo.save(user)
 
-        await this.tempSessionModel.deleteMany({email});
+        // await this.tempSessionModel.deleteMany({email});
+        await this.tempSessionRepo.delete({email})
 
-        this.logsService.logAction(user , "Change-Password" , "User" , user._id , "Changed the Password using forget password method ")
+        this.logsService.logAction(user , "Change-Password" , "User" , user.user_id , "Changed the Password using forget password method ")
 
         return { success: true, message: "Password changed successfully" }
     }
 
     async fetchLoggedInUser(userId: string) {
-        const user = await this.userModel.findById(userId).select('-password');
+        // const user = await this.userModel.findById(userId).select('-password');
+        const parsedId = parseInt(userId, 10);
+        if (isNaN(parsedId)) {
+            throw new BadRequestException('Invalid user ID');
+        }
+
+        const user = await this.userRepo.findOne({
+            where : {user_id : parsedId}
+            ,relations : ['user_role' , 'user_role.permissions' , 'groups' , 'complaints']
+        })
+            
         if (!user) {
             throw new NotFoundException('User not found');
         }
 
-        const role = await this.roleModel
-            .findOne({ user: userId })
-            .select('-user')
-            .populate('permissions', '-description')
+        
 
-        const groups = await this.groupModel.find({ users: userId });
+        // const groups = await this.groupModel.find({ users: userId });
 
-        const complaints = await this.complaintModel.find({ userId: userId });
-
+        // const complaints = await this.complaintModel.find({ userId: userId });
+        // console.log(user)
         return {
             success: true,
             message: 'User data fetched successfully',
             user: {
-            _id: user._id,
-            name: user.name,
-            email: user.email,
+            _id: user.user_id,
+            name: user.user_name,
+            email: user.user_email,
             profilePicture: user.profilePicture,
-            role: role?.role || null,
-            permissions: role?.permissions || [],
-            group: groups || [],
-            complaints: complaints || [],
+            role: user?.user_role.role_name || null,
+            permissions: user?.user_role?.permissions || [],
+            group: user.groups || [],
+            complaints: user.complaints || [],
             },
         };
         }

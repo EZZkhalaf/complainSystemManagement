@@ -11,10 +11,7 @@ export class OTPEntity {
   @Column({ type: "varchar", nullable: false })
   code: string;
 
-  @Column({ type: "timestamptz", nullable: false })
-  @Index() // index for expiration checks
-  expiresAt: Date;
-
+  
   @Column({ default: false })
   verified: boolean;
 
@@ -23,4 +20,8 @@ export class OTPEntity {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Column({ type: "timestamptz", nullable: false })
+  @Index() // index for expiration checks
+  expiresAt: Date;
 }

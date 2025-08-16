@@ -21,7 +21,7 @@ const AddPermissionsToRole = () => {
       setPermissions(data)
 
       const roleData = await getRoleByIdHook(id);
-      const rolePermissionsIds = roleData.role.permissions.map(p => p._id)
+      const rolePermissionsIds = roleData.role.permissions.map(p => p.permission_id)
       seetFetchedRolePermissions(roleData.role.permissions)
       setSelected(rolePermissionsIds)
     }
@@ -39,7 +39,7 @@ const AddPermissionsToRole = () => {
 
       let temp =[]
       temp.push(newPermission)
-      if(newPermission.name === "" || newPermission.description === ""){
+      if(newPermission.permission_name === "" || newPermission.permission_description === ""){
         toast.error("please enter the required fields .")
         return null
       }
@@ -139,10 +139,10 @@ const AddPermissionsToRole = () => {
           </thead>
           <tbody className="bg-white">
             {permissions.map((perm, index) => (
-              <tr key={perm._id} className="hover:bg-indigo-50 transition-colors duration-200">
+              <tr key={perm.permission_id} className="hover:bg-indigo-50 transition-colors duration-200">
                 <td className="border border-gray-200 px-5 py-3 text-gray-700">{index + 1}</td>
                 <td className="border border-gray-200 px-5 py-3 text-gray-800 font-semibold">
-                  {perm.name
+                  {perm.permission_name
                     .split('_')
                     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
                     .join(' ')}
@@ -150,17 +150,17 @@ const AddPermissionsToRole = () => {
                 <td className="border border-gray-200 px-5 py-3 text-gray-700">{perm.description}</td>
                 <td className="border border-gray-200 px-5 py-3 text-center space-x-2 flex justify-center items-center">
                   <button
-                    onClick={() => toggleSelect(perm._id)}
+                    onClick={() => toggleSelect(perm.permission_id)}
                     className={`px-3 py-1 rounded-md font-medium shadow-sm transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-300 ${
-                      selected.includes(perm._id)
+                      selected.includes(perm.permission_id)
                         ? 'bg-indigo-400 text-white hover:bg-indigo-700'
                         : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
                     }`}
                   >
-                    {selected.includes(perm._id) ? 'Selected' : 'Select'}
+                    {selected.includes(perm.permission_id) ? 'Selected' : 'Select'}
                   </button>
                   <button
-                    onClick={() => handleDelete(perm._id)}
+                    onClick={() => handleDelete(perm.permission_id)}
                     className="bg-red-300 text-red-800 px-3 py-1 rounded-full hover:bg-red-400 shadow-sm transition duration-300 font-semibold focus:outline-none focus:ring-2 focus:ring-red-300"
                     title="Delete Permission"
                   >

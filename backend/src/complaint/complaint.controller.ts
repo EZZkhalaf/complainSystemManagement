@@ -14,10 +14,11 @@ export class ComplaintController {
     constructor(private readonly complaintService : ComplaintService){}
 
     @Post(":id")
-    @UseGuards(CheckTokenGaurd,CheckPermissionGaurd)
-    @Permission("add_complaint")
+    @UseGuards(CheckTokenGaurd)
+    // @Permission("add_complaint")
     async addComplaint(@Param("id") id : string , @Body() addComplaintDto : AddComplaintDto){
-        return this.complaintService.addComplaint(addComplaintDto , id)
+        const idNum = Number(id)
+        return this.complaintService.addComplaint(addComplaintDto , idNum)
     }
 
     @Post('handleComplaintInGroup/:id')
@@ -58,6 +59,7 @@ export class ComplaintController {
     @UseGuards(CheckTokenGaurd,CheckPermissionGaurd)
     @Permission("delete_complaint")
     async deleteComplaint(@Param("userId") userId : string , @Body() dto : DeleteComplaintDto){
+        console.log("testing")
         return this.complaintService.deleteComplaint(userId , dto.complaintId)
     }
 

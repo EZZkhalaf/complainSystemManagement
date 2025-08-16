@@ -22,7 +22,8 @@ import { UserEntity } from 'src/user/entities/user.entity';
       {name : User.name , schema : UserSchema},
       {name : Permission.name , schema : PremissionSchema}
     ]),
-    LogsModule, 
+    
+      forwardRef(() =>LogsModule),   
     
      forwardRef(()=> UserModule),
 

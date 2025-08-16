@@ -19,6 +19,7 @@ export const getLogsHook = async(page , logsPerPage , {action , resource , user}
 
 
               const data = await res.json();
+              // console.log(data)
               if (data.success) {
                 return data
               } else {

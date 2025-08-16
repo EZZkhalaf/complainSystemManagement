@@ -2,7 +2,7 @@ import { IsMongoId, IsOptional, IsString, IsInt, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class ListGroupComplaintsDto {
-  @IsMongoId({ message: 'Invalid userId format' })
+  // @IsMongoId({ message: 'Invalid userId format' })
   userId: string;
 
   @IsOptional()

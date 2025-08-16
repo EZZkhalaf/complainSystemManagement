@@ -18,7 +18,7 @@ const ComplaintCard = ({ complaint }) => {
   const navigate = useNavigate();
   return (
     <div 
-      onClick={() => navigate(`/userPage/complaint/${complaint._id}`)}
+      onClick={() => navigate(`/userPage/complaint/${complaint.complaint_id}`)}
       className="bg-white rounded-2xl shadow-md p-6 border border-gray-200 hover:shadow-xl transition duration-200 flex flex-col justify-between">
       <div className="mb-3">
         <h3 className="text-xl font-semibold text-gray-900 mb-1 capitalize">
@@ -28,12 +28,12 @@ const ComplaintCard = ({ complaint }) => {
       </div>
 
       <div className="flex justify-between items-center mt-4">
-        <span className={`text-sm px-3 py-1 rounded-full font-medium ${getStatusStyles(complaint.status)}`}>
-          {complaint.status}
+        <span className={`text-sm px-3 py-1 rounded-full font-medium ${getStatusStyles(complaint.complaint_status)}`}>
+          {complaint.complaint_status}
         </span>
         <div className="text-sm text-gray-500 text-right">
-          <p className="font-medium">{complaint.userId?.name}</p>
-          <p className="text-xs">{complaint.userId?.email}</p>
+          <p className="font-medium">{complaint.creator_user?.user_name}</p>
+          <p className="text-xs">{complaint.creator_user?.user_email}</p>
         </div>
       </div>
     </div>
@@ -48,6 +48,7 @@ const ListUserComplaints = () => {
       try {
         setLoading(true)
         const data = await ListUserComplaintsHook(user._id);
+        console.log(data)
         setComplaints(data);
         setLoading(false)
       } catch (error) {
@@ -73,7 +74,7 @@ const ListUserComplaints = () => {
         ) : (
           <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {complaints?.map((complaint) => (
-              <ComplaintCard key={complaint._id} complaint={complaint} />
+              <ComplaintCard key={complaint.complaint_id} complaint={complaint} />
             ))}
           </div>
         )}

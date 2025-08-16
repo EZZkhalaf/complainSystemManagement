@@ -4,10 +4,10 @@ import { IsArray, ArrayNotEmpty, IsMongoId, IsString } from 'class-validator';
 export class AddPermissionsToRoleDto {
   @IsArray()
   @ArrayNotEmpty()
-  @IsMongoId({ each: true })
+  // @IsMongoId({ each: true })
   permissionsIds: string[];
 
   @IsString()
-  @IsMongoId()
+  // @IsMongoId()
   roleId: string;
 }
