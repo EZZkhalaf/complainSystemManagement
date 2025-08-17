@@ -1,6 +1,8 @@
 import { toast } from "react-toastify"
 import { useAuthContext } from "../Context/authContext";
 
+
+//safe
 export const loginHook = async(email,password,navigate,login) =>{
     try {
         if(!email || !password){
@@ -21,7 +23,6 @@ export const loginHook = async(email,password,navigate,login) =>{
         })
 
         const data = await response.json();
-        console.log(data)
         if(!data.success) {
             toast.error(data.message)
             return 

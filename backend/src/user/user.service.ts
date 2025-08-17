@@ -88,7 +88,7 @@ export class UserService {
     //     }
     // }
 
-        async changeUserRole(dto : ChangeUserRoleDto){
+    async changeUserRole(dto : ChangeUserRoleDto){
         try{
             const { userId, newRole } = dto;
 
@@ -100,10 +100,17 @@ export class UserService {
 
 
             //remove from the prev roles
-            const roles = await this.rolesRepo.createQueryBuilder("role_info")
-                .leftJoin("role_info.users" , 'user_info')
-                .where("user_info.user_id ' :userId" , {userId : userIdNumber})
-                .getMany()
+            // const roles = await this.rolesRepo.createQueryBuilder("role_info")
+            //     .leftJoin("role_info.users" , 'user_info')
+            //     .where("user_info.user_id = :userId" , {userId : userIdNumber})
+            //     .getMany()
+
+            const roles = await this.rolesRepo.find({
+                relations: ["users"],
+                where: {
+                    users: { user_id: userIdNumber }
+                }
+            });
 
             for (const role of roles){
                 role.users = role.users.filter( u => u.user_id !== userIdNumber)
@@ -126,13 +133,13 @@ export class UserService {
                 await this.rolesRepo.save(newRoleEntity)
             }
 
-            // await logAction(
-            //     user,
-            //     'Role',
-            //     'User',
-            //     user._id,
-            //     `Changed The User Role to ${role.role}`,
-            // );
+            await this.logsService.logAction(
+                user,
+                'Role',
+                'User',
+                user.user_id,
+                `Changed The User Role to ${newRoleEntity.role_name}`,
+            );
 
             return {
                 success: true,

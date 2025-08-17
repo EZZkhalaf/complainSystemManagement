@@ -21,7 +21,6 @@ const ViewLogs = () => {
   const fetchLogs = async() =>{
     // setLoading(true);
     const data = await getLogsHook(currentPage , LOGS_PER_PAGE , {action , resource , user})
-    console.log(data)
     setLogs(data.data);
     setTotalPages(Math.ceil(data.totalPages ));
     // setLoading(false)

@@ -85,11 +85,15 @@ export class ComplaintService {
             throw new BadRequestException('Description and userId are required');
         }
 
-        const user = await this.userRepo.findOne({ where: { user_id: userId } });
+        const user = await this.userRepo.findOne({ 
+            where: { user_id: userId } 
+            
+        });
         if (!user) throw new NotFoundException('User not found');
 
         const group1 = await this.groupRepo.findOne({ where: { group_name: 'HR' } });
         if (!group1) throw new NotFoundException('No default group to take the complaint');
+
 
         const newComplaint = this.complaintRepo.create({
             description,
@@ -103,7 +107,6 @@ export class ComplaintService {
         return {
             success: true,
             message: 'Complaint added successfully',
-            complaint: newComplaint,
         };
     }
 
@@ -237,9 +240,27 @@ export class ComplaintService {
 
         const complaint = await this.complaintRepo.findOne({
             where : {complaint_id : Number(complaintId)},
-            relations : ['creator_user']
+            relations : ['creator_user' , 'creator_user.user_role'] ,
+            select :{
+                complaint_id : true ,
+                complaint_status : true ,
+                complaint_type : true ,
+                created_at : true ,
+                creator_user:{
+                    created_at : true ,
+                    profilePicture : true ,
+                    user_name : true ,
+                    user_email : true ,
+                    user_id : true,
+                    user_role : {
+                        role_name : true ,
+                        role_id : true
+                    }
+                }
+            }
         })
 
+       
         if (!complaint) {
             throw new NotFoundException('Complaint not found');
         }
