@@ -19,8 +19,8 @@ const AddPermissionsToRole = () => {
     const fetchData = async() =>{
       const data = await fetchPermissionsHook();
       setPermissions(data)
-
       const roleData = await getRoleByIdHook(id);
+      // console.log(roleData)
       const rolePermissionsIds = roleData.role.permissions.map(p => p.permission_id)
       seetFetchedRolePermissions(roleData.role.permissions)
       setSelected(rolePermissionsIds)

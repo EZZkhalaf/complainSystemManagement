@@ -22,6 +22,9 @@ import { ComplaintEntity, ComplaintStatus, ComplaintType } from './entities/comp
 import { GroupEntity } from 'src/groups/entities/group.entity';
 import { ComplaintGroupsRuleEntity } from './entities/complaint-groups-rule.entity';
 import { RolesEntity } from 'src/roles/entities/roles.entity';
+import { plainToInstance } from 'class-transformer';
+import { PaginatedResponseDto } from './dtos/paginated-response.dto';
+import { ComplaintOutputDto } from './dtos/complaint-output.dto';
 
 
 
@@ -139,7 +142,7 @@ export class ComplaintService {
             relations:['groups'] // or whatever primary column exists
         });
 
-        console.log(complaint)
+        // console.log(complaint)
         const groups = rule?.groups;
         const currentStep = complaint.groupsQueue.length;
 
@@ -300,7 +303,7 @@ export class ComplaintService {
         };
     }
 
-
+    //done / secure
     async listComplaints(dto: ListComplaintsDto): Promise<any> {
         const { page , limit } = dto;
 
@@ -319,33 +322,63 @@ export class ComplaintService {
         });
 
 
-        return {
-            success: true,
-            complaints,
-            currentPage: page,
-            totalPages: Math.ceil(totalCount / limit),
-        };
+        // return {
+        //     success: true,
+        //     complaints,
+        //     currentPage: page,
+        //     totalPages: Math.ceil(totalCount / limit),
+        // };
+
+        return plainToInstance(
+            PaginatedResponseDto , {
+                success : true ,
+                complaints : complaints.map( c => 
+                    plainToInstance(ComplaintOutputDto , c , {
+                        excludeExtraneousValues : true
+                    })
+                ),
+                currenPage : page , 
+                totalPages : Math.ceil(totalCount/limit),
+                totalCount
+            } ,
+            {excludeExtraneousValues : true}
+        )
     }
 
-    async getComplaintInfo(id : string) : Promise<{ success: boolean; complaint: ComplaintEntity }>{
+    async getComplaintInfo(id : string) : Promise<{ success: boolean; complaint: ComplaintOutputDto }>{
         
         if(!id)
             throw new BadRequestException("please provide the correct id")
 
         // const complaint = await this.complaintModel.findById(id).populate("userId" , "-password");
         const complaint = await this.complaintRepo.findOne({
-            where :{complaint_id : Number(id)}
+            where :{complaint_id : Number(id)},
+            relations:['creator_user'],
+            select : {
+                complaint_id : true ,
+                complaint_status : true ,
+                complaint_type : true ,
+                created_at : true ,
+                creator_user :{
+                    user_email : true ,
+                    profilePicture : true ,
+                    user_id : true ,
+                    user_name : true ,
+                    user_password : false ,
+                    user_role : false
+                }
+            }
         })
 
         if(!complaint){
             throw new NotFoundException("complaint not found")
         }
         return {
-            success : true , complaint
+            success : true , complaint : plainToInstance(ComplaintOutputDto , complaint , {excludeExtraneousValues : true})
         }
     }
 
-    async listUsrComplaints( id : string) : Promise<{success : boolean , complaints : ComplaintEntity[]}>{
+    async listUsrComplaints( id : string){
         // const userExists = await this.userModel.findById(id)
         const userExists = await this.userRepo.findOne({
             where : {user_id : Number(id)}
@@ -355,10 +388,24 @@ export class ComplaintService {
         
         // const complaints = await this.complaintModel.find({userId : id})
         const complaints = await this.complaintRepo.find({
-            where : {creator_user : {user_id : Number(id)}}
+            where : {creator_user : {user_id : Number(id)}} ,
+            relations : ['creator_user'],
+            select : {
+                complaint_id : true ,
+                complaint_status : true , 
+                complaint_type : true ,
+                created_at : true  ,
+                creator_user : {
+                    user_name : true ,
+                    user_email : true ,
+                    user_id : true,
+                    user_password : false ,
+                    user_role : false
+                }
+            }
         })
         // console.log(complaints)
-        return {success : true , complaints}
+        return {success : true , complaints : plainToInstance(ComplaintOutputDto , complaints , {excludeExtraneousValues : true})}
     }
 
 
@@ -367,7 +414,6 @@ async deleteComplaint(userId: string, complaintId: string) {
     const parsedComplaintId = Number(complaintId);
     const parsedUserId = Number(userId);
 
-    console.log(parsedComplaintId , parsedUserId)
     
     if (isNaN(parsedComplaintId) || isNaN(parsedUserId)) {
         throw new BadRequestException("Invalid userId or complaintId");

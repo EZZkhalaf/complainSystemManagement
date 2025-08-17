@@ -19,6 +19,8 @@ import { Repository } from 'typeorm';
 import { UserEntity } from 'src/user/entities/user.entity';
 import { ComplaintEntity } from 'src/complaint/entities/complaint.entity';
 import { ComplaintGroupsRuleEntity } from 'src/complaint/entities/complaint-groups-rule.entity';
+import { plainToInstance } from 'class-transformer';
+import { GroupOutputDto } from './dtos/group-output.dto';
 
 @Injectable()
 export class GroupsService {
@@ -199,7 +201,7 @@ export class GroupsService {
         if(!group)
             throw new NotFoundException("group not found")
 
-        return { success: true, group }
+        return { success: true, group : plainToInstance(GroupOutputDto , group , {excludeExtraneousValues:true}) }
     }
 
 
@@ -290,7 +292,7 @@ export class GroupsService {
             where : {users :{user_id :  Number(userId)}},
             relations : ['users']
         })
-        return { success: true, groups }
+        return { success: true, groups :  plainToInstance(GroupOutputDto , groups , {excludeExtraneousValues : true}) }
 
     }
 

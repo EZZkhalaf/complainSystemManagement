@@ -26,9 +26,8 @@ const fetchEmployees = async () => {
 
     const users = await fetchUsersHook();
     let roles2 = users.roles2;
-
-    console.log(users)
-    // Find the target role by ID (use .find instead of .filter if you only want one)
+    // console.log(users)
+    
     const targetRole = roles2.find((r) => r.role_id === Number(id));
     if (!targetRole) {
       console.warn("Role with the given ID not found");
@@ -54,7 +53,6 @@ const fetchEmployees = async () => {
   }
 };
 
-console.log(employees)
 useEffect(() => {
   fetchEmployees();
 }, []);
@@ -75,7 +73,6 @@ useEffect(() => {
     const roles = await fetchRolesHook();
     let filteredRoles = roles.filter((r) => r.role_id === Number(id))
     // console.log(filteredRoles[0].role)
-    console.log(selectedEmployee , filteredRoles[0].role_name)
     const data = await changeUserRoleHook (selectedEmployee , filteredRoles[0].role_name);
     if(data.success){
         toast.success("employee added successfully")

@@ -122,7 +122,7 @@ export class RolesService {
             const inserted = await this.permissionRepo1.save(
                 newPermissions.map((p) => ({
                     permission_name: p.name,
-                    description: p.description,
+                    permission_description: p.description,
                 }))
             );
 

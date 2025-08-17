@@ -13,6 +13,7 @@ const GroupsListingForComplaints = () => {
     const fetchUserGroups = async () => {
       setLoading(true)
       const data = await getUserGroupsHook(user._id);
+      // console.log(data)
       setGroups(data)
       setLoading(false)
     };

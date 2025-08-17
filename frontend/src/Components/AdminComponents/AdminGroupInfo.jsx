@@ -28,6 +28,7 @@ const AdminGroupInfo = () => {
     setLoading(true);
     try {
       const data = await getGroupInfoHook(id);
+      console.log(data)
       if (data) {
         setGroup(data);
       } else {
