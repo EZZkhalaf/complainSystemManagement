@@ -1,6 +1,8 @@
 import { toast } from "react-toastify";
 
 
+
+//not secure
 export const listComplaintsHook = async(userId , page , limit )=>{
     try {
         const response = await fetch(`http://localhost:5000/api/complaints` , {
@@ -30,7 +32,7 @@ export const listComplaintsHook = async(userId , page , limit )=>{
     }
 }
 
-
+//not secure
 export const AddComplaintHook = async(userId , description , type ,navigate) => {
     try {
         const response = await fetch(`http://localhost:5000/api/complaints/${userId}` , {
@@ -59,7 +61,7 @@ export const AddComplaintHook = async(userId , description , type ,navigate) => 
     }
 }
 
-
+//not secure
 export const getComaplintInfoHook = async(id) =>{
     try {
         const response = await fetch(`http://localhost:5000/api/complaints/info/${id}` , {

@@ -39,7 +39,6 @@ export class ComplaintController {
     @UseGuards(CheckTokenGaurd,CheckPermissionGaurd)
     @Permission("view_complaints")
     async listComplaints(@Body() dto : ListComplaintsDto){
-        console.log(dto)
         return this.complaintService.listComplaints(dto);
     }
 

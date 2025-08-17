@@ -70,6 +70,7 @@ const ListComplaints = () => {
     try {
 
       const data = await listComplaintsHook(user._id , currentPage , 9);
+      console.log(data)
       setCurrentPage(data.currentPage)
       setTotalPages(data.totalPages)
       setComplaints(data.complaints);

@@ -24,6 +24,7 @@ const ComplaintInfo = () => {
     try {
         setLoading(true)
       const response = await getComaplintInfoHook(id)
+      console.log(response)
       setComplaints(response);
       setNewStatus(response.status)
       const gData  = await listGroupsHook(user._id)
@@ -35,7 +36,6 @@ const ComplaintInfo = () => {
     }
 };
 
-console.log(complaint)
 
 const changeComaplaintStatus = async(Decision) =>{
     setLoading(true);

@@ -70,6 +70,7 @@ const ComplaintsList = () => {
         page,
         limit: 10,
       });
+      // console.log(data)
       setComplaints(data.complaints);
       setTotalPages(data.totalPages);
     } catch (error) {

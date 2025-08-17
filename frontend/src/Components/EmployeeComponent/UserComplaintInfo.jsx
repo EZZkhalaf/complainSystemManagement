@@ -16,6 +16,7 @@ const UserComplaintInfo = () => {
     const fetchComplaints = async () => {
       try {
         const response = await getComaplintInfoHook(id)
+        console.log(response)
         setComplaints(response);
         setNewStatus(response.status)
       } catch (err) {

@@ -271,7 +271,7 @@ const EmployeeInfo = () => {
                 {groups.map((g) => (
                 <div
                     key={g._id}
-                    onClick={()=> navigate(`/${user.role === 'admin' ? 'adminPage' : 'userPage'}/current-group/${g._id}`)}
+                    onClick={()=> navigate(`/${user.role === 'admin' ? 'adminPage' : 'userPage'}/current-group/${g.group_id}`)}
                     className="p-4 bg-white rounded-2xl shadow-md border border-gray-200 hover:shadow-lg transition"
                 >
                     <h3 className="text-lg font-semibold text-blue-800 mb-2 capitalize">

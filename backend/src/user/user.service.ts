@@ -18,6 +18,9 @@ import { Repository } from 'typeorm';
 import { RolesEntity } from 'src/roles/entities/roles.entity';
 import { GroupEntity } from 'src/groups/entities/group.entity';
 import { ComplaintEntity } from 'src/complaint/entities/complaint.entity';
+import { plainToInstance } from 'class-transformer';
+import { UserOutputDto } from './dtos/user-output.dto';
+import { ComplaintOutputDto } from 'src/complaint/dtos/complaint-output.dto';
 
 export interface UserWithRole {
         user: any; 
@@ -88,7 +91,7 @@ export class UserService {
     //     }
     // }
 
-        async changeUserRole(dto : ChangeUserRoleDto){
+    async changeUserRole(dto : ChangeUserRoleDto){
         try{
             const { userId, newRole } = dto;
 
@@ -100,10 +103,17 @@ export class UserService {
 
 
             //remove from the prev roles
-            const roles = await this.rolesRepo.createQueryBuilder("role_info")
-                .leftJoin("role_info.users" , 'user_info')
-                .where("user_info.user_id ' :userId" , {userId : userIdNumber})
-                .getMany()
+            // const roles = await this.rolesRepo.createQueryBuilder("role_info")
+            //     .leftJoin("role_info.users" , 'user_info')
+            //     .where("user_info.user_id = :userId" , {userId : userIdNumber})
+            //     .getMany()
+
+            const roles = await this.rolesRepo.find({
+                relations: ["users"],
+                where: {
+                    users: { user_id: userIdNumber }
+                }
+            });
 
             for (const role of roles){
                 role.users = role.users.filter( u => u.user_id !== userIdNumber)
@@ -126,13 +136,13 @@ export class UserService {
                 await this.rolesRepo.save(newRoleEntity)
             }
 
-            // await logAction(
-            //     user,
-            //     'Role',
-            //     'User',
-            //     user._id,
-            //     `Changed The User Role to ${role.role}`,
-            // );
+            await this.logsService.logAction(
+                user,
+                'Role',
+                'User',
+                user.user_id,
+                `Changed The User Role to ${newRoleEntity.role_name}`,
+            );
 
             return {
                 success: true,
@@ -235,7 +245,7 @@ export class UserService {
                     user_name: true,
                     user_email: true,
                     profilePicture: true,
-                    // don't include user_password here
+                    user_password : false
                     },
                     role_name: true,
                     role_id: true,
@@ -332,13 +342,14 @@ export class UserService {
                         user_name: true,
                         user_email: true,
                         profilePicture: true,
+                        user_password : false
                     },
                 },
                 })
             if(!group)
                 throw new NotFoundException("group not found")
 
-            console.log(group)
+            // console.log(group)
 
             // const user = await this.userModel.findById(userId);
             const user = await this.userRepo.findOne({ where : {user_id : Number(userId)}})
@@ -490,7 +501,19 @@ export class UserService {
 
         // const user = await this.userModel.findById(id);
         const user = await this.userRepo.findOne({
-            where : {user_id : Number(id)}
+            where : {user_id : Number(id)},
+            select : {
+                user_email : true ,
+                user_name : true ,
+                user_password : false ,
+                user_id : true ,
+                user_role : {
+                    role_id : true ,
+                    role_name : true ,
+                    users : false,
+                    permissions : false
+                }
+            }
         })
 
         if (!user) 
@@ -710,7 +733,8 @@ export class UserService {
     async getUserById(id : string){
         
         const user = await this.userRepo.findOne({
-            where : {user_id : Number(id)}
+            where : {user_id : Number(id)},
+            
         });
 
         const role = await this.rolesRepo.findOne({
@@ -738,10 +762,10 @@ export class UserService {
 
         return {
             success: true,
-            user: user,     // only the populated user object
+            user: plainToInstance(UserOutputDto , user , {excludeExtraneousValues : true}),     // only the populated user object
             role: role.role_name,     // role string (if needed)
             groups,
-            complaints,
+            complaints : plainToInstance(ComplaintOutputDto , complaints , {excludeExtraneousValues : true}),
         }
     }
 

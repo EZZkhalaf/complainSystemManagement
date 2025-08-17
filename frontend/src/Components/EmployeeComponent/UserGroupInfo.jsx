@@ -26,7 +26,7 @@ const UserGroupInfo = () => {
       setLoading(true);
       try {
         const data = await getGroupInfoHook(id);
-        // console.log("testing")
+        console.log(data)
         if (data) {
           setGroup(data);
         } else {

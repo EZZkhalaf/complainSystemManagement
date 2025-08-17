@@ -26,10 +26,9 @@ const fetchEmployees = async () => {
 
     const users = await fetchUsersHook();
     let roles2 = users.roles2;
-
-    console.log(users)
-    // Find the target role by ID (use .find instead of .filter if you only want one)
-    const targetRole = roles2.find((r) => r.role_id === id);
+    // console.log(users)
+    
+    const targetRole = roles2.find((r) => r.role_id === Number(id));
     if (!targetRole) {
       console.warn("Role with the given ID not found");
       setEmployees([]);
@@ -42,7 +41,7 @@ const fetchEmployees = async () => {
     let user2 = users.users || [];
     user2 = user2.filter(
       (emp) =>
-        String(emp.user._id) !== String(user?.user_id) && emp.role_name !== targetRole.role_name
+        emp.user.user_id !== user?.user_id && emp.role !== targetRole.role
     );
 
     setEmployees(user2);
@@ -54,7 +53,6 @@ const fetchEmployees = async () => {
   }
 };
 
-console.log(employees)
 useEffect(() => {
   fetchEmployees();
 }, []);
@@ -65,15 +63,15 @@ useEffect(() => {
     const lower = search.toLowerCase();
     setFilteredEmployees(
       employees?.filter(emp =>
-        emp?.user?.name?.toLowerCase().includes(lower) ||
-        emp?.user?.email?.toLowerCase().includes(lower)
+        emp?.user?.user_name?.toLowerCase().includes(lower) ||
+        emp?.user?.user_email?.toLowerCase().includes(lower)
       )
     );
   }, [search, employees]);
 
   const handleAddEmployee = async () => {
     const roles = await fetchRolesHook();
-    let filteredRoles = roles.filter((r) => r.role_id === id)
+    let filteredRoles = roles.filter((r) => r.role_id === Number(id))
     // console.log(filteredRoles[0].role)
     const data = await changeUserRoleHook (selectedEmployee , filteredRoles[0].role_name);
     if(data.success){

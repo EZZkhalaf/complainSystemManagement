@@ -1,5 +1,7 @@
 import { toast } from "react-toastify";
 
+
+//safe
 export const getLogsHook = async(page , logsPerPage , {action , resource , user}) =>{
     try {
         const res = await fetch(`http://localhost:5000/api/logs/`, {

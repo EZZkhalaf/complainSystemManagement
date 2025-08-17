@@ -13,7 +13,6 @@ export const fetchUsersHook = async () => {
     }
 
     return data;
-    
 
   } catch (error) {
     console.error("Fetch error:", error);
@@ -24,7 +23,6 @@ export const fetchUsersHook = async () => {
 
 
 export const addEmployeeToGroupHelper = async(groupId , userId , navigate) => {
-    console.log(groupId , userId)
     try {
         const response = await fetch("http://localhost:5000/api/user/add" , {
             method : "POST",

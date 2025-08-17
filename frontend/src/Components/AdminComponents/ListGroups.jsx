@@ -14,6 +14,7 @@ const ListGroups = () => {
   const fetchUserGroups = async () => {
     setLoading(true);
     const data = await listGroupsHook(user._id);
+    // console.log(data)
     setGroups(data);
     setLoading(false);
   };
