@@ -1,4 +1,4 @@
-import { GroupEntity } from "src/groups/entities/group.entity";
+import { GroupEntity } from "../../groups/entities/group.entity";
 import { Entity, PrimaryGeneratedColumn, CreateDateColumn, ManyToMany, JoinTable } from "typeorm";
 
 @Entity("complaint_groups_rule")

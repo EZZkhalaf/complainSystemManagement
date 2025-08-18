@@ -1,15 +1,15 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Role, RoleDocument } from './schemas/role.schema';
-import { isValidObjectId, Model, Types } from 'mongoose';
-import { Permission, PermissionDocument } from './schemas/permission.schema';
-import { PermissionDto } from './dtos/permissions.dto';
+// import { InjectModel } from '@nestjs/mongoose';
+// import { Role, RoleDocument } from './schemas/role.schema';
+// import { isValidObjectId, Model, Types } from 'mongoose';
+// import { Permission, PermissionDocument } from './schemas/permission.schema';
+// import { PermissionDto } from './dtos/permissions.dto';
 import { AddPermissionsToRoleDto } from './dtos/add-permissions-to-role.dto';
-import { NotFoundError } from 'rxjs';
-import { LogsService } from 'src/logs/logs.service';
-import { User, UserDocument } from 'src/user/schemas/user.schema';
+// import { NotFoundError } from 'rxjs';
+import { LogsService } from '../logs/logs.service';
+// import { User, UserDocument } from 'src/user/schemas/user.schema';
 import { CreatePermissionDto } from './dtos/create-permissions.dto';
-import { RoleRepository } from './roles.repository';
+// import { RoleRepository } from './roles.repository';
 import { RolesEntity } from './entities/roles.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
@@ -21,9 +21,9 @@ import { PermissionRepository } from './permission.repository';
 export class RolesService {
     constructor(
         private readonly logsService : LogsService,
-        @InjectModel(Role.name) private roleModel : Model<RoleDocument> ,
-        @InjectModel(Permission.name) private permissionModel : Model<PermissionDocument>,
-        @InjectModel(User.name) private userModel : Model<UserDocument> ,
+        // @InjectModel(Role.name) private roleModel : Model<RoleDocument> ,
+        // @InjectModel(Permission.name) private permissionModel : Model<PermissionDocument>,
+        // @InjectModel(User.name) private userModel : Model<UserDocument> ,
 
 
 

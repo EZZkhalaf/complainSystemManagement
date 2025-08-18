@@ -1,26 +1,28 @@
 import { BadRequestException, ForbiddenException, HttpException, HttpStatus, Inject, Injectable, InternalServerErrorException, NotFoundException, Type, UnauthorizedException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { User, UserDocument } from './schemas/user.schema';
-import { isValidObjectId, Model, Types } from 'mongoose';
-import { Group, GroupDocument } from 'src/groups/schemas/group.schema';
-import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
+// import { InjectModel } from '@nestjs/mongoose';
+// import { User, UserDocument } from './schemas/user.schema';
+// import { isValidObjectId, Model, Types } from 'mongoose';
+// import { Group, GroupDocument } from 'src/groups/schemas/group.schema';
+// import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
 import { ChangeUserRoleDto } from './dtos/change-user-role.dto';
 import { AddUserToGroupDto } from './dtos/add-user-to-group.dto';
-import { Complaint, ComplaintDocument } from 'src/complaint/schemas/complaint.schema';
+// import { Complaint, ComplaintDocument } from 'src/complaint/schemas/complaint.schema';
 import * as bcrypt from 'bcrypt'
 import * as nodemailer from 'nodemailer';
 import * as jwt from 'jsonwebtoken';
 import { AdminEditUserInfoDto } from './dtos/admin-edit-user-info.dto';
-import { LogsService } from 'src/logs/logs.service';
+import { LogsService } from '../logs/logs.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
 import { Repository } from 'typeorm';
-import { RolesEntity } from 'src/roles/entities/roles.entity';
-import { GroupEntity } from 'src/groups/entities/group.entity';
-import { ComplaintEntity } from 'src/complaint/entities/complaint.entity';
+// import { RolesEntity } from 'src/roles/entities/roles.entity';
+import { RolesEntity } from '../roles/entities/roles.entity'
+
+import { GroupEntity } from '../groups/entities/group.entity';
+import { ComplaintEntity } from '../complaint/entities/complaint.entity';
 import { plainToInstance } from 'class-transformer';
 import { UserOutputDto } from './dtos/user-output.dto';
-import { ComplaintOutputDto } from 'src/complaint/dtos/complaint-output.dto';
+import { ComplaintOutputDto } from '../complaint/dtos/complaint-output.dto';
 
 export interface UserWithRole {
         user: any; 
@@ -30,10 +32,10 @@ export interface UserWithRole {
 export class UserService {
     constructor(
         private readonly logsService : LogsService,
-        @InjectModel(User.name) private userModel  :Model<UserDocument> ,
-        @InjectModel(Group.name) private groupModel : Model<GroupDocument>,
-        @InjectModel(Role.name) private roleModel : Model<RoleDocument> ,
-        @InjectModel(Complaint.name) private complaintModel : Model<ComplaintDocument>,
+        // @InjectModel(User.name) private userModel  :Model<UserDocument> ,
+        // @InjectModel(Group.name) private groupModel : Model<GroupDocument>,
+        // @InjectModel(Role.name) private roleModel : Model<RoleDocument> ,
+        // @InjectModel(Complaint.name) private complaintModel : Model<ComplaintDocument>,
 
 
 

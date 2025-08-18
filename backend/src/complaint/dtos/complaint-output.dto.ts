@@ -1,7 +1,7 @@
 // src/complaint/dto/complaint-output.dto.ts
 import { Expose, Type } from "class-transformer";
 import { ComplaintStatus, ComplaintType } from "../entities/complaint.entity";
-import { UserOutputDto } from "src/user/dtos/user-output.dto";
+import { UserOutputDto } from "../../user/dtos/user-output.dto";
 
 export class ComplaintOutputDto {
   @Expose() complaint_id: number;

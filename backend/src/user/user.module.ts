@@ -3,16 +3,16 @@ import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schemas/user.schema';
-import { Role, RoleSchema } from 'src/roles/schemas/role.schema';
-import { Group, GroupSchema } from 'src/groups/schemas/group.schema';
-import { Complaint, ComplaintSchema } from 'src/complaint/schemas/complaint.schema';
-import { LogsModule } from 'src/logs/logs.module';
+import { Role, RoleSchema } from '../roles/schemas/role.schema';
+import { Group, GroupSchema } from '../groups/schemas/group.schema';
+import { Complaint, ComplaintSchema } from '../complaint/schemas/complaint.schema';
+import { LogsModule } from '../logs/logs.module';
 import { JwtService } from '@nestjs/jwt';
-import { RolesModule } from 'src/roles/roles.module';
+import { RolesModule } from '../roles/roles.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
-import { GroupsModule } from 'src/groups/groups.module';
-import { ComplaintModule } from 'src/complaint/complaint.module';
+import { GroupsModule } from '../groups/groups.module';
+import { ComplaintModule } from '../complaint/complaint.module';
 
 @Module({
   imports:[

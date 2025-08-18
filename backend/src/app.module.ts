@@ -48,9 +48,9 @@ export class AppModule {
 
   async onApplicationBootstrap(){
     if (this.dataSource.isInitialized) {
-      console.log('✅ Connected to Postgres database');
+      console.log('Connected to Postgres database');
     } else {
-      console.error('❌ Failed to connect to Postgres database');
+      console.error('Failed to connect to Postgres database');
     }
   }
 }

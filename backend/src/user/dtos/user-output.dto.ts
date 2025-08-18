@@ -1,6 +1,6 @@
 // src/user/dto/user-output.dto.ts
 import { Exclude, Expose } from "class-transformer";
-import { RolesEntity } from "src/roles/entities/roles.entity";
+import { RolesEntity } from "../../roles/entities/roles.entity";
 
 export class UserOutputDto {
   @Expose() user_id: number;

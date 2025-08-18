@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, ManyToMany, JoinTable, CreateDateColumn, UpdateDateColumn } from "typeorm";
-import { UserEntity } from "src/user/entities/user.entity";
-import { GroupEntity } from "src/groups/entities/group.entity";
+import { UserEntity } from "../../user/entities/user.entity";
+import { GroupEntity } from "../../groups/entities/group.entity";
 export enum ComplaintStatus {
   PENDING = "pending",
   IN_PROGRESS = "in-progress",

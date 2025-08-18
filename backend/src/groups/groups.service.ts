@@ -1,18 +1,18 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException, Type } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { isValidObjectId, Model, Types } from 'mongoose';
-import { User, UserDocument } from 'src/user/schemas/user.schema';
-import { Group, GroupDocument } from './schemas/group.schema';
+// import { InjectModel } from '@nestjs/mongoose';
+// import { isValidObjectId, Model, Types } from 'mongoose';
+// import { User, UserDocument } from 'src/user/schemas/user.schema';
+// import { Group, GroupDocument } from './schemas/group.schema';
 import { CreateGroupDto } from './dtos/create-group.dto';
 import { RemoveUserFromGroupDto } from './dtos/remove-user-from-group.dto';
-import { IsMongoId } from 'class-validator';
-import { Complaint, ComplaintDocument } from 'src/complaint/schemas/complaint.schema';
+// import { IsMongoId } from 'class-validator';
+// import { Complaint, ComplaintDocument } from 'src/complaint/schemas/complaint.schema';
 import { ListGroupComplaintsDto } from './dtos/list-group-complaints.dto';
-import { ComplaintGroupsRule, ComplaintGroupsRuleDocument } from 'src/complaint/schemas/complaint-groups-rule.schema';
-import { RolesModule } from 'src/roles/roles.module';
+// import { ComplaintGroupsRule, ComplaintGroupsRuleDocument } from 'src/complaint/schemas/complaint-groups-rule.schema';
+// import { RolesModule } from 'src/roles/roles.module';
 import { LogsService } from 'src/logs/logs.service';
-import { UserIdParameterDto } from './dtos/user-id-parameter.dto';
-import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
+// import { UserIdParameterDto } from './dtos/user-id-parameter.dto';
+// import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
 import { InjectRepository } from '@nestjs/typeorm';
 import { GroupEntity } from './entities/group.entity';
 import { Repository } from 'typeorm';
@@ -27,11 +27,11 @@ export class GroupsService {
 
     constructor(
         private readonly logsService : LogsService,
-        @InjectModel(User.name) private userModel : Model<UserDocument> ,
-        @InjectModel(Group.name) private groupModel : Model<GroupDocument> , 
-        @InjectModel(Role.name) private roleModel : Model<RoleDocument>,
-        @InjectModel(Complaint.name) private complaintModel : Model<ComplaintDocument>,
-        @InjectModel(ComplaintGroupsRule.name) private complaintGroupsRule : Model<ComplaintGroupsRuleDocument> ,
+        // @InjectModel(User.name) private userModel : Model<UserDocument> ,
+        // @InjectModel(Group.name) private groupModel : Model<GroupDocument> , 
+        // @InjectModel(Role.name) private roleModel : Model<RoleDocument>,
+        // @InjectModel(Complaint.name) private complaintModel : Model<ComplaintDocument>,
+        // @InjectModel(ComplaintGroupsRule.name) private complaintGroupsRule : Model<ComplaintGroupsRuleDocument> ,
 
 
         @InjectRepository(GroupEntity) private groupRepo : Repository<GroupEntity>,
@@ -188,7 +188,7 @@ export class GroupsService {
     //     return { success: true, group }
     // }
 
-        async getGroupInfoAndUsers(groupId : string){
+    async getGroupInfoAndUsers(groupId : string){
         // if (!isValidObjectId(groupId)) {
         //     throw new BadRequestException('Invalid groupId format');
         // }

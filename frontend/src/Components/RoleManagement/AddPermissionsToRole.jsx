@@ -147,7 +147,7 @@ const AddPermissionsToRole = () => {
                     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
                     .join(' ')}
                 </td>
-                <td className="border border-gray-200 px-5 py-3 text-gray-700">{perm.description}</td>
+                <td className="border border-gray-200 px-5 py-3 text-gray-700">{perm.permission_description}</td>
                 <td className="border border-gray-200 px-5 py-3 text-center space-x-2 flex justify-center items-center">
                   <button
                     onClick={() => toggleSelect(perm.permission_id)}

@@ -1,16 +1,16 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, Type } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { HydratedDocument, Model, Types } from 'mongoose';
-import { User, UserDocument } from 'src/user/schemas/user.schema';
+// import { InjectModel } from '@nestjs/mongoose';
+// import { HydratedDocument, Model, Types } from 'mongoose';
+// import { User, UserDocument } from 'src/user/schemas/user.schema';
 import { AddComplaintDto } from './dtos/add-complaint.dto';
-import { Group, GroupDocument } from 'src/groups/schemas/group.schema';
-import { Complaint, ComplaintDocument } from './schemas/complaint.schema';
+// import { Group, GroupDocument } from 'src/groups/schemas/group.schema';
+// import { Complaint, ComplaintDocument } from './schemas/complaint.schema';
 import {  HandleComplaintInGroupDto } from './dtos/handle-complaint-in-group.dto';
-import { ComplaintGroupsRule } from './schemas/complaint-groups-rule.schema';
-import { stat } from 'fs';
+// import { ComplaintGroupsRule } from './schemas/complaint-groups-rule.schema';
+// import { stat } from 'fs';
 import { sendComplaintEmail } from 'src/utils/send-complaints-email.util';
 import { ChangeComplaintStatusDto } from './dtos/change-complaint-status.dto';
-import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
+// import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
 import { sendEmail } from 'src/utils/email.util';
 import * as nodemailer from 'nodemailer'
 import { ListComplaintsDto } from './dtos/list-complaints.dto';
@@ -60,11 +60,11 @@ export class ComplaintService {
 
     constructor(
         private readonly logsService : LogsService,
-        @InjectModel(Complaint.name) private complaintModel : Model<ComplaintDocument>,
-        @InjectModel(ComplaintGroupsRule.name) private complaintGroupsRule : Model<ComplaintGroupsRule>,
-        @InjectModel(Role.name) private roleModel : Model<RoleDocument>,
-        @InjectModel(User.name) private userModel : Model<UserDocument> ,
-        @InjectModel(Group.name) private groupModel : Model<GroupDocument> ,
+        // @InjectModel(Complaint.name) private complaintModel : Model<ComplaintDocument>,
+        // @InjectModel(ComplaintGroupsRule.name) private complaintGroupsRule : Model<ComplaintGroupsRule>,
+        // @InjectModel(Role.name) private roleModel : Model<RoleDocument>,
+        // @InjectModel(User.name) private userModel : Model<UserDocument> ,
+        // @InjectModel(Group.name) private groupModel : Model<GroupDocument> ,
 
 
         @InjectRepository(UserEntity) private userRepo : Repository<UserEntity>,
@@ -224,12 +224,21 @@ export class ComplaintService {
     async changeComplaintStatus(dto : ChangeComplaintStatusDto){
         const { complaintId, status, userId, groupId } = dto;
 
-        const user = await this.roleModel.findOne({ user: userId });
+        // const user = await this.roleModel.findOne({ user: userId });
+        const user = await this.userRepo.findOne({
+            where : {user_id : Number(userId)},
+            select:{
+                user_id : true ,
+                user_email : true ,
+                user_name : true ,
+                user_role : {role_id : true , role_name : true} ,
+                user_password:false
+            }
+        })
         if (!user) {
             throw new NotFoundException('User role not found');
         }
 
-        // const group = await this.groupModel.findById(groupId);
         const group = await this.groupRepo.findOne({
             where : {group_id : Number(groupId)}
         })
@@ -237,9 +246,7 @@ export class ComplaintService {
             throw new NotFoundException('Group not found');
         }
 
-        // const complaint = await this.complaintModel
-        //     .findById(complaintId)
-        //     .populate('userId');
+        
 
         const complaint = await this.complaintRepo.findOne({
             where : {complaint_id : Number(complaintId)},

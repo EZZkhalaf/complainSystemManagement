@@ -1,23 +1,23 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
-import { User, UserDocument } from 'src/user/schemas/user.schema';
+// import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
+// import { User, UserDocument } from 'src/user/schemas/user.schema';
 import { RegisterDto } from './dtos/register.dto';
 import * as bcrypt from 'bcrypt'
 import * as jwt from 'jsonwebtoken'
 import * as nodemailer from 'nodemailer'
 import { LoginDto } from './dtos/login.dto';
-import { Group, GroupDocument } from 'src/groups/schemas/group.schema';
-import { OTP, OTPDocument } from './schemas/OTP.schema';
+// import { Group, GroupDocument } from 'src/groups/schemas/group.schema';
+// import { OTP, OTPDocument } from './schemas/OTP.schema';
 import { SendOtpDto } from './dtos/send-otp.dto';
 import { sendEmail } from 'src/utils/email.util';
-import { TempSession, TempSessionDocument } from './schemas/tempSession.schema';
+// import { TempSession, TempSessionDocument } from './schemas/tempSession.schema';
 import { v4 as uuidv4 } from 'uuid';
 import { ChangeOtpPasswordDto } from './dtos/change-otp-password.dto';
 import { LogsService } from 'src/logs/logs.service';
 import { Response } from 'express';
-import { Complaint, ComplaintDocument } from 'src/complaint/schemas/complaint.schema';
+// import { Complaint, ComplaintDocument } from 'src/complaint/schemas/complaint.schema';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from 'src/user/entities/user.entity';
 import { MoreThan, Repository } from 'typeorm';
@@ -25,7 +25,7 @@ import { GroupEntity } from 'src/groups/entities/group.entity';
 import { RolesEntity } from 'src/roles/entities/roles.entity';
 import { OTPEntity } from './entities/OTP.entity';
 import { TempSessionEntity } from './entities/tempSession.entity';
-import { Code } from 'typeorm/browser';
+// import { Code } from 'typeorm/browser';
 
 
 interface interfaceUser {
@@ -43,12 +43,12 @@ interface interfaceUser {
 export class AuthService {
     constructor(
         private readonly logsService : LogsService,
-        @InjectModel(User.name) private userModel = Model<UserDocument> ,
-        @InjectModel(Role.name) private roleModel = Model<RoleDocument> ,
-        @InjectModel(Group.name) private groupModel = Model<GroupDocument> ,
-        @InjectModel(OTP.name) private otpModel = Model<OTPDocument> , 
-        @InjectModel(TempSession.name) private tempSessionModel = Model<TempSessionDocument>,
-        @InjectModel(Complaint.name) private complaintModel = Model<ComplaintDocument>,
+        // @InjectModel(User.name) private userModel = Model<UserDocument> ,
+        // @InjectModel(Role.name) private roleModel = Model<RoleDocument> ,
+        // @InjectModel(Group.name) private groupModel = Model<GroupDocument> ,
+        // @InjectModel(OTP.name) private otpModel = Model<OTPDocument> , 
+        // @InjectModel(TempSession.name) private tempSessionModel = Model<TempSessionDocument>,
+        // @InjectModel(Complaint.name) private complaintModel = Model<ComplaintDocument>,
 
 
         @InjectRepository(UserEntity) private userRepo : Repository<UserEntity>,

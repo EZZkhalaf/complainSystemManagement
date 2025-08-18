@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import NavigationBar from '../Components/NavigationBar'
 import { Outlet, useNavigate } from 'react-router-dom'
 import EmployeeSideBar from '../Components/EmployeeComponent/EmployeeSideBar'
@@ -7,6 +7,8 @@ import { useAuthContext } from '../Context/authContext'
 const UserPage = () => {
   const {user} = useAuthContext() ;
   const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  
   useEffect(()=>{
     if(user.role === 'admin'){
       navigate('/adminPage')
@@ -14,9 +16,12 @@ const UserPage = () => {
   },[])
   return (
        <div className="flex flex-col min-h-screen">
-            <NavigationBar />
+            <NavigationBar onMobileSideBarToggle = { () => setSidebarOpen(!sidebarOpen)}/>
             <div className="flex flex-grow">
-                <EmployeeSideBar />
+                <EmployeeSideBar 
+                  isOpen = {sidebarOpen}
+                  onClose = {() => setSidebarOpen(false)}
+                />
                 <div className="flex-grow p-6">
                
                     <Outlet />
