@@ -33,7 +33,7 @@ const AddEmployeeToGroup = () => {
     // Combine both arrays into one list (you can adjust this as needed)
     let combinedUsers = [...data.users];
 
-combinedUsers = combinedUsers.filter(emp => emp.user.user_id !== user.user_id);
+      combinedUsers = combinedUsers.filter(emp => emp.user.user_id !== user.user_id);
     console.log("combined users :  ",combinedUsers)
     setEmployees(combinedUsers);
     setFilteredEmployees(combinedUsers);
