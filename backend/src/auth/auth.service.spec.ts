@@ -14,6 +14,7 @@ import * as jwt from 'jsonwebtoken';
 import * as nodemailer from 'nodemailer';
 import * as sendEmail  from '../utils/email.util';
 import { mock } from 'node:test';
+import { profile } from 'console';
 
 jest.mock("bcrypt", () => ({
   compare : jest.fn(),
@@ -482,5 +483,44 @@ describe('AuthService', () => {
     await expect(service.fetchLoggedInUser(userId)).rejects.toThrow(
       new NotFoundException('User not found')
     )
+  })
+  it("should return the user data when the user id is found", async () => {
+  const fakeUser = {
+    user_id: 123,
+    user_name: "ezz",
+    user_email: "test@gmail.com",
+    profilePicture: "p.jpg",
+    user_role: {
+      role_name: "user",
+      permissions: ["create"],
+    },
+    groups: [
+      {
+        id: 1,
+        group_name: "group",
+      },
+    ],
+    complaints: [{ id: 1, description: "description" }],
+  };
+
+  userRepo.findOne.mockResolvedValue(fakeUser);
+
+  const result = await service.fetchLoggedInUser("123");
+
+  expect(result).toEqual({
+    success: true,
+    message: "User data fetched successfully",
+    user: {
+      _id: 123,
+      name: "ezz",
+      email: "test@gmail.com",
+      profilePicture: "p.jpg",
+      role: "user",
+      permissions: ["create"],
+      group: [{ id: 1, group_name: "group" }],
+      complaints: [{ id: 1, description: "description" }],
+    },
+  });
+
   })
 });

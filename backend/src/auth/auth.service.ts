@@ -340,10 +340,7 @@ export class AuthService {
 
         
 
-        // const groups = await this.groupModel.find({ users: userId });
-
-        // const complaints = await this.complaintModel.find({ userId: userId });
-        // console.log(user)
+        
         return {
             success: true,
             message: 'User data fetched successfully',
@@ -358,7 +355,7 @@ export class AuthService {
             complaints: user.complaints || [],
             },
         };
-        }
+    }
 
 }
 
