@@ -1,7 +1,8 @@
-import { ComplaintEntity } from "src/complaint/entities/complaint.entity";
-import { GroupEntity } from "src/groups/entities/group.entity";
-import { LogsEntity } from "src/logs/entities/logs.entity";
-import { RolesEntity } from "src/roles/entities/roles.entity";
+import { ComplaintEntity } from "../../complaint/entities/complaint.entity";
+import { GroupEntity } from "../../groups/entities/group.entity";
+import { LogsEntity } from "../../logs/entities/logs.entity";
+// import { RolesEntity } from "src/roles/entities/roles.entity";
+import { RolesEntity } from '../../roles/entities/roles.entity';
 import { Column, CreateDateColumn, Entity, ForeignKey, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, Timestamp, Unique } from "typeorm";
 
 

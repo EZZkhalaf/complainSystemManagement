@@ -29,8 +29,8 @@ async function bootstrap() {
     cookieSession({
       name: 'session',
       keys: [process.env.COOKIE_SECRET || 'default_secret_key'],
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      httpOnly: true,  // better security
+      maxAge: 24 * 60 * 60 * 1000, 
+      httpOnly: true,  
       secure: process.env.NODE_ENV === 'production', // send only over HTTPS in prod
     }),
   );
@@ -53,18 +53,18 @@ async function bootstrap() {
     }),
   );
 
-  mongoose.connection.on('connected', () => {
-    console.log('Successfully connected to MongoDB');
-  });
+  // mongoose.connection.on('connected', () => {
+  //   console.log('Successfully connected to MongoDB');
+  // });
 
-  mongoose.connection.on('error', (err) => {
-    console.error('MongoDB connection error:', err);
-  });
+  // mongoose.connection.on('error', (err) => {
+  //   console.error('MongoDB connection error:', err);
+  // });
 
   const dataSource = app.get(DataSource)
   
     if(dataSource.isInitialized){
-    console.log('✅ Connected to Postgres database');
+    console.log('Connected to Postgres database');
     }else{
       console.log("postgres db is not initialized")
     }
@@ -72,6 +72,6 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3000;
   await app.listen(port);
-  console.log(`Server running on http://localhost:${port}/api`);
+  // console.log(`Server running on http://localhost:${port}/api`);
 }
 bootstrap();

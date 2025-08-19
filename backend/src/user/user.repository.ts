@@ -12,6 +12,6 @@ export class UserRepository {
 
 
     async findUserByEmail(email: string) {
-    return this.userRepo.findOne({ where: { user_email : email } });
-  }
+        return this.userRepo.findOne({ where: { user_email : email } });
+    }
 }

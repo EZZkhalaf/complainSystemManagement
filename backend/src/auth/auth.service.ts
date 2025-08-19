@@ -1,31 +1,22 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
-import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
-import { User, UserDocument } from 'src/user/schemas/user.schema';
-import { RegisterDto } from './dtos/register.dto';
-import * as bcrypt from 'bcrypt'
-import * as jwt from 'jsonwebtoken'
-import * as nodemailer from 'nodemailer'
-import { LoginDto } from './dtos/login.dto';
-import { Group, GroupDocument } from 'src/groups/schemas/group.schema';
-import { OTP, OTPDocument } from './schemas/OTP.schema';
-import { SendOtpDto } from './dtos/send-otp.dto';
-import { sendEmail } from 'src/utils/email.util';
-import { TempSession, TempSessionDocument } from './schemas/tempSession.schema';
-import { v4 as uuidv4 } from 'uuid';
-import { ChangeOtpPasswordDto } from './dtos/change-otp-password.dto';
-import { LogsService } from 'src/logs/logs.service';
-import { Response } from 'express';
-import { Complaint, ComplaintDocument } from 'src/complaint/schemas/complaint.schema';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserEntity } from 'src/user/entities/user.entity';
+import * as bcrypt from 'bcrypt';
+import { Response } from 'express';
+import * as jwt from 'jsonwebtoken';
+import * as nodemailer from 'nodemailer';
 import { MoreThan, Repository } from 'typeorm';
-import { GroupEntity } from 'src/groups/entities/group.entity';
-import { RolesEntity } from 'src/roles/entities/roles.entity';
+import { v4 as uuidv4 } from 'uuid';
+import { GroupEntity } from '../groups/entities/group.entity';
+import { LogsService } from '../logs/logs.service';
+import { RolesEntity } from '../roles/entities/roles.entity';
+import { UserEntity } from '../user/entities/user.entity';
+import { sendEmail } from '../utils/email.util';
+import { ChangeOtpPasswordDto } from './dtos/change-otp-password.dto';
+import { LoginDto } from './dtos/login.dto';
+import { RegisterDto } from './dtos/register.dto';
+import { SendOtpDto } from './dtos/send-otp.dto';
 import { OTPEntity } from './entities/OTP.entity';
 import { TempSessionEntity } from './entities/tempSession.entity';
-import { Code } from 'typeorm/browser';
 
 
 interface interfaceUser {
@@ -43,12 +34,7 @@ interface interfaceUser {
 export class AuthService {
     constructor(
         private readonly logsService : LogsService,
-        @InjectModel(User.name) private userModel = Model<UserDocument> ,
-        @InjectModel(Role.name) private roleModel = Model<RoleDocument> ,
-        @InjectModel(Group.name) private groupModel = Model<GroupDocument> ,
-        @InjectModel(OTP.name) private otpModel = Model<OTPDocument> , 
-        @InjectModel(TempSession.name) private tempSessionModel = Model<TempSessionDocument>,
-        @InjectModel(Complaint.name) private complaintModel = Model<ComplaintDocument>,
+        
 
 
         @InjectRepository(UserEntity) private userRepo : Repository<UserEntity>,
@@ -153,7 +139,7 @@ export class AuthService {
 
     //done
     async login (loginDto : LoginDto ) : Promise<any>{
-        try {
+        
             const {email , password} = loginDto;
 
             // const user = await this.userModel.findOne({email:email}).lean() as interfaceUser | null;
@@ -212,10 +198,7 @@ export class AuthService {
                     permissions: tempRole.permissions,
                 },
             };
-        }catch (error) {
-            console.log(error)
-            throw new BadRequestException('error cant login');
-        }
+        
     }
 
     
@@ -263,14 +246,10 @@ export class AuthService {
         };
     }
 
+
+
     async verifyOtp(email : string , otp : string ){
-        // const isCorrect = await this.otpModel.findOne({email , code : otp , expiresAt : {$gt : new Date()}}).sort({createdAt : -1})
-        // console.log(otp)
-        // const isCorrect = await this.otpModel.findOne(
-        //     { email, code: otp, expiresAt: { $gt: new Date() } },
-        //     null,
-        //     { sort: { createdAt: -1 } }
-        // );
+        
 
         const isCorrect = await this.otpRepo.findOne({
             where :{
@@ -287,11 +266,7 @@ export class AuthService {
         }
 
         const resetToken = uuidv4();
-        // const f = await this.tempSessionModel.create({
-        //     email , 
-        //     token : resetToken ,
-        //     expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
-        // })
+
         const f =  this.tempSessionRepo.create({
             email ,
             token : resetToken ,
@@ -299,7 +274,6 @@ export class AuthService {
         })
 
         await this.tempSessionRepo.save(f)
-        // const f2 = await this.otpModel.deleteMany({email})
         await this.otpRepo.delete({email})
         return {
             success: true,
@@ -321,7 +295,8 @@ export class AuthService {
             }
         })
         if(!session || session.expiresAt < new Date()){
-            return { success: false, message: "Session expired or invalid" }
+            // return { success: false, message: "Session expired or invalid" }
+            throw new BadRequestException("Session expired or invalid")
         }
 
         // const user = await this.userModel.findOne({email})
@@ -331,7 +306,8 @@ export class AuthService {
             }
         })
         if (!user) {
-            return { success: false, message: "User not found" }
+            // return { success: false, message: "User not found" }
+            throw new BadRequestException("User not found")
         }
 
         const hashedPassword = await bcrypt.hash(newPassword , 10)
@@ -339,7 +315,6 @@ export class AuthService {
         user.user_password = hashedPassword;
         await this.userRepo.save(user)
 
-        // await this.tempSessionModel.deleteMany({email});
         await this.tempSessionRepo.delete({email})
 
         this.logsService.logAction(user , "Change-Password" , "User" , user.user_id , "Changed the Password using forget password method ")
@@ -365,10 +340,7 @@ export class AuthService {
 
         
 
-        // const groups = await this.groupModel.find({ users: userId });
-
-        // const complaints = await this.complaintModel.find({ userId: userId });
-        // console.log(user)
+        
         return {
             success: true,
             message: 'User data fetched successfully',
@@ -383,7 +355,7 @@ export class AuthService {
             complaints: user.complaints || [],
             },
         };
-        }
+    }
 
 }
 

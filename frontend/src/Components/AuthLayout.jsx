@@ -19,7 +19,7 @@ const AuthLayout = ({ children }) => {
           ${isLogin ? 'md:order-first' : 'md:order-last'}`}
       >
         <h1 className="text-white text-4xl font-bold text-center leading-snug">
-          Employee Management System
+          Complaint Management System
         </h1>
       </motion.div>
 

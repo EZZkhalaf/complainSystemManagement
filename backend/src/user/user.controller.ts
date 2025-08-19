@@ -3,11 +3,11 @@ import { UserService, UserWithRole } from './user.service';
 import { ChangeUserRoleDto } from './dtos/change-user-role.dto';
 import { AddUserToGroupDto } from './dtos/add-user-to-group.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { multerConfig } from 'src/multer.config';
+import { multerConfig } from '../multer.config';
 import { AdminEditUserInfoDto } from './dtos/admin-edit-user-info.dto';
 import type { Response } from 'express';
-import { CheckPermissionGaurd, Permission } from 'src/gaurds/check-permission.gaurd';
-import { CheckTokenGaurd } from 'src/gaurds/check-token-gaurd.gaurd';
+import { CheckPermissionGaurd, Permission } from '../gaurds/check-permission.gaurd';
+import { CheckTokenGaurd } from '../gaurds/check-token-gaurd.gaurd';
 import { permission } from 'process';
 
 @Controller('user')

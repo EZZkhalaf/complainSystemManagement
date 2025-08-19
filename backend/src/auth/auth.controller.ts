@@ -6,7 +6,7 @@ import { SendOtpDto } from './dtos/send-otp.dto';
 import { VerifyOtpDto } from './dtos/verify-otp.dto';
 import { ChangeOtpPasswordDto } from './dtos/change-otp-password.dto';
 import type { Response } from 'express';
-import { CheckTokenGaurd } from 'src/gaurds/check-token-gaurd.gaurd';
+import { CheckTokenGaurd } from '../gaurds/check-token-gaurd.gaurd';
 
 @Controller('auth')
 export class AuthController {

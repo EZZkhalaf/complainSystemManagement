@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useAuthContext } from '../Context/authContext'
 import NavigationBar from '../Components/NavigationBar';
 import { useEffect } from 'react';
@@ -6,8 +6,11 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import AdminSideBar from '../Components/AdminComponents/AdminSideBar';
 
 const AdminPage = () => {
-    const { user , logout } = useAuthContext();
+  const { user , logout } = useAuthContext();
   const navigate = useNavigate()
+
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
 
   useEffect(()=>{
 
@@ -19,9 +22,12 @@ const AdminPage = () => {
   },[user , navigate])
   return (
        <div className="flex flex-col min-h-screen">
-            <NavigationBar />
+            <NavigationBar onMobileSideBarToggle = { () => setSidebarOpen(!sidebarOpen)}/>
             <div className="flex flex-grow">
-                <AdminSideBar />
+                <AdminSideBar 
+                  isOpen = {sidebarOpen}
+                  onClose = {() => setSidebarOpen(false)}
+                />
                 <div className="flex-grow p-6">
                
                     <Outlet />
