@@ -1,27 +1,20 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, Type } from '@nestjs/common';
-// import { InjectModel } from '@nestjs/mongoose';
-// import { HydratedDocument, Model, Types } from 'mongoose';
-// import { User, UserDocument } from 'src/user/schemas/user.schema';
+
 import { AddComplaintDto } from './dtos/add-complaint.dto';
-// import { Group, GroupDocument } from 'src/groups/schemas/group.schema';
-// import { Complaint, ComplaintDocument } from './schemas/complaint.schema';
+
 import {  HandleComplaintInGroupDto } from './dtos/handle-complaint-in-group.dto';
-// import { ComplaintGroupsRule } from './schemas/complaint-groups-rule.schema';
-// import { stat } from 'fs';
-import { sendComplaintEmail } from 'src/utils/send-complaints-email.util';
+import { sendComplaintEmail } from '../utils/send-complaints-email.util';
 import { ChangeComplaintStatusDto } from './dtos/change-complaint-status.dto';
-// import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
-import { sendEmail } from 'src/utils/email.util';
 import * as nodemailer from 'nodemailer'
 import { ListComplaintsDto } from './dtos/list-complaints.dto';
-import { LogsService } from 'src/logs/logs.service';
+import { LogsService } from '../logs/logs.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserEntity } from 'src/user/entities/user.entity';
+import { UserEntity } from '../user/entities/user.entity';
 import { DeepPartial, Repository } from 'typeorm';
 import { ComplaintEntity, ComplaintStatus, ComplaintType } from './entities/complaint.entity';
-import { GroupEntity } from 'src/groups/entities/group.entity';
+import { GroupEntity } from '../groups/entities/group.entity';
 import { ComplaintGroupsRuleEntity } from './entities/complaint-groups-rule.entity';
-import { RolesEntity } from 'src/roles/entities/roles.entity';
+import { RolesEntity } from '../roles/entities/roles.entity';
 import { plainToInstance } from 'class-transformer';
 import { PaginatedResponseDto } from './dtos/paginated-response.dto';
 import { ComplaintOutputDto } from './dtos/complaint-output.dto';
@@ -60,13 +53,6 @@ export class ComplaintService {
 
     constructor(
         private readonly logsService : LogsService,
-        // @InjectModel(Complaint.name) private complaintModel : Model<ComplaintDocument>,
-        // @InjectModel(ComplaintGroupsRule.name) private complaintGroupsRule : Model<ComplaintGroupsRule>,
-        // @InjectModel(Role.name) private roleModel : Model<RoleDocument>,
-        // @InjectModel(User.name) private userModel : Model<UserDocument> ,
-        // @InjectModel(Group.name) private groupModel : Model<GroupDocument> ,
-
-
         @InjectRepository(UserEntity) private userRepo : Repository<UserEntity>,
         @InjectRepository(ComplaintEntity) private complaintRepo : Repository<ComplaintEntity>,
         @InjectRepository(GroupEntity) private groupRepo : Repository<GroupEntity>,
@@ -117,13 +103,9 @@ export class ComplaintService {
 
     
 
-    ///////
     async handleComplaintInGroup(id: string, dto: HandleComplaintInGroupDto) {
         const { userId, status } = dto;
 
-        // const complaint = await this.complaintModel
-        // .findById(id)
-        // .populate('userId');
 
         const complaint =  await this.complaintRepo.findOne({
             where : {complaint_id : Number(id)},
@@ -131,18 +113,15 @@ export class ComplaintService {
         })
         if (!complaint) throw new NotFoundException('Complaint not found');
 
-        // const user = await this.userModel.findById(userId);
         const user = await this.userRepo.findOne({
             where : {user_id : Number(userId)}
         })
-        // const rule = await this.complaintGroupsRule.findOne();
         const rule = await this.complaintGroupsRuleRepo.findOne({
             order: { id: "ASC" } ,
             where:{} ,
-            relations:['groups'] // or whatever primary column exists
+            relations:['groups'] 
         });
 
-        // console.log(complaint)
         const groups = rule?.groups;
         const currentStep = complaint.groupsQueue.length;
 
@@ -176,9 +155,7 @@ export class ComplaintService {
         complaint.groupsQueue.push(currentGroup);
         if (currentStep === groups.length - 1) {
             complaint.complaint_status = ComplaintStatus.RESOLVED;
-            // await complaint.save();
             await this.complaintRepo.save(complaint)
-            // const complaintId = (complaint._id as Types.ObjectId).toString()
             await sendComplaintEmail(userDoc.user_email, 'Resolved', userDoc.user_name);
             await this.logsService.logAction(user, 'Resolve', 'Complaint', complaint.complaint_id, `Final group resolved the complaint.`);
             return {
@@ -188,10 +165,8 @@ export class ComplaintService {
             };
         } else {
             complaint.complaint_status = ComplaintStatus.IN_PROGRESS;
-            // await complaint.save();
             await this.complaintRepo.save(complaint)
-            // const complaintId = (complaint._id as Types.ObjectId).toString()
-            await this.logsService.logAction(user, 'Accept', 'Complaint', complaint.complaint_id, `Complaint accepted by group ${currentGroup}.`);
+            await this.logsService.logAction(user, 'Accept', 'Complaint', complaint.complaint_id, `Complaint accepted by one of the groups in the rule.`);
             return {
                 success : true,
                 status: 200,
@@ -203,11 +178,9 @@ export class ComplaintService {
         if (status === 'reject') {
             complaint.complaint_status = ComplaintStatus.REJECTED;
             complaint.groupsQueue.push(currentGroup);
-            // await complaint.save();
             await this.complaintRepo.save(complaint)
             await sendComplaintEmail(userDoc.user_email, 'rejected', userDoc.user_name);
-            // const complaintId = (complaint._id as Types.ObjectId).toString()
-            await this.logsService.logAction(user, 'Reject', 'Complaint', complaint.complaint_id, `Complaint Rejected by group ${currentGroup}.`);
+            await this.logsService.logAction(user, 'Reject', 'Complaint', complaint.complaint_id, `Complaint Rejected by the complaint groups rule .`);
             return {
                 success : true ,
                 status: 200,
@@ -310,7 +283,7 @@ export class ComplaintService {
         };
     }
 
-    //done / secure
+   
     async listComplaints(dto: ListComplaintsDto): Promise<any> {
         const { page , limit } = dto;
 
@@ -417,40 +390,40 @@ export class ComplaintService {
 
 
 
-async deleteComplaint(userId: string, complaintId: string) {
-    const parsedComplaintId = Number(complaintId);
-    const parsedUserId = Number(userId);
+    async deleteComplaint(userId: string, complaintId: string) {
+        const parsedComplaintId = Number(complaintId);
+        const parsedUserId = Number(userId);
 
-    
-    if (isNaN(parsedComplaintId) || isNaN(parsedUserId)) {
-        throw new BadRequestException("Invalid userId or complaintId");
+        
+        if (isNaN(parsedComplaintId) || isNaN(parsedUserId)) {
+            throw new BadRequestException("Invalid userId or complaintId");
+        }
+
+        const complaint = await this.complaintRepo.findOne({
+            where: { complaint_id: parsedComplaintId },
+            relations: ['creator_user'] // needed for isOwner check
+        });
+        if (!complaint) {
+            throw new NotFoundException("complaint not found");
+        }
+
+        const user = await this.rolesRepo.findOne({
+            where: { users: { user_id: parsedUserId } },
+            relations: ['users']
+        });
+        if (!user) {
+            throw new NotFoundException("user not found");
+        }
+
+        const isOwner = complaint.creator_user.user_id === parsedUserId;
+
+        await this.complaintRepo.delete(parsedComplaintId);
+
+        return {
+            success: true,
+            message: `Complaint deleted successfully${isOwner ? " (owned by user)" : ""}`
+        };
     }
-
-    const complaint = await this.complaintRepo.findOne({
-        where: { complaint_id: parsedComplaintId },
-        relations: ['creator_user'] // needed for isOwner check
-    });
-    if (!complaint) {
-        throw new NotFoundException("complaint not found");
-    }
-
-    const user = await this.rolesRepo.findOne({
-        where: { users: { user_id: parsedUserId } },
-        relations: ['users']
-    });
-    if (!user) {
-        throw new NotFoundException("user not found");
-    }
-
-    const isOwner = complaint.creator_user.user_id === parsedUserId;
-
-    await this.complaintRepo.delete(parsedComplaintId);
-
-    return {
-        success: true,
-        message: `Complaint deleted successfully${isOwner ? " (owned by user)" : ""}`
-    };
-}
 
 
 
