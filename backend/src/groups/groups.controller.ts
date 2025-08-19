@@ -6,8 +6,8 @@ import { RemoveUserFromGroupDto } from './dtos/remove-user-from-group.dto';
 import { ListGroupComplaintsDto } from './dtos/list-group-complaints.dto';
 import { SearchGroupDto } from './dtos/search-group.dto';
 import { AddGroupToRuleDto } from './dtos/add-group-to-rule.dto';
-import { CheckTokenGaurd } from 'src/gaurds/check-token-gaurd.gaurd';
-import { CheckPermissionGaurd, Permission } from 'src/gaurds/check-permission.gaurd';
+import { CheckTokenGaurd } from '../gaurds/check-token-gaurd.gaurd';
+import { CheckPermissionGaurd, Permission } from '../gaurds/check-permission.gaurd';
 
 @Controller('group')
 export class GroupsController {
