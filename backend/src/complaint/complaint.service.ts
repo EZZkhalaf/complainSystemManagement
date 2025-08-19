@@ -288,7 +288,6 @@ export class ComplaintService {
         const { page , limit } = dto;
 
         const skip = (page - 1) * limit;
-        // const totalCount = await this.complaintModel.countDocuments();
         const totalCount = await this.complaintRepo.count()
 
         const complaints = await this.complaintRepo.find({
@@ -302,12 +301,6 @@ export class ComplaintService {
         });
 
 
-        // return {
-        //     success: true,
-        //     complaints,
-        //     currentPage: page,
-        //     totalPages: Math.ceil(totalCount / limit),
-        // };
 
         return plainToInstance(
             PaginatedResponseDto , {
@@ -317,7 +310,7 @@ export class ComplaintService {
                         excludeExtraneousValues : true
                     })
                 ),
-                currenPage : page , 
+                currentPage : page , 
                 totalPages : Math.ceil(totalCount/limit),
                 totalCount
             } ,
@@ -327,10 +320,9 @@ export class ComplaintService {
 
     async getComplaintInfo(id : string) : Promise<{ success: boolean; complaint: ComplaintOutputDto }>{
         
-        if(!id)
+        if(!id.trim())
             throw new BadRequestException("please provide the correct id")
 
-        // const complaint = await this.complaintModel.findById(id).populate("userId" , "-password");
         const complaint = await this.complaintRepo.findOne({
             where :{complaint_id : Number(id)},
             relations:['creator_user'],
