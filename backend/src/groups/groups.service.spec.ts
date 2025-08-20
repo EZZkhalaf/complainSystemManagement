@@ -29,6 +29,12 @@ describe('GroupsService', () => {
     remove : jest.Mock,
     createQueryBuilder:jest.Mock
   }
+  let complaintGroupsRuleRepo : {
+    findOne : jest.Mock ,
+    find : jest.Mock,
+    create : jest.Mock , 
+    save : jest.Mock
+  }
 
   let usersRepo : {
     findOne : jest.Mock ,
@@ -62,6 +68,13 @@ describe('GroupsService', () => {
     complaintsRepo = {
       createQueryBuilder : jest.fn()
     }
+
+    complaintGroupsRuleRepo = {
+      findOne : jest.fn() ,
+      find : jest.fn() ,
+      create : jest.fn() , 
+      save : jest.fn()
+    }
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GroupsService,
@@ -72,7 +85,7 @@ describe('GroupsService', () => {
         { provide: getRepositoryToken(OTPEntity), useValue: {} },
         { provide: getRepositoryToken(TempSessionEntity), useValue: {} },
         { provide: getRepositoryToken(ComplaintEntity), useValue: complaintsRepo },
-        { provide: getRepositoryToken(ComplaintGroupsRuleEntity), useValue: {} },
+        { provide: getRepositoryToken(ComplaintGroupsRuleEntity), useValue: complaintGroupsRuleRepo },
       ],
     }).compile();
 
@@ -579,5 +592,380 @@ describe('GroupsService', () => {
 
     expect(groupsRepo.createQueryBuilder).toHaveBeenCalledWith("group_entity")
     expect(queryBuild.where).toHaveBeenCalledWith('group_entity.group_name ILIKE :search', { search: `%${search}%` })
+  })
+
+  //add group to rule 
+  it("should throw an error when the gorup id or user Id are not a number " , async() =>{
+    const userId = "aaa"
+    const groupId = "bb"
+
+    await expect(service.addGroupToRule(userId , "1")).rejects.toThrow(
+      new BadRequestException("Invalid groupId or userId")
+    )
+    await expect(service.addGroupToRule("1" , groupId)).rejects.toThrow(
+      new BadRequestException("Invalid groupId or userId")
+    )
+  })
+  it("should throw not found error when the user not found " , async() =>{
+    const groupId = "12"
+    const userId = "1"
+
+    usersRepo.findOne.mockResolvedValue(null);
+
+    await expect(service.addGroupToRule(userId , groupId)).rejects.toThrow(
+      new NotFoundException("user not found")
+    )
+
+    expect(usersRepo.findOne).toHaveBeenCalledWith(
+      {
+        where :{user_id : Number(userId)}
+      }
+    )
+  })
+  it('should throw not found error when the group is not found ' , async()=>{
+    const groupId = "2"
+    const userId = '1'
+    const fakeUser = {
+      user_id : 1 ,
+      user_name : "ezz" ,
+      user_email : "ezz@gmail.com"
+    }
+    usersRepo.findOne.mockResolvedValue(fakeUser)
+    groupsRepo.findOne.mockResolvedValue(null)
+
+    await expect(service.addGroupToRule(userId , groupId)).rejects.toThrow(
+      new NotFoundException("group not found")
+    )
+    expect(usersRepo.findOne).toHaveBeenCalledWith(
+      {
+        where :{user_id : Number(userId)}
+      }
+    )
+    expect(groupsRepo.findOne).toHaveBeenCalledWith(
+      {
+        where : { group_id : Number(groupId)}
+      }
+    )
+  })
+  it("should create a new rule if it not exists" , async() =>{
+    const groupId = "2"
+    const userId = '1'
+    const fakeUser = {
+      user_id : 1 ,
+      user_name : "ezz" ,
+      user_email : "ezz@gmail.com"
+    }
+    const fakeGroup = {
+      group_id : 1, 
+      group_name : "HR",
+      users : []
+    }
+
+    const fakeRule = {
+      id : 1 ,
+      groups : [fakeGroup] ,
+      created_at : new Date()
+    }
+    usersRepo.findOne.mockResolvedValue(fakeUser)
+    groupsRepo.findOne.mockResolvedValue(fakeGroup)
+    complaintGroupsRuleRepo.findOne.mockResolvedValue(null)
+    complaintGroupsRuleRepo.create.mockReturnValue(fakeRule)
+    complaintGroupsRuleRepo.save.mockResolvedValue(true)
+
+    const result = await service.addGroupToRule(userId , groupId)
+    expect(result.success).toBe(true);
+    expect(result.rule).toMatchObject(fakeRule )
+
+
+    expect(usersRepo.findOne).toHaveBeenCalledWith(
+      {
+        where :{user_id : Number(userId)}
+      }
+    )
+    expect(groupsRepo.findOne).toHaveBeenCalledWith(
+      {
+        where : { group_id : Number(groupId)}
+      }
+    )
+    expect(complaintGroupsRuleRepo.findOne).toHaveBeenCalledWith(
+      {
+        where :{},
+        relations: ['groups']
+      }
+    )
+    expect(complaintGroupsRuleRepo.create).toHaveBeenCalledWith(
+      {
+        groups: [fakeGroup]
+      }
+    )
+  })
+  it("should throw error when the group is already in the rule " , async() =>{
+    const groupId = "2"
+    const userId = '1'
+    const fakeUser = {
+      user_id : 1 ,
+      user_name : "ezz" ,
+      user_email : "ezz@gmail.com"
+    }
+    const fakeGroup = {
+      group_id : 2, 
+      group_name : "HR",
+      users : []
+    }
+
+    const fakeRule = {
+      id : 1 ,
+      groups : [fakeGroup] ,
+      created_at : new Date()
+    }
+    usersRepo.findOne.mockResolvedValue(fakeUser)
+    groupsRepo.findOne.mockResolvedValue(fakeGroup)
+    complaintGroupsRuleRepo.findOne.mockResolvedValue(fakeRule)
+    // complaintGroupsRuleRepo.create.mockReturnValue(fakeRule)
+    // complaintGroupsRuleRepo.save.mockResolvedValue(true)
+
+    const result = await service.addGroupToRule(userId , groupId)
+    expect(result.success).toBe(false);
+    expect(result.message).toEqual("group already in the complaint groups sequence"  )
+
+
+    expect(usersRepo.findOne).toHaveBeenCalledWith(
+      {
+        where :{user_id : Number(userId)}
+      }
+    )
+    expect(groupsRepo.findOne).toHaveBeenCalledWith(
+      {
+        where : { group_id : Number(groupId)}
+      }
+    )
+    expect(complaintGroupsRuleRepo.findOne).toHaveBeenCalledWith(
+      {
+        where :{},
+        relations: ['groups']
+      }
+    )
+    
+
+  })
+  it("should add the roup to the rule and then add the log and then return success" , async() =>{
+    const groupId = "2"
+    const userId = '1'
+    const fakeUser = {
+      user_id : 1 ,
+      user_name : "ezz" ,
+      user_email : "ezz@gmail.com"
+    }
+    const fakeGroup = {
+      group_id : 2, 
+      group_name : "HR",
+      users : []
+    }
+
+    const fakeRule = {
+      id : 1 ,
+      groups : [] ,
+      created_at : new Date()
+    }
+    usersRepo.findOne.mockResolvedValue(fakeUser)
+    groupsRepo.findOne.mockResolvedValue(fakeGroup)
+    complaintGroupsRuleRepo.findOne.mockResolvedValue(fakeRule)
+    complaintGroupsRuleRepo.save.mockResolvedValue(fakeRule)
+    logsService.logAction(
+      fakeUser,
+      "Edit-Rule",
+      "Rule",
+      fakeRule.id,
+      `The User Has Added Group ${fakeGroup.group_name} to the Rule`
+    )
+    const result = await service.addGroupToRule(userId , groupId)
+    expect(result.success).toBe(true);
+    expect(result.rule).toEqual(fakeRule)
+    expect(result.groupsSequence).toMatchObject(fakeRule.groups)
+
+    expect(usersRepo.findOne).toHaveBeenCalledWith(
+      {
+        where :{user_id : Number(userId)}
+      }
+    )
+    expect(groupsRepo.findOne).toHaveBeenCalledWith(
+      {
+        where : { group_id : Number(groupId)}
+      }
+    )
+    expect(complaintGroupsRuleRepo.findOne).toHaveBeenCalledWith(
+      {
+        where :{},
+        relations: ['groups']
+      }
+    )
+    
+
+  })
+
+
+  //remove group form rule 
+  it("should reutrn a not found error when the user not found " , async()=>{
+    const id = "1" 
+    const groupId = "2"
+    usersRepo.findOne.mockResolvedValue(null);
+    
+    await expect(service.removeGroupFromRule(id , groupId)).rejects.toThrow(
+      new NotFoundException("user not found")
+    )
+    expect(usersRepo.findOne).toHaveBeenCalledWith(
+      {
+        where : {user_id : Number(id)}
+      }
+    )
+  })
+  it("should throw not found error when the group not found" , async() =>{
+    const id = "1" 
+    const groupId = "2"
+    const fakeUser = {
+      user_id : 1 , 
+      user_name : "ezz",
+      user_email : "ezz@gmail.com"
+    }
+    usersRepo.findOne.mockResolvedValue(fakeUser);
+    groupsRepo.findOne.mockResolvedValue(null)
+    
+    await expect(service.removeGroupFromRule(id , groupId)).rejects.toThrow(
+      new NotFoundException("group not found")
+    )
+    expect(usersRepo.findOne).toHaveBeenCalledWith(
+      {
+        where : {user_id : Number(id)}
+      }
+    )
+    expect(groupsRepo.findOne).toHaveBeenCalledWith(
+      {
+        where : {group_id : Number(groupId)}
+      }
+    )
+  })
+  it("should throw not found error when the rule not found" , async() =>{
+    const id = "1" 
+    const groupId = "2"
+    const fakeUser = {
+      user_id : 1 , 
+      user_name : "ezz",
+      user_email : "ezz@gmail.com"
+    }
+    const fakeGroup = {
+      groupid : 1, 
+      group_name : "HR" , 
+      users : [fakeUser]
+    }
+    usersRepo.findOne.mockResolvedValue(fakeUser);
+    groupsRepo.findOne.mockResolvedValue(fakeGroup)
+    complaintGroupsRuleRepo.findOne.mockResolvedValue(null)
+
+    await expect(service.removeGroupFromRule(id , groupId)).rejects.toThrow(
+      new NotFoundException("rule not found")
+    )
+    expect(usersRepo.findOne).toHaveBeenCalledWith(
+      {
+        where : {user_id : Number(id)}
+      }
+    )
+    expect(groupsRepo.findOne).toHaveBeenCalledWith(
+      {
+        where : {group_id : Number(groupId)}
+      }
+    )
+    expect(complaintGroupsRuleRepo.findOne).toHaveBeenCalledWith(
+      {
+        where: { groups: { group_id: Number(groupId) } },
+        relations: ["groups"]
+      }
+    )
+  })
+  it("should remove the group from rule and save and then add lg and return success" , async() =>{
+    const id = "1" 
+    const groupId = "2"
+    const fakeUser = {
+      user_id : 1 , 
+      user_name : "ezz",
+      user_email : "ezz@gmail.com"
+    }
+    const fakeGroup = {
+      group_id : 1, 
+      group_name : "HR" , 
+      users : [fakeUser]
+    }
+    const fakeRule = {
+      id : 1, 
+      groups : [fakeGroup],
+      created_at : new Date()
+    }
+    usersRepo.findOne.mockResolvedValue(fakeUser);
+    groupsRepo.findOne.mockResolvedValue(fakeGroup)
+    complaintGroupsRuleRepo.findOne.mockResolvedValue(fakeRule)
+    complaintGroupsRuleRepo.save.mockResolvedValue(fakeRule)
+    logsService.logAction(
+            fakeUser,
+            "Edit-Rule",
+            "Rule",
+            fakeRule.id,
+            `The User Has Removed Group ${fakeGroup.group_name} from Rule`   
+    )
+    
+    const result = await service.removeGroupFromRule(id , groupId)
+    expect(result.success ).toBe(true);
+    expect(result.rule).toMatchObject(fakeRule)
+    expect(result.groupsSequence).toMatchObject(fakeRule.groups)
+
+    expect(usersRepo.findOne).toHaveBeenCalledWith(
+      {
+        where : {user_id : Number(id)}
+      }
+    )
+    expect(groupsRepo.findOne).toHaveBeenCalledWith(
+      {
+        where : {group_id : Number(groupId)}
+      }
+    )
+    expect(complaintGroupsRuleRepo.findOne).toHaveBeenCalledWith(
+      {
+        where: { groups: { group_id: Number(groupId) } },
+        relations: ["groups"]
+      }
+    )
+  })
+
+  //get rules 
+  it("should reutrn all the rules in the db with their groups" , async() =>{
+    const fakeRule = 
+      {
+        id : 1 , 
+        groups : [
+          {
+            group_id : 1 ,
+            group_name : "HR" ,
+            users : [
+              {
+                user_id : 1 ,
+                user_name : "ezz"
+              }
+            ]
+          }
+        ],
+        created_at : new Date()
+      }
+    
+
+    complaintGroupsRuleRepo.find.mockResolvedValue([fakeRule]);
+
+    const result = await service.getRules()
+    expect(result.success).toBe(true);
+    expect(result.rule).toMatchObject(fakeRule)
+
+    expect(complaintGroupsRuleRepo.find).toHaveBeenCalledWith(
+      {
+        relations: ['groups', 'groups.users'],
+        take: 1,
+      }
+    )
   })
 })

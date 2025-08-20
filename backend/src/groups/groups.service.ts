@@ -243,7 +243,6 @@ export class GroupsService {
 
 
    
-//you stopped hee for unit testing 
     async addGroupToRule(userId: string, groupId: string) {
         const userIdNum = Number(userId);
         const groupIdNum = Number(groupId);

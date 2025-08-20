@@ -97,11 +97,7 @@ export class ComplaintService {
             success: true,
             message: 'Complaint added successfully',
         };
-    }
-
-
-
-    
+    } 
 
     async handleComplaintInGroup(id: string, dto: HandleComplaintInGroupDto) {
         const { userId, status } = dto;
@@ -320,7 +316,7 @@ export class ComplaintService {
 
     async getComplaintInfo(id : string) : Promise<{ success: boolean; complaint: ComplaintOutputDto }>{
         
-        if(!id.trim())
+        if(!id.trim() || isNaN(Number(id)))
             throw new BadRequestException("please provide the correct id")
 
         const complaint = await this.complaintRepo.findOne({
