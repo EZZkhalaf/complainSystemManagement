@@ -7,7 +7,7 @@ export class AddPermissionsToRoleDto {
   // @IsMongoId({ each: true })
   permissionsIds: string[];
 
-  @IsString()
+  // @IsString()
   // @IsMongoId()
   roleId: string;
 }

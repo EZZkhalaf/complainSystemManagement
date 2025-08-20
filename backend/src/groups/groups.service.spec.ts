@@ -564,6 +564,7 @@ describe('GroupsService', () => {
             where : {group_id : Number(groupId)},
             relations:['users']
     })
+    
     expect(complaintsRepo.createQueryBuilder).toHaveBeenCalledWith('complaint_info')
     expect(queryBuild.innerJoin).toHaveBeenCalledWith("complaint_info.groupsQueue", "group_entity")
     expect(queryBuild.where).toHaveBeenCalledWith("group_entity.group_id = :groupId", { groupId: Number(groupId)})    
@@ -748,7 +749,7 @@ describe('GroupsService', () => {
     
 
   })
-  it("should add the roup to the rule and then add the log and then return success" , async() =>{
+  it("should add the group to the rule and then add the log and then return success" , async() =>{
     const groupId = "2"
     const userId = '1'
     const fakeUser = {

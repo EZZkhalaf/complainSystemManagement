@@ -3,9 +3,8 @@ import { RolesService } from './roles.service';
 import { CreatePermissionDto } from './dtos/create-permissions.dto';
 import { AddPermissionsToRoleDto } from './dtos/add-permissions-to-role.dto';
 import { CreateRoleDto } from './dtos/create-role.dto';
-import { CheckTokenGaurd } from 'src/gaurds/check-token-gaurd.gaurd';
-import { CheckPermissionGaurd, Permission } from 'src/gaurds/check-permission.gaurd';
-import { PermissionEntity } from './entities/permission.entity';
+import { CheckTokenGaurd } from '../gaurds/check-token-gaurd.gaurd';
+import { CheckPermissionGaurd, Permission } from '../gaurds/check-permission.gaurd';
 
 @Controller('role')
 export class RolesController {

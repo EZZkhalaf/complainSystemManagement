@@ -1,37 +1,21 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-// import { InjectModel } from '@nestjs/mongoose';
-// import { Role, RoleDocument } from './schemas/role.schema';
-// import { isValidObjectId, Model, Types } from 'mongoose';
-// import { Permission, PermissionDocument } from './schemas/permission.schema';
-// import { PermissionDto } from './dtos/permissions.dto';
 import { AddPermissionsToRoleDto } from './dtos/add-permissions-to-role.dto';
-// import { NotFoundError } from 'rxjs';
 import { LogsService } from '../logs/logs.service';
-// import { User, UserDocument } from 'src/user/schemas/user.schema';
 import { CreatePermissionDto } from './dtos/create-permissions.dto';
-// import { RoleRepository } from './roles.repository';
 import { RolesEntity } from './entities/roles.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { PermissionEntity } from './entities/permission.entity';
 import { PermissionRepository } from './permission.repository';
-// import { RolePaermissionEntity } from './entities/role-permission.entity';
 
 @Injectable()
 export class RolesService {
     constructor(
         private readonly logsService : LogsService,
-        // @InjectModel(Role.name) private roleModel : Model<RoleDocument> ,
-        // @InjectModel(Permission.name) private permissionModel : Model<PermissionDocument>,
-        // @InjectModel(User.name) private userModel : Model<UserDocument> ,
-
-
 
         @InjectRepository(RolesEntity) private readonly rolesRepo : Repository<RolesEntity>,
         @InjectRepository(PermissionEntity) private readonly permissionRepo1 : Repository<PermissionEntity>,
-        private readonly permissionRepo : PermissionRepository ,
-        // @InjectRepository(RolePaermissionEntity) private readonly rolePermissionRepo : Repository<RolePaermissionEntity>
-
+        // private readonly permissionRepo : PermissionRepository 
     ){}
 
 
@@ -65,7 +49,6 @@ export class RolesService {
     }
 
     async getRoles(){
-        // const roles = await this.roleModel.find().populate("permissions")
         const roles = await this.rolesRepo
             .createQueryBuilder("role_info")
             .leftJoinAndSelect("role_info.permissions", "permission_info")
@@ -78,7 +61,7 @@ export class RolesService {
 
 
     async addPermissions(user: any, permissions: CreatePermissionDto[]) {
-        try {
+       
             if (!Array.isArray(permissions)) {
                 permissions = [permissions]
             }
@@ -142,10 +125,7 @@ export class RolesService {
                 message: 'New permissions added successfully',
                 data: inserted,
             };
-        } catch (err) {
-            console.error(err);
-            throw new InternalServerErrorException('Internal server error');
-        }
+        
     }
 
 
@@ -160,7 +140,7 @@ export class RolesService {
             throw new NotFoundException('Permission not found');
         }
 
-        // 2. Remove the permission from all roles that have it
+        
         const rolesWithPermission = await this.rolesRepo.find({
             relations: ['permissions'],
             where: { permissions: { permission_id: Number(id) } },
@@ -173,7 +153,6 @@ export class RolesService {
             await this.rolesRepo.save(role);
         }
 
-        // 3. Delete the permission
         await this.permissionRepo1.delete(id);
 
         await this.logsService.logAction(
@@ -201,10 +180,9 @@ export class RolesService {
         const {permissionsIds , roleId} = dto;
 
         const user = req.user;
-        if (!Array.isArray(permissionsIds) || !roleId)
+        if (!Array.isArray(permissionsIds) || !roleId || isNaN(Number(roleId)))
             throw new BadRequestException("Missing or invalid 'permissionsIds' array or 'roleId'")
 
-        // const role = await this.roleModel.findById(roleId).populate("permissions")
 
         const role = await this.rolesRepo.findOne({
             where : {role_id : Number(roleId)},
@@ -213,10 +191,6 @@ export class RolesService {
         if(!role)
             throw new NotFoundException("role not found ")
 
-        // const validPermissions = await this.permissionModel.find({
-        //     _id : {$in : permissionsIds}
-        // })
-
         const validPermissions = await this.permissionRepo1.find({
             where : {permission_id : In(permissionsIds)}
         })
@@ -224,10 +198,6 @@ export class RolesService {
             throw new BadRequestException("One or more permission IDs are invalid")
 
 
-        // const updatedRole = await this.roleModel.findByIdAndUpdate(roleId , 
-        //     {permissions : permissionsIds},
-        //     {new : true}
-        // )
 
         role.permissions = validPermissions
         const updatedRole = await this.rolesRepo.save(role)
@@ -243,15 +213,16 @@ export class RolesService {
     }
 
     async getRoleById(id : string){
-        // if(!isValidObjectId(id)){
-        //     throw new BadRequestException("id is invalid so search")
-        // }
-        // const role = await this.roleModel.findById(id).populate("permissions")
         const role = await this.rolesRepo.findOne({
             where : {role_id : Number(id)},
             relations:['permissions']
         })
-        return {success: true , role}
+        if(!role){
+            throw new NotFoundException("role not found")
+        }
+        else{
+            return {success: true , role}
+        }
     }
 
     async deleteRole(id : string , req : any){
