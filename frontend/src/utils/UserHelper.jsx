@@ -100,6 +100,25 @@ export const fetchAdminSummaryHook = async(id) =>{
 }
 
 
+export const fetchSummaryChart = async (id)=>{
+    try {
+        const response = await fetch(`http://localhost:5000/api/user/getSummaryCharts/${id}` , {
+            credentials:"include",
+        })
+
+        const data =await response.json();
+        if(data.success){
+            return data
+        }else{
+            toast.error(data.message);
+            return
+        }
+    } catch (error) {
+        console.log(error)
+        throw new Error(error)   
+    }
+}
+
 export const editUserInfoHook = async(formdata , id )=>{
     try {
         const response = await fetch(`http://localhost:5000/api/user/editInfo/${id}` , {

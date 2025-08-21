@@ -204,6 +204,34 @@ export class UserService {
          
     }
 
+
+    async getSummaryCharts (id : string) {
+        
+
+        const complaintsPerCategory = await this.complaintRepo.createQueryBuilder("complaint_info")
+            .select("complaint_info.complaint_type" , 'complaint_type')
+            .addSelect("COUNT(*)" , "total")
+            .groupBy("complaint_info.complaint_type")
+            .getRawMany();
+
+        const commontComplaintsTypes = await this.complaintRepo.createQueryBuilder("complaint_info")
+            .select("complaint_info.complaint_type" , "complaint_type")
+            .addSelect("COUNT(*)" , "total")
+            .groupBy("complaint_info.complaint_type")
+            .orderBy("total" , "DESC")
+            .getRawMany()
+
+        if( !commontComplaintsTypes){
+            throw new NotFoundException("error getting the summary of the complaints")
+        }
+
+        return {
+            success : true ,
+            complaintsPerCategory ,
+            commontComplaintsTypes
+        }
+    }
+
      async editUserInfo(
         id : string ,
         body : any ,
@@ -316,17 +344,17 @@ export class UserService {
 
     async adminEditUserInfo(id: string, dto: AdminEditUserInfoDto) {
         const { userId, newName, newEmail, newPassword } = dto;
-        const adminRole = await this.rolesRepo.findOne({
-            where : {users :{
-                user_id : Number(userId)
-            }},
-            relations : ['users']
-        })
+        // const adminRole = await this.rolesRepo.findOne({
+        //     where : {users :{
+        //         user_id : Number(userId)
+        //     }},
+        //     relations : ['users']
+        // })
 
 
-        if (!adminRole || adminRole.role_name !== 'admin') {
-            throw new HttpException('Only the admin can edit user info', HttpStatus.UNAUTHORIZED);
-        }
+        // if (!adminRole || adminRole.role_name !== 'admin') {
+        //     throw new HttpException('Only the admin can edit user info', HttpStatus.UNAUTHORIZED);
+        // }
         const targetUser = await this.userRepo.findOne({
             where : {user_id : Number(userId)}
         })

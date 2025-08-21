@@ -1,3 +1,4 @@
+import { LeavesEntity } from "../../leaves/entities/leaves.entity";
 import { ComplaintEntity } from "../../complaint/entities/complaint.entity";
 import { GroupEntity } from "../../groups/entities/group.entity";
 import { LogsEntity } from "../../logs/entities/logs.entity";
@@ -53,4 +54,9 @@ export class UserEntity{
     @OneToMany(() => LogsEntity , (log) => log.user)
     logs : LogsEntity[]
 
+    @OneToMany(()=> LeavesEntity , (leave)=> leave.leave_user)
+    own_leaves : LeavesEntity[]
+
+    @OneToMany(()=>LeavesEntity , (leave) => leave.leave_handler)
+    handeled_leaves : LeavesEntity[]
 }

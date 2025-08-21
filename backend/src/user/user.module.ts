@@ -13,6 +13,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
 import { GroupsModule } from '../groups/groups.module';
 import { ComplaintModule } from '../complaint/complaint.module';
+import { LeavesModule } from '../leaves/leaves.module';
 
 @Module({
   imports:[
@@ -24,7 +25,7 @@ import { ComplaintModule } from '../complaint/complaint.module';
     ]),
     forwardRef(()=>LogsModule),
      RolesModule ,GroupsModule ,
-     
+     forwardRef(()=> LeavesModule),
      forwardRef(() =>  ComplaintModule),
     TypeOrmModule.forFeature([
        UserEntity

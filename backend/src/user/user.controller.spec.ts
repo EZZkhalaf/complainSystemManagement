@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
 import { RolesEntity } from '../roles/entities/roles.entity';
+import { NotFoundException } from '@nestjs/common';
 
 describe('UserController', () => {
   let controller: UserController;
@@ -17,7 +18,7 @@ describe('UserController', () => {
     changeUserRole: jest.fn(),
     deleteUser: jest.fn(),
     verifyEmailUpdate: jest.fn(),
-    // add other service methods as needed
+    getSummaryCharts : jest.fn()
   };
 
   beforeEach(async () => {
@@ -42,16 +43,28 @@ describe('UserController', () => {
     expect(controller).toBeDefined();
   });
 
-  // it('should call editUserInfo on UserService', async () => {
-  //   const body : any  = { newName: 'ezz', newEmail: 'test@gmail.com' };
-  //   const file = null;
-  //   const currentUser = { user_id: 1 };
+  it('should call get summary data for the charts', async () => {
+    const id = "1"
+    const mockResult = {
+      success: true,
+      complaintsPerCategory: [{ complaint_type: 'general', total: 3 }],
+      commontComplaintsTypes: [{ complaint_type: 'network', total: 5 }],
+    };
 
-  //   mockUserService.editUserInfo.mockResolvedValue({ success: true });
+    mockUserService.getSummaryCharts.mockResolvedValue(mockResult)
+    const result = await controller.getSummaryCharts(id);
 
-  //   const result = await controller.editEmployeeInfo('1', body, file, currentUser);
+    expect(mockUserService.getSummaryCharts).toHaveBeenCalledWith('1');
+    expect(result).toEqual(mockResult);
+  });
 
-  //   expect(result).toEqual({ success: true });
-  //   expect(mockUserService.editUserInfo).toHaveBeenCalledWith('1', body, file, currentUser);
-  // });
+  it('should throw if service throws', async () => {
+    mockUserService.getSummaryCharts.mockRejectedValue(
+      new NotFoundException("error getting the summary of the complaints"),
+    );
+
+    await expect(controller.getSummaryCharts('1')).rejects.toThrow(
+      NotFoundException,
+    );
+  });
 });

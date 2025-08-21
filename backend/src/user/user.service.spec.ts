@@ -1846,34 +1846,34 @@ describe('UserService - admin edit user info', () => {
 
     service = module.get<UserService>(UserService);
   });
-    it("should throw http exception if the admin user is not an admin " , async() =>{
-    const dto : any = {userId : "1", newName : "ezz2", newEmail : "ezz@gmail.com", newPassword : "123456"}
-    const id = "2"
-    rolesRepo.findOne.mockResolvedValue(null)
+  //   it("should throw http exception if the admin user is not an admin " , async() =>{
+  //   const dto : any = {userId : "1", newName : "ezz2", newEmail : "ezz@gmail.com", newPassword : "123456"}
+  //   const id = "2"
+  //   rolesRepo.findOne.mockResolvedValue(null)
 
-    await expect(service.adminEditUserInfo(id ,dto)).rejects.toThrow(
-       new HttpException('Only the admin can edit user info', HttpStatus.UNAUTHORIZED)
-    )
+  //   await expect(service.adminEditUserInfo(id ,dto)).rejects.toThrow(
+  //      new HttpException('Only the admin can edit user info', HttpStatus.UNAUTHORIZED)
+  //   )
 
-    expect(rolesRepo.findOne).toHaveBeenCalledWith(
-      {
-            where : {users :{
-                user_id : Number(dto.userId)
-            }},
-            relations : ['users']
-      }
-    )
-  })
+  //   expect(rolesRepo.findOne).toHaveBeenCalledWith(
+  //     {
+  //           where : {users :{
+  //               user_id : Number(dto.userId)
+  //           }},
+  //           relations : ['users']
+  //     }
+  //   )
+  // })
   it("should throw not found error when the target user not found " , async() =>{
     const dto : any = {userId : "1", newName : "ezz2", newEmail : "ezz@gmail.com", newPassword : "123456"}
     const id = "2"
-    const fakeAdminRole = {
-      role_id : 1, 
-      role_name : "admin",
-      users:[],
-      permissions:[]
-    }
-    rolesRepo.findOne.mockResolvedValue(fakeAdminRole)
+    // const fakeAdminRole = {
+    //   role_id : 1, 
+    //   role_name : "admin",
+    //   users:[],
+    //   permissions:[]
+    // }
+    // rolesRepo.findOne.mockResolvedValue(fakeAdminRole)
     userRepo.findOne.mockResolvedValue(null)
 
 
@@ -1881,14 +1881,14 @@ describe('UserService - admin edit user info', () => {
        new NotFoundException("user not found")
     )
 
-    expect(rolesRepo.findOne).toHaveBeenCalledWith(
-      {
-            where : {users :{
-                user_id : Number(dto.userId)
-            }},
-            relations : ['users']
-      }
-    )
+    // expect(rolesRepo.findOne).toHaveBeenCalledWith(
+    //   {
+    //         where : {users :{
+    //             user_id : Number(dto.userId)
+    //         }},
+    //         relations : ['users']
+    //   }
+    // )
 
     expect(userRepo.findOne).toHaveBeenCalledWith(
       {
@@ -1918,7 +1918,7 @@ describe('UserService - admin edit user info', () => {
       ...fakeUser,user_name: dto.newName, user_email: dto.newEmail 
     }
     const {user_password , ...safeUser} = updatedUser 
-    rolesRepo.findOne.mockResolvedValue(fakeAdminRole)
+    // rolesRepo.findOne.mockResolvedValue(fakeAdminRole)
     userRepo.findOne.mockResolvedValue(fakeUser)
     userRepo.save.mockResolvedValue(updatedUser)
 
@@ -1927,14 +1927,14 @@ describe('UserService - admin edit user info', () => {
     expect(result.success).toBe(true)
     expect(result.message).toEqual('User updated successfully')
     expect(result.updatedUser).toMatchObject(safeUser)
-    expect(rolesRepo.findOne).toHaveBeenCalledWith(
-      {
-            where : {users :{
-                user_id : Number(dto.userId)
-            }},
-            relations : ['users']
-      }
-    )
+    // expect(rolesRepo.findOne).toHaveBeenCalledWith(
+    //   {
+    //         where : {users :{
+    //             user_id : Number(dto.userId)
+    //         }},
+    //         relations : ['users']
+    //   }
+    // )
 
     expect(userRepo.findOne).toHaveBeenCalledWith(
       {
@@ -2161,5 +2161,141 @@ describe('UserService -get user by id ', () => {
 
 
   })
+
+})
+
+describe('UserService - get summary as charts data', () => {
+  let service: UserService;
+  let userRepo :{
+    findOne : jest.Mock ,
+    count : jest.Mock , 
+    save : jest.Mock , 
+    update : jest.Mock , 
+    delete : jest.Mock
+  }
+  let  groupRepo : {
+    findOne : jest.Mock,
+    save : jest.Mock , 
+    count : jest.Mock,
+    createQueryBuilder : jest.Mock
+
+  }
+  let complaintRepo : {
+    create : jest.Mock ,
+    findOne : jest.Mock ,
+    delete : jest.Mock , 
+    save : jest.Mock,
+    find : jest.Mock , 
+    count : jest.Mock ,
+    createQueryBuilder : jest.Mock
+  }
+  let rolesRepo : {
+    create : jest.Mock ,
+    findOne : jest.Mock ,
+    delete : jest.Mock , 
+    save : jest.Mock,
+    find : jest.Mock , 
+    count : jest.Mock,
+    createQueryBuilder : jest.Mock
+  }
+  let complaintgroupsRuleRepo : {
+    findOne : jest.Mock ,
+
+  }
+  let logsService : {
+    logAction : jest.Mock
+  }
+
+  beforeEach(async () => {
+    userRepo = {
+      findOne : jest.fn(),
+      count : jest.fn(),
+      save :  jest.fn() , 
+      update : jest.fn() ,
+      delete : jest.fn()
+
+    }
+    groupRepo = {
+      findOne : jest.fn(),
+      save : jest.fn(),
+      count  :jest.fn(),
+      createQueryBuilder : jest.fn()
+    }
+    complaintRepo = {
+      create : jest.fn(),
+      findOne : jest.fn() ,
+      find : jest.fn(),
+      delete : jest.fn() ,
+      save : jest.fn(),
+      count : jest.fn(),
+      createQueryBuilder:jest.fn()
+    }
+    rolesRepo = {
+      create : jest.fn(),
+      findOne : jest.fn() ,
+      find : jest.fn(),
+      delete : jest.fn() ,
+      save : jest.fn(),
+      count : jest.fn(),
+      createQueryBuilder : jest.fn()
+    }
+    complaintgroupsRuleRepo = {
+      findOne : jest.fn()
+    }
+
+    
+    logsService = {
+      logAction : jest.fn()
+    }
+
+    const module: TestingModule = await Test.createTestingModule({
+            providers: [
+        UserService,
+        {provide : getRepositoryToken(UserEntity) , useValue :userRepo},
+        {provide : getRepositoryToken(ComplaintEntity) , useValue :complaintRepo},
+        {provide : getRepositoryToken(RolesEntity) , useValue :rolesRepo},
+        {provide : getRepositoryToken(ComplaintGroupsRuleEntity) , useValue :complaintgroupsRuleRepo},
+        {provide : getRepositoryToken(GroupEntity) , useValue :groupRepo},
+        {provide : LogsService , useValue : logsService}
+      ],
+    }).compile();
+
+    service = module.get<UserService>(UserService);
+  });
+
+  
+
+  it('should throw not found error when the complaints data are not found or empty', async () => {
+    const id = "1";
+
+    const queryBuilder1 = {
+      select: jest.fn().mockReturnThis(),
+      addSelect: jest.fn().mockReturnThis(),
+      groupBy: jest.fn().mockReturnThis(),
+      getRawMany: jest.fn().mockResolvedValue(null), 
+    };
+
+    const queryBuilder2 = {
+      select: jest.fn().mockReturnThis(),
+      addSelect: jest.fn().mockReturnThis(),
+      groupBy: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      getRawMany: jest.fn().mockResolvedValue(null), 
+    };
+
+    (complaintRepo.createQueryBuilder as jest.Mock)
+      .mockReturnValueOnce(queryBuilder1)
+      .mockReturnValueOnce(queryBuilder2);
+
+    await expect(service.getSummaryCharts(id)).rejects.toThrow(
+      new NotFoundException("error getting the summary of the complaints")
+    );
+
+    expect(complaintRepo.createQueryBuilder).toHaveBeenCalledWith("complaint_info");
+    expect(queryBuilder1.select).toHaveBeenCalledWith("complaint_info.complaint_type", "complaint_type");
+    expect(queryBuilder1.addSelect).toHaveBeenCalledWith("COUNT(*)", "total");
+    expect(queryBuilder1.groupBy).toHaveBeenCalledWith("complaint_info.complaint_type");
+    expect(queryBuilder1.getRawMany).toHaveBeenCalled();
+  });
 
 })

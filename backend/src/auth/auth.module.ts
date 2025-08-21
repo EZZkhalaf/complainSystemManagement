@@ -21,15 +21,15 @@ import { RolesModule } from 'src/roles/roles.module';
 
 @Module({
   imports : [
-    MongooseModule.forFeature([
-      {name : User.name , schema : UserSchema},
-      {name : Role.name , schema : RoleSchema},
-      {name : OTP.name , schema : OTPSchema} ,
-      {name : TempSession.name , schema : TempSessionSchema},
-      {name : Group.name , schema : GroupSchema},
-      {name : Logs.name , schema : LogsSchema},
-      {name : Complaint.name , schema : ComplaintSchema}
-    ]) ,
+    // MongooseModule.forFeature([
+    //   {name : User.name , schema : UserSchema},
+    //   {name : Role.name , schema : RoleSchema},
+    //   {name : OTP.name , schema : OTPSchema} ,
+    //   {name : TempSession.name , schema : TempSessionSchema},
+    //   {name : Group.name , schema : GroupSchema},
+    //   {name : Logs.name , schema : LogsSchema},
+    //   {name : Complaint.name , schema : ComplaintSchema}
+    // ]) ,
     forwardRef(()=>LogsModule),UserModule , GroupsModule, RolesModule,
     TypeOrmModule.forFeature([
       OTPEntity , TempSessionEntity
