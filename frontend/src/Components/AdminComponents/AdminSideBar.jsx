@@ -21,13 +21,12 @@ const AdminSideBar = ({isOpen , onClose}) => {
     onClose?.()
   };
   const navLinkBase =
-  'flex items-center  gap-2 text-slate-300 px-3 py-2 text-sm rounded-md transition-colors duration-200 hover:bg-blue-700 truncate mt-5 w-full';
+  'flex items-center  gap-2 text-slate-300 px-3 py-2 text-sm rounded-md transition-colors duration-200 hover:bg-blue-700 truncate mt-3 w-full';
 
   const activeLinkStyles = 'bg-blue-800 text-white shadow-inner';
 
     const navLinks = (
-      <div className="flex flex-col min-h-screen justify-between fixed">
-        {/* Top nav links */}
+      <div className="flex flex-col h-full justify-between ">
         <div className="flex flex-col gap-2">
           <NavLink
             to="/adminPage/"
@@ -94,7 +93,7 @@ const AdminSideBar = ({isOpen , onClose}) => {
         </div>
 
         {/* Bottom: settings + logout */}
-        <div className="flex flex-row gap-3  mb-25">
+        <div className="flex flex-row gap-3 ">
           <NavLink
             to={user.role === 'admin' ? '/adminPage/settings' : '/userPage/settings'}
             className={({ isActive }) =>
@@ -135,14 +134,14 @@ const AdminSideBar = ({isOpen , onClose}) => {
       {/* Sidebar */}
       <aside
         className={`
-          fixed top-0 left-0 h-full z-50  
-          bg-slate-900 flex flex-col justify-between
-          p-3 shadow-lg overflow-y-hidden
-          min-w-[150px] max-w-[250px]
-          w-64 sm:w-56 md:w-60 lg:static lg:h-auto lg:translate-x-0
-          transform transition-transform duration-300 ease-in-out
-          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-        `}
+    bg-slate-900 flex flex-col justify-between
+    p-3 shadow-lg overflow-y-auto
+    w-64 sm:w-56 md:w-60
+    h-screen fixed top-0 left-0
+    transform transition-transform duration-300 ease-in-out
+    ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+    z-50
+  `}
       >
         {navLinks}
       </aside>

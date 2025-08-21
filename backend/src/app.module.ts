@@ -14,6 +14,9 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { LeavesController } from './leaves/leaves.controller';
+import { LeavesService } from './leaves/leaves.service';
+import { LeavesModule } from './leaves/leaves.module';
 
 @Module({
   imports: [
@@ -38,10 +41,11 @@ import { DataSource } from 'typeorm';
       database: 'postgres',
       autoLoadEntities: true,
       synchronize: true, // only for dev
-    })
+    }),
+    LeavesModule
   ],
-  controllers: [AppController],
-  providers: [AppService , DatabaseService],
+  controllers: [AppController, LeavesController],
+  providers: [AppService , DatabaseService, LeavesService],
 })
 export class AppModule {
   constructor(private dataSource : DataSource){}

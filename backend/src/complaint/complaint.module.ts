@@ -4,18 +4,18 @@ import { ComplaintService } from './complaint.service';
 import { Complaint, ComplaintSchema } from './schemas/complaint.schema';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ComplaintGroupsRule, ComplaintGroupsRuleSchema } from './schemas/complaint-groups-rule.schema';
-import { User, UserSchema } from 'src/user/schemas/user.schema';
-import { Group, GroupSchema } from 'src/groups/schemas/group.schema';
-import { Role, RoleSchema } from 'src/roles/schemas/role.schema';
+import { User, UserSchema } from '../user/schemas/user.schema';
+import { Group, GroupSchema } from '../groups/schemas/group.schema';
+import { Role, RoleSchema } from '../roles/schemas/role.schema';
 import { LogsModule } from 'src/logs/logs.module';
 import { CheckTokenGaurd } from 'src/gaurds/check-token-gaurd.gaurd';
 import { JwtService } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ComplaintEntity } from './entities/complaint.entity';
 import { ComplaintGroupsRuleEntity } from './entities/complaint-groups-rule.entity';
-import { UserModule } from 'src/user/user.module';
-import { RolesModule } from 'src/roles/roles.module';
-import { GroupsModule } from 'src/groups/groups.module';
+import { UserModule } from '../user/user.module';
+import { RolesModule } from '../roles/roles.module';
+import { GroupsModule } from '../groups/groups.module';
 
 @Module({
     imports:[

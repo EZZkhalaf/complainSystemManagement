@@ -5,8 +5,8 @@ import { HandleComplaintInGroupDto } from './dtos/handle-complaint-in-group.dto'
 import { ChangeComplaintStatusDto } from './dtos/change-complaint-status.dto';
 import { ListComplaintsDto } from './dtos/list-complaints.dto';
 import { DeleteComplaintDto } from './dtos/delete-complaint.dto';
-import { CheckTokenGaurd } from 'src/gaurds/check-token-gaurd.gaurd';
-import { CheckPermissionGaurd, Permission } from 'src/gaurds/check-permission.gaurd';
+import { CheckTokenGaurd } from '../gaurds/check-token-gaurd.gaurd';
+import { CheckPermissionGaurd, Permission } from '../gaurds/check-permission.gaurd';
 
 @Controller('complaints')
 export class ComplaintController {

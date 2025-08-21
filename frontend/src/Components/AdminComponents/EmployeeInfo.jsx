@@ -64,8 +64,8 @@ const EmployeeInfo = () => {
 
     const [editing, setEditing] = useState(false);
     const [selectedRole, setSelectedRole] = useState(employee?.user_role.role_name || 'User');
-    const [editableName, setEditableName] = useState('');
-    const [editableEmail, setEditableEmail] = useState('');
+    const [editableName, setEditableName] = useState(employee?.user_name);
+    const [editableEmail, setEditableEmail] = useState(employee?.user_email);
     const [newPassword, setNewPassword] = useState('');
 
 
@@ -126,9 +126,7 @@ const EmployeeInfo = () => {
 
     const getUserData = async()=>{
         const data = await getUserByIdHook(id);
-        console.log(data)
         const roles = await fetchRolesHook();
-        console.log(roles)
         setRoles(roles.map(({user , ...rest}) => rest))
 
 
@@ -156,6 +154,7 @@ const EmployeeInfo = () => {
       
     }, [employee]);
 
+    console.log(employee)
   return (
     <div className="max-w-full mx-auto p-6 sm:p-10 bg-white rounded-3xl shadow-xl  border border-gray-200">
       <div className="flex justify-end mb-4">
@@ -188,12 +187,12 @@ const EmployeeInfo = () => {
           alt="Profile"
           className="w-32 h-32 rounded-full object-cover border-2 border-gray-300"
         />
-        <div className="text-center sm:text-left">
+        <div className="text-center items-center sm:text-left">
           {!editing ? (
-              <>
+              <div className='items-center'>
                 <h2 className="text-2xl font-bold text-blue-800 capitalize">{employee?.user_name}</h2>
                 <p className="text-gray-600 mt-1">{employee?.user_email}</p>
-              </>
+              </div>
             ) : (
               <div className='flex flex-col'>
                 <input

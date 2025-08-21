@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { fetchAdminSummaryHook } from '../../utils/UserHelper';
+import { fetchAdminSummaryHook, fetchSummaryChart } from '../../utils/UserHelper';
 import { useAuthContext } from '../../Context/authContext';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 const AdminHero = () => {
   const { user } = useAuthContext();
@@ -10,11 +11,17 @@ const AdminHero = () => {
     groups: 0,
   });
 
+  const [complaintsSumm , setComplaintsSumm] = useState(null)
+
   useEffect(() => {
     const fetchSummary = async () => {
       try {
         const data = await fetchAdminSummaryHook(user._id);
         setSummary(data);
+
+        const dataChart = await fetchSummaryChart(user._id)
+        console.log(dataChart)
+        setComplaintsSumm(dataChart)
       } catch (error) {
         console.error("Failed to fetch summary:", error);
       }
@@ -33,8 +40,9 @@ const AdminHero = () => {
         </p>
       </div>
 
+      <ComplaintsBarChart data = {complaintsSumm}/>
       {/* Summary + Features Pair Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto mt-6">
         <SummaryWithFeature
           label="Complaints"
           value={summary.complaints}
@@ -64,6 +72,33 @@ const AdminHero = () => {
           desc="Only admins and authorized users can make changes."
         />
       </div>
+    </div>
+  );
+};
+
+
+
+const ComplaintsBarChart = ({ data }) => {
+  if (!data) return <p>No chart data</p>;
+
+  // Map your backend data to the format Recharts expects
+  const chartData = data.complaintsPerCategory.map((c) => ({
+    category: c.complaint_type,
+    total: Number(c.total),
+  }));
+
+  return (
+    <div className="w-full h-64">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+          <XAxis dataKey="category" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Bar dataKey="total" fill="#1D4ED8" />
+        </BarChart>
+        
+      </ResponsiveContainer>
     </div>
   );
 };

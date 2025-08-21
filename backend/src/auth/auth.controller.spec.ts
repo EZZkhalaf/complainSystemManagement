@@ -12,6 +12,8 @@ import { OTPEntity } from './entities/OTP.entity';
 import { TempSessionEntity } from './entities/tempSession.entity';
 import { LogsService } from '../logs/logs.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { RegisterDto } from './dtos/register.dto';
+import { LoginDto } from './dtos/login.dto';
 
 
 describe('AuthController', () => {
@@ -21,14 +23,25 @@ describe('AuthController', () => {
   let logsService : {
     logAction : jest.Mock
   }
-  const mockAuthService = {
-    login : jest.fn() ,
-    register : jest.fn()
-  }
+  const mockAuthService: jest.Mocked<AuthService> = {
+    login: jest.fn(),
+    register: jest.fn(),
+    verifyEmail: jest.fn(),  
+  };
 
-  const mockJwtService = {
+  const mockRes = () => ({
+    cookie: jest.fn(),
+    status: jest.fn().mockReturnThis(),
+    json: jest.fn(),
+  });
+
+  const mockReq = () => ({ session: {} });
+
+
+  const mockJwtService  = {
     sign : jest.fn(),
-    verify : jest.fn()
+    verifyEmail : jest.fn(),
+
   }
   let userRepo: { 
     findOne: jest.Mock ,
@@ -91,4 +104,57 @@ describe('AuthController', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
+
+  //register
+  it("should call register service with correct params" , async() =>{
+    const dto : RegisterDto = {email : "test@gmail.com" , password  : "123456" , name : "ezz"}
+    const result  = { success: true, message: 'Verification email sent.' };
+
+    (service.register as jest.Mock).mockResolvedValue(result)
+    const response =  await controller.register(dto)
+    expect(service.register).toHaveBeenCalledWith(dto);
+    expect(response).toEqual(result);
+  })
+
+  //verify email
+  it('should call verifyEmail service with correct token', async () => {
+    const token = 'valid-token';
+    const result = { success: true, message: 'Email verified successfully.' };
+
+    // mock the service method
+    service.verifyEmail.mockResolvedValue(result);
+
+    const response = await controller.verifyEmail(token);
+
+    expect(service.verifyEmail).toHaveBeenCalledWith(token);
+    expect(response).toEqual(result);
+  });
+
+  //login
+  it("should calll login and set cookie + session " , async() =>{
+    const loginDto: LoginDto = { email: 'test@test.com', password: '123456' };
+    const req = mockReq();
+    const res = mockRes();
+
+    const loginResult = { token: 'abc123', user: { id: 1, email: 'test@test.com' } };
+    (service.login as jest.Mock).mockResolvedValue(loginResult);
+
+    const result = await controller.login(loginDto, res as any, req as any);
+
+    expect(service.login).toHaveBeenCalledWith(loginDto);
+    expect(res.cookie).toHaveBeenCalledWith(
+      'access_token',
+      'abc123',
+      expect.objectContaining({ httpOnly: true }),
+    );
+    expect(req.session.token).toBe('abc123');
+    expect(result).toEqual({
+      success: true,
+      message: 'Login successful',
+      user: loginResult.user,
+    });
+  })
+
+  
 });
+

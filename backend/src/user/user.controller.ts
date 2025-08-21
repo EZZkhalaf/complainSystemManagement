@@ -53,6 +53,14 @@ export class UserController {
         return this.userService.getSummary(id);
     }
 
+
+    @Get("getSummaryCharts/:id")
+    @UseGuards(CheckTokenGaurd,CheckPermissionGaurd)
+    @Permission("view_dashboard_summary")
+    async getSummaryCharts(@Param("id") id : string){
+        return this.userService.getSummaryCharts(id);
+    }
+
     @Put("editInfo/:id")
     @UseGuards(CheckTokenGaurd)
     @UseInterceptors(FileInterceptor("profilePicture" , multerConfig))
