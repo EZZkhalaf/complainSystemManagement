@@ -12,6 +12,7 @@ import { OTPEntity } from './entities/OTP.entity';
 import { TempSessionEntity } from './entities/tempSession.entity';
 import { LogsService } from '../logs/logs.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { RegisterDto } from './dtos/register.dto';
 
 
 describe('AuthController', () => {
@@ -21,14 +22,17 @@ describe('AuthController', () => {
   let logsService : {
     logAction : jest.Mock
   }
-  const mockAuthService = {
-    login : jest.fn() ,
-    register : jest.fn()
-  }
+  const mockAuthService: jest.Mocked<AuthService> = {
+    login: jest.fn(),
+    register: jest.fn(),
+    verifyEmail: jest.fn(),  
+  };
 
-  const mockJwtService = {
+
+  const mockJwtService  = {
     sign : jest.fn(),
-    verify : jest.fn()
+    verifyEmail : jest.fn(),
+
   }
   let userRepo: { 
     findOne: jest.Mock ,
@@ -91,4 +95,28 @@ describe('AuthController', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
+  it("should call register service with correct params" , async() =>{
+    const dto : RegisterDto = {email : "test@gmail.com" , password  : "123456" , name : "ezz"}
+    const result  = { success: true, message: 'Verification email sent.' };
+
+    (service.register as jest.Mock).mockResolvedValue(result)
+    const response =  await controller.register(dto)
+    expect(service.register).toHaveBeenCalledWith(dto);
+    expect(response).toEqual(result);
+  })
+it('should call verifyEmail service with correct token', async () => {
+  const token = 'valid-token';
+  const result = { success: true, message: 'Email verified successfully.' };
+
+  // mock the service method
+  service.verifyEmail.mockResolvedValue(result);
+
+  const response = await controller.verifyEmail(token);
+
+  expect(service.verifyEmail).toHaveBeenCalledWith(token);
+  expect(response).toEqual(result);
 });
+
+
+});
+

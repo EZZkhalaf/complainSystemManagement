@@ -21,20 +21,20 @@ const AdminPage = () => {
     if(user.role !== 'admin') navigate('/userPage')
   },[user , navigate])
   return (
-       <div className="flex flex-col min-h-screen">
-            <NavigationBar onMobileSideBarToggle = { () => setSidebarOpen(!sidebarOpen)}/>
-            <div className="flex flex-grow">
-                <AdminSideBar 
-                  isOpen = {sidebarOpen}
-                  onClose = {() => setSidebarOpen(false)}
-                />
-                <div className="flex-grow p-6">
-               
-                    <Outlet />
-                </div>
-                
+       <div className="flex min-h-screen">
+          {/* Sidebar */}
+          <AdminSideBar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+          {/* Main content */}
+          <div className="flex-1 flex flex-col lg:ml-60"> {/* <-- add lg:ml-64 */}
+            <NavigationBar onMobileSideBarToggle={() => setSidebarOpen(!sidebarOpen)} />
+            <div className="flex-1 overflow-auto p-6">
+              <Outlet />
             </div>
+          </div>
         </div>
+
+
   )
 }
 

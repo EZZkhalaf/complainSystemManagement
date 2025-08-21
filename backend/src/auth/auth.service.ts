@@ -46,7 +46,7 @@ export class AuthService {
 
 
     
-    async register(registerDto : RegisterDto) : Promise<{message : string }>{
+    async register(registerDto : RegisterDto) : Promise<{success : true ,message : string }>{
         const {name , email , password} = registerDto;
 
         const userExists = await this.userRepo.findOne({ where : {user_email : email}})
@@ -84,7 +84,7 @@ export class AuthService {
             `,
         });
 
-        return { message: 'Verification email sent.' };
+        return {success : true , message: 'Verification email sent.' };
 
     }
 

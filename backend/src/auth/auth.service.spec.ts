@@ -156,7 +156,7 @@ describe('AuthService', () => {
       })
     );
 
-    expect(result).toEqual({ message: 'Verification email sent.' });
+    expect(result).toEqual({success : true , message: 'Verification email sent.' });
   });
 
 
