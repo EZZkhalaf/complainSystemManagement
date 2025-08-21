@@ -11,6 +11,9 @@ import { ComplaintService } from './complaint.service';
 import { LogsService } from '../logs/logs.service';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import * as EmailUtils from '../utils/send-complaints-email.util';
+import { PaginatedResponseDto } from './dtos/paginated-response.dto';
+import { ComplaintOutputDto } from './dtos/complaint-output.dto';
+import { plainToInstance } from 'class-transformer';
 
 describe('ComplaintService', () => {
   let service: ComplaintService;
@@ -26,7 +29,17 @@ describe('ComplaintService', () => {
     create : jest.Mock ,
     findOne : jest.Mock ,
     delete : jest.Mock , 
-    save : jest.Mock
+    save : jest.Mock,
+    find : jest.Mock , 
+    count : jest.Mock
+  }
+  let rolesRepo : {
+    create : jest.Mock ,
+    findOne : jest.Mock ,
+    delete : jest.Mock , 
+    save : jest.Mock,
+    find : jest.Mock , 
+    count : jest.Mock
   }
   let complaintgroupsRuleRepo : {
     findOne : jest.Mock ,
@@ -45,8 +58,18 @@ describe('ComplaintService', () => {
     complaintRepo = {
       create : jest.fn(),
       findOne : jest.fn() ,
+      find : jest.fn(),
       delete : jest.fn() ,
-      save : jest.fn()
+      save : jest.fn(),
+      count : jest.fn()
+    }
+    rolesRepo = {
+      create : jest.fn(),
+      findOne : jest.fn() ,
+      find : jest.fn(),
+      delete : jest.fn() ,
+      save : jest.fn(),
+      count : jest.fn()
     }
     complaintgroupsRuleRepo = {
       findOne : jest.fn()
@@ -64,7 +87,7 @@ describe('ComplaintService', () => {
          
         {provide : getRepositoryToken(UserEntity) , useValue :userRepo},
         {provide : getRepositoryToken(ComplaintEntity) , useValue :complaintRepo},
-        {provide : getRepositoryToken(RolesEntity) , useValue :{}},
+        {provide : getRepositoryToken(RolesEntity) , useValue :rolesRepo},
         {provide : getRepositoryToken(ComplaintGroupsRuleEntity) , useValue :complaintgroupsRuleRepo},
         {provide : getRepositoryToken(GroupEntity) , useValue :groupRepo},
         {provide : LogsService , useValue : logsService}
@@ -307,7 +330,6 @@ describe('ComplaintService', () => {
     expect(result.body.message).toContain('Accepted');
 
   })
-
   it("rejects the complaint , send email , add the log " , async() =>{
      const dto: any = { userId: "123", status: "reject" };
 
@@ -356,5 +378,307 @@ describe('ComplaintService', () => {
     expect(result.status).toBe(200);
     expect(result.body.message).toContain('Rejected');
 
+  })
+
+  //list complaints 
+  it("should return complaints based on what page is called , event if there is no compplaints it return empty array" , async() =>{
+    const dto : any = {page : 1 , limit:10}
+    const fakeComplaints = [
+        {
+        complaint_id : 1 ,
+        description : "this is description" ,
+        complaint_status : "pending",
+        complaint_type : "general",
+        creator_user : {
+          user_id : 1 ,
+          user_name :"ezz",
+          user_email : "ezz@gmail.com"
+        },
+        groupsQueue : [],
+        created_at : new Date()
+      },
+      {
+        complaint_id : 2 ,
+        description : "this is second description" ,
+        complaint_status : "pending",
+        complaint_type : "general",
+        creator_user : {
+          user_id : 4 ,
+          user_name :"ezz",
+          user_email : "ezz@gmail.com"
+        },
+        groupsQueue : [],
+        created_at : new Date()
+      }
+    ]
+
+    const skip = (dto.page - 1) * dto.limit;
+    const totalCount = fakeComplaints.length ;
+
+    complaintRepo.count.mockResolvedValue(totalCount)
+    complaintRepo.find.mockResolvedValue(fakeComplaints)
+
+    const result = await service.listComplaints(dto)
+
+    expect(result).toBeInstanceOf(PaginatedResponseDto)
+    expect(result).toMatchObject({
+      success : true,
+      complaints : [
+        expect.objectContaining({complaint_id : 1}),
+        expect.objectContaining({complaint_id : 2})
+      ],
+      currentPage : dto.page ,
+      totalPages : 1 ,
+      totalCount : totalCount
+    })
+
+    expect(complaintRepo.find).toHaveBeenCalledWith(
+      {
+        relations: ["creator_user"],       
+        select: {
+            creator_user: { user_password: false }, 
+        },
+        order: { created_at: "DESC" },      
+        skip: skip,
+        take: dto.limit,
+      }
+    )
+  })
+
+  //get complaint info 
+  it("should throw bad request errror when the id is invalid" , async() =>{
+    const id = "ss"
+
+    await expect(service.getComplaintInfo("")).rejects.toThrow(
+      new BadRequestException("please provide the correct id")
+    )
+    await expect(service.getComplaintInfo(id)).rejects.toThrow(
+      new BadRequestException("please provide the correct id")
+    )
+  })
+  it("should throw not fouond error when the complaint not found" , async() => {
+    const id = "1" 
+
+    complaintRepo.findOne.mockResolvedValue(null);
+
+    await expect(service.getComplaintInfo(id)).rejects.toThrow(
+      new NotFoundException("complaint not found")
+    )
+  })
+  it("found the complaint and return it and return success too" , async() => {
+    const id = "1" 
+    const fakeCompalint = {
+      complaint_id : 1 ,
+      complaint_status : "pending" ,
+      complaint_type : "general" ,
+      created_at : new Date() ,
+      creator_user :{
+          user_email : "ezz@gmail.com" ,
+          profilePicture : "any.jpg" ,
+          user_id : 1 ,
+          user_name : "ezz"
+      }
+    }
+    complaintRepo.findOne.mockResolvedValue(fakeCompalint);
+
+    const expectedOutput = plainToInstance(ComplaintOutputDto , fakeCompalint , {excludeExtraneousValues : true})
+    const result = await service.getComplaintInfo(id)
+    expect(result.success).toBe(true)
+    expect(result.complaint).toMatchObject(expectedOutput)
+
+    expect(complaintRepo.findOne).toHaveBeenCalledWith(
+      {
+        where :{complaint_id : Number(id)},
+            relations:['creator_user'],
+            select : {
+                complaint_id : true ,
+                complaint_status : true ,
+                complaint_type : true ,
+                created_at : true ,
+                creator_user :{
+                    user_email : true ,
+                    profilePicture : true ,
+                    user_id : true ,
+                    user_name : true ,
+                    user_password : false ,
+                    user_role : false
+                }
+            }
+      }
+    )
+  })
+
+
+  //list user complaints
+  it("should throw not found error when the user not found" ,async()=>{
+    const id = "1"
+    
+    userRepo.findOne.mockResolvedValue(null)
+
+    await expect(service.listUsrComplaints(id)).rejects.toThrow(
+      new NotFoundException(" user not found ")
+    )
+    expect(userRepo.findOne).toHaveBeenCalledWith(
+      {
+        where  : { user_id : Number(id)}
+      }
+    )
+  })
+  it("should return all the user complaints" ,async()=>{
+    const id = "1"
+    const fakeUser = {
+      user_id : 1, 
+      useR_name :"ezz" ,
+      user_email : "ezz@gmail.com"
+    }
+    const fakeComplaints =[ 
+        {
+          complaint_id : 1 ,
+          complaint_status : "pending" ,
+          complaint_type : "general" ,
+          created_at : new Date() ,
+          creator_user :{
+              user_email : "ezz@gmail.com" ,
+              profilePicture : "any.jpg" ,
+              user_id : 1 ,
+              user_name : "ezz"
+          }
+        }
+      ]
+    userRepo.findOne.mockResolvedValue(fakeUser)
+    complaintRepo.find.mockResolvedValue(fakeComplaints)
+    
+    const result = await service.listUsrComplaints(id)
+    const expectedComplaints = plainToInstance(ComplaintOutputDto , fakeComplaints , {excludeExtraneousValues : true})
+    expect(result.success).toBe(true)
+    expect(result.complaints).toMatchObject(expectedComplaints)
+    expect(userRepo.findOne).toHaveBeenCalledWith(
+      {
+        where  : { user_id : Number(id)}
+      }
+    )
+    expect(complaintRepo.find).toHaveBeenCalledWith(
+      {
+        where : {creator_user : {user_id : Number(id)}} ,
+        relations : ['creator_user'],
+        select : {
+            complaint_id : true ,
+            complaint_status : true , 
+            complaint_type : true ,
+            created_at : true  ,
+            creator_user : {
+                user_name : true ,
+                user_email : true ,
+                user_id : true,
+                user_password : false ,
+                user_role : false
+            }
+        }
+      }
+    )
+  })
+
+
+  //delete complaint
+  it("should throw bad request error when the ids are not valid" , async()=>{
+      const userId = "a"
+      const complaintId = "e"
+      await expect(service.deleteComplaint(userId , "1")).rejects.toThrow(
+        new BadRequestException("Invalid userId or complaintId")
+      )
+
+    await expect(service.deleteComplaint("1" , complaintId)).rejects.toThrow(
+        new BadRequestException("Invalid userId or complaintId")
+      )    
+  })
+  it("should throw not found error when complaint not found" , async()=>{
+    const userId = "1"
+    const complaintId = "1"
+    
+    complaintRepo.findOne.mockResolvedValue(null)
+
+  await expect(service.deleteComplaint(userId , complaintId)).rejects.toThrow(
+      new NotFoundException("complaint not found")
+    )    
+
+    expect(complaintRepo.findOne).toHaveBeenCalledWith(
+      {
+        where: { complaint_id: Number(complaintId) },
+        relations: ['creator_user'] 
+      }
+    )
+  })
+  it("should throw not found error when user not found" , async()=>{
+    const userId = "1"
+    const complaintId = "1"
+
+    const fakeComplaint = {
+          complaint_id : 1 ,
+          complaint_status : "pending" ,
+          complaint_type : "general" ,
+          created_at : new Date() ,
+          creator_user :{
+              user_email : "ezz@gmail.com" ,
+              profilePicture : "any.jpg" ,
+              user_id : 1 ,
+              user_name : "ezz"
+          }
+    }
+    complaintRepo.findOne.mockResolvedValue(fakeComplaint)
+    rolesRepo.findOne.mockResolvedValue(null)
+
+  await expect(service.deleteComplaint(userId , complaintId)).rejects.toThrow(
+      new NotFoundException("user not found")
+    )    
+
+    expect(complaintRepo.findOne).toHaveBeenCalledWith(
+      {
+        where: { complaint_id: Number(complaintId) },
+        relations: ['creator_user'] 
+      }
+    )
+    expect(rolesRepo.findOne).toHaveBeenCalledWith(
+      {
+        where: { users: { user_id: Number(userId) } },
+        relations: ['users']
+      }
+    )
+  })
+  it("should delete the complaint and return success" , async()=>{
+    const userId = "1"
+    const complaintId = "1"
+
+    const fakeUser = {
+        user_email : "ezz@gmail.com" ,
+        profilePicture : "any.jpg" ,
+        user_id : 1 ,
+        user_name : "ezz"
+    }
+    const fakeComplaint = {
+          complaint_id : 1 ,
+          complaint_status : "pending" ,
+          complaint_type : "general" ,
+          created_at : new Date() ,
+          creator_user :fakeUser
+    }
+    complaintRepo.findOne.mockResolvedValue(fakeComplaint)
+    rolesRepo.findOne.mockResolvedValue(fakeUser)
+
+    const result = await service.deleteComplaint(userId , complaintId)
+    expect(result.success).toBe(true)
+    expect(result.message).toContain("Complaint deleted successfully")
+
+    expect(complaintRepo.findOne).toHaveBeenCalledWith(
+      {
+        where: { complaint_id: Number(complaintId) },
+        relations: ['creator_user'] 
+      }
+    )
+    expect(rolesRepo.findOne).toHaveBeenCalledWith(
+      {
+        where: { users: { user_id: Number(userId) } },
+        relations: ['users']
+      }
+    )
   })
 });

@@ -5,5 +5,5 @@ import { PermissionDto } from './permissions.dto';
 
 export class CreatePermissionDto {
     name: string;
-    description: string;
+    description?: string;
 }
