@@ -6,6 +6,10 @@ import { AddLeaveDto } from './dtos/add-leave.dto';
 import { UserEntity } from '../user/entities/user.entity';
 import { ChangeLeaveStateDto } from './dtos/change-leave-state.dto';
 import { GroupEntity } from '../groups/entities/group.entity';
+import { PagingDto } from './dtos/paging.dto';
+import { format } from 'date-fns'; // for date formatting
+import { GetUserLeavesDto, LeaveItemDto } from './dtos/get-user-leaves.dto';
+
 
 @Injectable()
 export class LeavesService {
@@ -212,4 +216,69 @@ export class LeavesService {
             message : "the leave has been deleted successfully by its own user"
         }
     }
+
+
+
+    async getUserLeaves(userId: string, dto: PagingDto): Promise<GetUserLeavesDto> {
+        const { currentPage, leavesPerPage } = dto;
+
+        if (isNaN(Number(userId))) {
+            throw new BadRequestException('user id is invalid');
+        }
+
+        if (
+            isNaN(Number(currentPage)) ||
+            isNaN(Number(leavesPerPage)) ||
+            Number(leavesPerPage) <= 0 ||
+            Number(currentPage) <= 0
+        ) {
+            throw new BadRequestException('error in the input page');
+        }
+
+        const skip = (Number(currentPage) - 1) * Number(leavesPerPage);
+        const take = Number(leavesPerPage);
+
+        const user = await this.userRepo
+            .createQueryBuilder('user_info')
+            .leftJoinAndSelect('user_info.own_leaves', 'leave_info')
+            .leftJoinAndSelect('leave_info.leave_user', 'leave_user') // join user who created the leave
+            .leftJoinAndSelect('leave_info.leave_handler', 'leave_handler') // join handler user
+            .where('user_info.user_id = :userId', { userId: Number(userId) })
+            .orderBy('leave_info.created_at', 'DESC')
+            .skip(skip)
+            .take(take)
+            .getOne();
+
+        if (!user) {
+            throw new NotFoundException('user not found');
+        }
+
+        const totalLeaves = await this.leavesRepo.count({
+            where: { leave_user: { user_id: Number(userId) } },
+        });
+
+        const leaves: LeaveItemDto[] = (user.own_leaves || []).map((leave) => ({
+            leave_id: leave.leave_id,
+            leave_description: leave.leave_description,
+            leave_status: leave.leave_status,
+            leave_type: leave.leave_type,
+            created_at: format(new Date(leave.created_at), 'yyyy-MM-dd HH:mm'),
+            updated_at: format(new Date(leave.updated_at), 'yyyy-MM-dd HH:mm'),
+            leave_user_name: leave.leave_user?.user_name || '',
+            leave_handler_name: leave.leave_handler?.user_name || '',
+        }));
+
+        
+        return {
+           
+
+            user_id: user.user_id,
+            user_name: user.user_name,
+            leaves,
+            currentPage: Number(currentPage),
+            leavesPerPage: take,
+            totalLeaves,
+        };
+        }
+
 }
