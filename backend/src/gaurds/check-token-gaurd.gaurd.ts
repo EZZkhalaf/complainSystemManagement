@@ -1,23 +1,14 @@
 import { CanActivate, ExecutionContext, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-// import { InjectModel } from "@nestjs/mongoose";
 import { InjectRepository } from "@nestjs/typeorm";
-// import { Model } from "mongoose";
-// import { permission } from "process";
-import { NotFoundError, Observable } from "rxjs";
 import { RolesEntity } from "../roles/entities/roles.entity";
-// import { Role, RoleDocument } from "src/roles/schemas/role.schema";
 import { UserEntity } from "../user/entities/user.entity";
-// import { User, UserDocument } from "src/user/schemas/user.schema";
 import { Repository } from "typeorm";
 
 @Injectable()
 export class CheckTokenGaurd implements CanActivate{
     constructor(
         private jwtService : JwtService,
-        // @InjectModel(User.name) private userModel : Model<UserDocument>,
-        // @InjectModel(Role.name) private roleModel : Model<RoleDocument>,
-
 
         @InjectRepository(UserEntity) private userRepo : Repository<UserEntity>,
         @InjectRepository(RolesEntity) private rolesRepo : Repository<RolesEntity>

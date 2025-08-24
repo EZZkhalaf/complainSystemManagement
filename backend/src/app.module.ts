@@ -17,6 +17,7 @@ import { DataSource } from 'typeorm';
 import { LeavesController } from './leaves/leaves.controller';
 import { LeavesService } from './leaves/leaves.service';
 import { LeavesModule } from './leaves/leaves.module';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -45,7 +46,7 @@ import { LeavesModule } from './leaves/leaves.module';
     LeavesModule
   ],
   controllers: [AppController, LeavesController],
-  providers: [AppService , DatabaseService, LeavesService],
+  providers: [AppService , DatabaseService, LeavesService , JwtService],
 })
 export class AppModule {
   constructor(private dataSource : DataSource){}

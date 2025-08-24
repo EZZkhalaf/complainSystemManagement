@@ -245,6 +245,13 @@ const EmployeeSideBar = ({ isOpen, onClose }) => {
         >
           View Groups Complaints
         </NavLink>
+
+        <NavLink
+          to="/userPage/leaves"
+          className={({ isActive }) => `${navLinkBase} ${isActive ? activeLinkStyles : ''}`}
+        >
+          Leaves
+        </NavLink>
       </div>
 
       {/* Bottom: settings + logout */}
@@ -286,14 +293,14 @@ const EmployeeSideBar = ({ isOpen, onClose }) => {
       {/* Sidebar */}
       <aside
         className={`
-    bg-slate-900 flex flex-col justify-between
-    p-3 shadow-lg overflow-y-auto
-    w-64 sm:w-56 md:w-60
-    h-screen fixed top-0 left-0
-    transform transition-transform duration-300 ease-in-out
-    ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-    z-50
-  `}
+          bg-slate-900 flex flex-col justify-between
+          p-3 shadow-lg overflow-y-auto
+          w-64 sm:w-56 md:w-60
+          h-screen fixed top-0 left-0
+          transform transition-transform duration-300 ease-in-out
+          ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          z-50
+        `}
       >
         {navLinks}
       </aside>

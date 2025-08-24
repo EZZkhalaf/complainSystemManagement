@@ -4,7 +4,7 @@ import { getUserGroupsHook } from '../../utils/GroupsHelper';
 import { useNavigate } from 'react-router-dom';
 
 const ListUserGroups = () => {
-  const { user } = useAuthContext(); // assumes user._id is available
+  const { user } = useAuthContext();
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
