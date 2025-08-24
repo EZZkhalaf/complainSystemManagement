@@ -7,26 +7,21 @@ import { User, UserSchema } from 'src/user/schemas/user.schema';
 import { Complaint, ComplaintSchema } from 'src/complaint/schemas/complaint.schema';
 import { ComplaintGroupsRule, ComplaintGroupsRuleSchema } from 'src/complaint/schemas/complaint-groups-rule.schema';
 import { LogsModule } from 'src/logs/logs.module';
-import { JwtService } from '@nestjs/jwt';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { Role, RoleSchema } from 'src/roles/schemas/role.schema';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GroupEntity } from './entities/group.entity';
 import { UserModule } from 'src/user/user.module';
 import { RolesModule } from 'src/roles/roles.module';
 import { ComplaintModule } from 'src/complaint/complaint.module';
+import { LeavesModule } from 'src/leaves/leaves.module';
 
 @Module({
   imports : [
-    MongooseModule.forFeature([
-      {name : Group.name , schema : GroupSchema} ,
-      {name : User.name , schema : UserSchema} , 
-      {name : Role.name , schema : RoleSchema},
-      {name :Complaint.name , schema : ComplaintSchema} ,
-      {name : ComplaintGroupsRule.name , schema : ComplaintGroupsRuleSchema}
-    ]) ,
     forwardRef(()=>LogsModule),
     forwardRef(()=>UserModule),
     forwardRef(()=>ComplaintModule),
+    forwardRef(()=>LeavesModule),
     RolesModule,
     TypeOrmModule.forFeature([
       GroupEntity

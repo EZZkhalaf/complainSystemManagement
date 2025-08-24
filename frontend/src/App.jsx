@@ -42,6 +42,7 @@ import GroupsListingForComplaints from './Components/Complaints/GroupsListingFor
 import ComplaintsList from './Components/Complaints/ComplaintsList'
 import ComplaintInfo from './Components/Complaints/ComplaintInfo'
 import ComplaintGroupsRule from './Components/Complaints/ComplaintGroupsRule'
+import LeavesHomePage from './Components/EmployeeComponent/Leaves/LeavesHomePage'
 
 const App = ()=> {
   const {user} = useAuthContext()
@@ -144,11 +145,11 @@ const App = ()=> {
           <Route path="/userPage/groupsForComplaints/complaint/:id" element = {<ComplaintInfo />}></Route> 
   
           {hasPermission(user,"view_logs") && <Route path='/userPage/view-logs' element={<ViewLogs />}/>}
+          <Route path='/userPage/leaves' element={<LeavesHomePage />} />
 
          
       
         </Route>
-
 
 
       </Routes>
