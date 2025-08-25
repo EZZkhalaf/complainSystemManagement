@@ -1,4 +1,4 @@
-# 📢 Complaint Management System – MERN Stack
+# 📢 Complaint Management System
 
 A powerful, secure, and user-friendly system for submitting, tracking, and managing complaints. Built with the MERN stack and Tailwind CSS, featuring robust role-based access control, permission management, real-time email notifications, and comprehensive API documentation via Swagger.
 
@@ -8,39 +8,39 @@ A powerful, secure, and user-friendly system for submitting, tracking, and manag
 
 ### 🧾 Complaint Handling
 
-* **Submit Complaints:** Users can file new complaints through an intuitive UI.
-* **Track Status:** Complaints are timestamped and tracked through stages (e.g., Pending, In Progress, Resolved).
-* **Manage Complaints:** Admins and Moderators can review, update statuses, and resolve complaints.
+- **Submit Complaints:** Users can file new complaints through an intuitive UI.
+- **Track Status:** Complaints are timestamped and tracked through stages (e.g., Pending, In Progress, Resolved).
+- **Manage Complaints:** Admins and Moderators can review, update statuses, and resolve complaints.
 
 ### 🔐 Role-Based Access Control (RBAC)
 
-* **Dynamic Roles:** Admins can create, update, and delete roles (e.g., `moderator`, `support_agent`).
-* **Custom Permissions:** Assign granular permissions (e.g., `view_complaint`, `delete_user`) to each role.
-* **Secure Enforcement:** All protected endpoints verify permissions server-side.
+- **Dynamic Roles:** Admins can create, update, and delete roles (e.g., `moderator`, `support_agent`).
+- **Custom Permissions:** Assign granular permissions (e.g., `view_complaint`, `delete_user`) to each role.
+- **Secure Enforcement:** All protected endpoints verify permissions server-side.
 
 ### 📩 Email Notifications
 
-* **Account Verification:** Users receive a verification email upon registration.
-* **Status Updates:** Automatic notifications when complaint status changes.
-* **Transactional Emails:** Powered by Nodemailer with configurable SMTP settings.
+- **Account Verification:** Users receive a verification email upon registration.
+- **Status Updates:** Automatic notifications when complaint status changes.
+- **Transactional Emails:** Powered by Nodemailer with configurable SMTP settings.
 
 ### 📘 Swagger API Documentation
 
-* **Interactive Docs:** Explore and test endpoints via Swagger UI.
-* **Endpoint Coverage:** Full documentation for user auth, complaints, roles, permissions, and admin summary.
-* **Access URL:** `/api-docs` (e.g., `http://localhost:5000/api-docs`).
+- **Interactive Docs:** Explore and test endpoints via Swagger UI.
+- **Endpoint Coverage:** Full documentation for user auth, complaints, roles, permissions, and admin summary.
+- **Access URL:** `/api-docs` (e.g., `http://localhost:5000/api-docs`).
 
 ### 🖥️ Admin Dashboard
 
-* **Overview:** Real-time system summary (total users, complaints, roles).
-* **Role Management:** Create, edit, and delete roles and their permissions.
-* **User Assignments:** Add or remove users from roles.
+- **Overview:** Real-time system summary (total users, complaints, roles).
+- **Role Management:** Create, edit, and delete roles and their permissions.
+- **User Assignments:** Add or remove users from roles.
 
 ### 📦 Frontend
 
-* **Tech:** React.js, Tailwind CSS, React Router DOM.
-* **Responsive:** Mobile-first design with a clean, reusable component library.
-* **Secure Routes:** Client-side protection based on user roles.
+- **Tech:** React.js, Tailwind CSS, React Router DOM.
+- **Responsive:** Mobile-first design with a clean, reusable component library.
+- **Secure Routes:** Client-side protection based on user roles.
 
 ---
 
@@ -62,9 +62,9 @@ A powerful, secure, and user-friendly system for submitting, tracking, and manag
 
 ### 🧪 Prerequisites
 
-* Node.js (v14+)
-* npm or yarn
-* MongoDB instance (local or Atlas)
+- Node.js (v14+)
+- npm or yarn
+- MongoDB instance (local or Atlas)
 
 ### 🖥️ Local Installation
 
@@ -111,9 +111,9 @@ A powerful, secure, and user-friendly system for submitting, tracking, and manag
 
 Your app should now be running:
 
-* Frontend: `http://localhost:3000`
-* Backend API: `http://localhost:5000`
-* Swagger UI: `http://localhost:5000/api-docs`
+- Frontend: `http://localhost:3000`
+- Backend API: `http://localhost:5000`
+- Swagger UI: `http://localhost:5000/api-docs`
 
 ---
 
@@ -125,9 +125,9 @@ To access the admin dashboard, ensure you have a user with the `admin` role. You
 
 ## 🛡️ Security
 
-* **JWT Authentication:** Protects all API routes.
-* **Role & Permission Middleware:** Server-side checks before sensitive operations.
-* **Environment Variables:** Secure credentials in `.env` files.
+- **JWT Authentication:** Protects all API routes.
+- **Role & Permission Middleware:** Server-side checks before sensitive operations.
+- **Environment Variables:** Secure credentials in `.env` files.
 
 ---
 
@@ -143,11 +143,11 @@ To access the admin dashboard, ensure you have a user with the `admin` role. You
 
 ## 📌 Future Improvements
 
-* Audit logs for user actions and permission changes
-* File attachments for complaints
-* Real-time updates via WebSockets
-* Multi-language support
-* Automated tests and CI/CD pipeline
+- Audit logs for user actions and permission changes
+- File attachments for complaints
+- Real-time updates via WebSockets
+- Multi-language support
+- Automated tests and CI/CD pipeline
 
 ---
 
