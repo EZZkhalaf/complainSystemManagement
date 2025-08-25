@@ -1,7 +1,7 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LeavesEntity, LeaveStatus, LeaveType } from './entities/leaves.entity';
-import { ILike, Repository } from 'typeorm';
+import { Between, ILike, Repository } from 'typeorm';
 import { AddLeaveDto } from './dtos/add-leave.dto';
 import { UserEntity } from '../user/entities/user.entity';
 import { ChangeLeaveStateDto } from './dtos/change-leave-state.dto';
@@ -9,6 +9,8 @@ import { GroupEntity } from '../groups/entities/group.entity';
 import { PagingDto } from './dtos/paging.dto';
 import { format } from 'date-fns'; // for date formatting
 import { GetUserLeavesDto, LeaveItemDto } from './dtos/get-user-leaves.dto';
+import { PaginAndFilterDto } from './dtos/paging-and-filter.dto';
+import { LogsService } from 'src/logs/logs.service';
 
 
 @Injectable()
@@ -16,6 +18,7 @@ export class LeavesService {
 
 
     constructor(
+        private readonly logsService : LogsService,
         @InjectRepository(LeavesEntity) private readonly leavesRepo : Repository<LeavesEntity>,
         @InjectRepository(UserEntity) private readonly userRepo : Repository<UserEntity> ,
         @InjectRepository(GroupEntity) private readonly groupRepo : Repository<GroupEntity>
@@ -104,6 +107,14 @@ export class LeavesService {
         leave.leave_status  = new_state as LeaveStatus ;
         leave.leave_handler = leaveHandler;
         await this.leavesRepo.save(leave)
+
+        await this.logsService.logAction(
+            leaveHandler,
+            'Leave-Action',
+            'Leave',
+            leaveHandler.user_id,
+            `${new_state} ${leave.leave_user.user_name} leave `
+        )
 
         return {
             success : true, 
@@ -238,26 +249,30 @@ export class LeavesService {
         const skip = (Number(currentPage) - 1) * Number(leavesPerPage);
         const take = Number(leavesPerPage);
 
-        const user = await this.userRepo
-            .createQueryBuilder('user_info')
-            .leftJoinAndSelect('user_info.own_leaves', 'leave_info')
-            .leftJoinAndSelect('leave_info.leave_user', 'leave_user') // join user who created the leave
-            .leftJoinAndSelect('leave_info.leave_handler', 'leave_handler') // join handler user
-            .where('user_info.user_id = :userId', { userId: Number(userId) })
-            .orderBy('leave_info.created_at', 'DESC')
-            .skip(skip)
-            .take(take)
-            .getOne();
+        const user = await this.userRepo.findOne(
+            {
+                where : {user_id : Number(userId)},
+                select : ['user_id' , 'user_name']
+            }
+        )
 
         if (!user) {
             throw new NotFoundException('user not found');
         }
 
-        const totalLeaves = await this.leavesRepo.count({
-            where: { leave_user: { user_id: Number(userId) } },
-        });
+        
 
-        const leaves: LeaveItemDto[] = (user.own_leaves || []).map((leave) => ({
+        const [leavesData , totalLeaves] = await this.leavesRepo.findAndCount(
+            {
+                where  :{leave_user : {user_id : Number(userId)}},
+                relations : ['leave_user' , 'leave_handler'],
+                order : {created_at  :"DESC"},
+                skip ,
+                take
+            }
+        )
+
+        const leaves : LeaveItemDto[] = leavesData.map((leave) => ({
             leave_id: leave.leave_id,
             leave_description: leave.leave_description,
             leave_status: leave.leave_status,
@@ -266,8 +281,7 @@ export class LeavesService {
             updated_at: format(new Date(leave.updated_at), 'yyyy-MM-dd HH:mm'),
             leave_user_name: leave.leave_user?.user_name || '',
             leave_handler_name: leave.leave_handler?.user_name || '',
-        }));
-
+        }))
         
         return {
            
@@ -279,6 +293,55 @@ export class LeavesService {
             leavesPerPage: take,
             totalLeaves,
         };
+    }
+
+    async getLeaves(dto : PaginAndFilterDto){
+        const { currentPage, leavesPerPage, leave_status , leave_type ,date_from , date_to} = dto;
+        const skip = (Number(currentPage) - 1) * Number(leavesPerPage);
+        const take = Number(leavesPerPage);
+
+        if (
+            isNaN(Number(currentPage)) ||
+            isNaN(Number(leavesPerPage)) ||
+            Number(leavesPerPage) <= 0 ||
+            Number(currentPage) <= 0
+        ) {
+            throw new BadRequestException('error in the input page');
         }
+
+        const where : any = {}
+
+        if(leave_status) where.leave_status = leave_status;
+        if(leave_type) where.leave_type = leave_type;
+        if(date_from && date_to) where.created_at = Between(new Date(date_from), new Date(date_to))
+
+        const [leavesData , totalLeaves] = await this.leavesRepo.findAndCount(
+            {
+                where  :where ,
+                order : {created_at : "DESC"},
+                skip , 
+                take ,
+                relations : ['leave_user' , 'leave_handler']
+            }
+        )
+
+        const leaves = leavesData.map((leave) => ({
+            leave_id: leave.leave_id,
+            leave_description: leave.leave_description,
+            leave_status: leave.leave_status,
+            leave_type: leave.leave_type,
+            created_at: format(new Date(leave.created_at), 'yyyy-MM-dd HH:mm'),
+            updated_at: format(new Date(leave.updated_at), 'yyyy-MM-dd HH:mm'),
+            leave_user_name: leave.leave_user?.user_name || '',
+            leave_handler_name: leave.leave_handler?.user_name || '',
+        }))
+
+        return {
+            currentPage: Number(currentPage),
+            leavesPerPage: Number(leavesPerPage),
+            totalLeaves,
+            leaves,
+        };
+    }
 
 }

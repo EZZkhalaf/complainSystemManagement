@@ -72,6 +72,7 @@ const ViewLogs = () => {
           <option value="Delete-Group">Delete-Group</option>
           <option value="Add-User">Add-User</option>
           <option value="Edit-Rule">Edit-Rule</option>
+          <option value="Leave-Action">Leave-Action</option>
         </select>
 
         <select

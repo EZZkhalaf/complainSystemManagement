@@ -20,47 +20,45 @@ export class RolesController {
     }
 
     @Get()
-    @UseGuards(CheckTokenGaurd)
-    async getRoles(){
+        async getRoles(){
         return this.rolesService.getRoles()
     }
 
     @Post("addPermissions")
-    @UseGuards(CheckTokenGaurd,CheckPermissionGaurd)
+    @UseGuards(CheckPermissionGaurd)
     @Permission("manage_permissions")
     async addPermissions(@Body() dto : CreatePermissionDto[] , @Req() req : any){
         return this.rolesService.addPermissions(req.user , dto)
     }
 
     @Delete("deletePermission/:id")
-    @UseGuards(CheckTokenGaurd,CheckPermissionGaurd)
+    @UseGuards(CheckPermissionGaurd)
     @Permission("manage_permissions")
     async deletePermission(@Param("id") id : string , @Req() req : any){
         return this.rolesService.deletePermission( req.user , id)
     }
 
     @Get("getPermissions")
-    @UseGuards(CheckTokenGaurd,CheckPermissionGaurd)
+    @UseGuards(CheckPermissionGaurd)
     @Permission("manage_permissions")
     async getPermissions(){
         return this.rolesService.getPermissions()
     }
 
     @Post("addPermissionsToRole")
-    @UseGuards(CheckTokenGaurd,CheckPermissionGaurd)
+    @UseGuards(CheckPermissionGaurd)
     @Permission("manage_permissions")
     async addPermissionsToRole(@Body() dto : AddPermissionsToRoleDto , @Req() req : any){
         return this.rolesService.addPermissionsToRole(dto , req)
     }
 
     @Get(":id")
-    @UseGuards(CheckTokenGaurd)
-    async getRoleById(@Param("id") id : string){
+        async getRoleById(@Param("id") id : string){
         return this.rolesService.getRoleById(id)
     }
 
     @Delete(":roleId")
-    @UseGuards(CheckTokenGaurd,CheckPermissionGaurd)
+    @UseGuards(CheckPermissionGaurd)
     @Permission("manage_permissions")
     async deleteRole(@Param("roleId") roleId : string , @Req() req : any){
         return this.rolesService.deleteRole(roleId , req)

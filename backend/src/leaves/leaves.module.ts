@@ -7,6 +7,7 @@ import { UserModule } from 'src/user/user.module';
 import { GroupsModule } from 'src/groups/groups.module';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { RolesModule } from 'src/roles/roles.module';
+import { LogsModule } from 'src/logs/logs.module';
 
 @Module({
 
@@ -14,7 +15,7 @@ import { RolesModule } from 'src/roles/roles.module';
         forwardRef(()=> RolesModule),
         forwardRef(()=> UserModule),
         forwardRef(()=>GroupsModule),
-        
+        forwardRef(() => LogsModule),
         TypeOrmModule.forFeature([
             LeavesEntity
         ]) ,

@@ -37,32 +37,27 @@ export class GroupsController {
     }
 
     @Get(":groupId")
-    @UseGuards(CheckTokenGaurd)
-    async getGroupInfoAndUsers(@Param("groupId") groupId : string){
+        async getGroupInfoAndUsers(@Param("groupId") groupId : string){
         return this.groupsService.getGroupInfoAndUsers(groupId)
     }
 
     @Get("user/:id")
-    @UseGuards(CheckTokenGaurd)
-    async getUsersGroups(@Param("id") id : string){
+        async getUsersGroups(@Param("id") id : string){
         return this.groupsService.getUserGroups(id)
     }
 
     @Get("admin/:id")
-    @UseGuards(CheckTokenGaurd)
-    async listGroups(@Param("id") id : string){
+        async listGroups(@Param("id") id : string){
         return this.groupsService.listGroups(id)
     }
 
     @Post("groupcomplaints/:id")
-    @UseGuards(CheckTokenGaurd)
-    async listGroupComplaints(@Param("id") id : string ,@Body() dto : ListGroupComplaintsDto){
+        async listGroupComplaints(@Param("id") id : string ,@Body() dto : ListGroupComplaintsDto){
         return this.groupsService.listGroupComplaints(id , dto)
     }
 
     @Post("searchGroups/:id")
-    @UseGuards(CheckTokenGaurd)
-    async searchGroups(@Param("id") id : string ,@Body() dto : SearchGroupDto ){
+        async searchGroups(@Param("id") id : string ,@Body() dto : SearchGroupDto ){
         return this.groupsService.searchGroups(dto.search)
     }
 
@@ -81,8 +76,7 @@ export class GroupsController {
     }
 
     @Get("getRules/:id")
-    @UseGuards(CheckTokenGaurd)
-    async getRules(@Param("id") id : string){
+        async getRules(@Param("id") id : string){
         return this.groupsService.getRules()
     }
 }
