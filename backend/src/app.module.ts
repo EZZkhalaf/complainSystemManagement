@@ -18,11 +18,15 @@ import { LeavesController } from './leaves/leaves.controller';
 import { LeavesService } from './leaves/leaves.service';
 import { LeavesModule } from './leaves/leaves.module';
 import { JwtService } from '@nestjs/jwt';
+import { APP_GUARD } from '@nestjs/core';
+import { CheckTokenGaurd } from './gaurds/check-token-gaurd.gaurd';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({isGlobal:true}),
-    MongooseModule.forRoot(process.env.CONNECTION_STRING ||"invalid connection string "),
+    ConfigModule.forRoot({ isGlobal: true }),
+    MongooseModule.forRoot(
+      process.env.CONNECTION_STRING || 'invalid connection string ',
+    ),
     ComplaintModule,
     AuthModule,
     UserModule,
@@ -30,9 +34,9 @@ import { JwtService } from '@nestjs/jwt';
     LogsModule,
     RolesModule,
     ServeStaticModule.forRoot({
-      rootPath : join(__dirname,"..","public","uploads"),
-      serveRoot:"/uploads"
-    }) ,
+      rootPath: join(__dirname, '..', 'public', 'uploads'),
+      serveRoot: '/uploads',
+    }),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',
@@ -43,15 +47,21 @@ import { JwtService } from '@nestjs/jwt';
       autoLoadEntities: true,
       synchronize: true, // only for dev
     }),
-    LeavesModule
+    LeavesModule,
   ],
   controllers: [AppController, LeavesController],
-  providers: [AppService , DatabaseService, LeavesService , JwtService],
+  providers: [
+    AppService,
+    DatabaseService,
+    LeavesService,
+    JwtService,
+    { provide: APP_GUARD, useClass: CheckTokenGaurd },
+  ],
 })
 export class AppModule {
-  constructor(private dataSource : DataSource){}
+  constructor(private dataSource: DataSource) {}
 
-  async onApplicationBootstrap(){
+  async onApplicationBootstrap() {
     if (this.dataSource.isInitialized) {
       console.log('Connected to Postgres database');
     } else {

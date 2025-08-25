@@ -14,48 +14,44 @@ export class ComplaintController {
     constructor(private readonly complaintService : ComplaintService){}
 
     @Post(":id")
-    @UseGuards(CheckTokenGaurd)
-    // @Permission("add_complaint")
+        // @Permission("add_complaint")
     async addComplaint(@Param("id") id : string , @Body() addComplaintDto : AddComplaintDto){
         const idNum = Number(id)
         return this.complaintService.addComplaint(addComplaintDto , idNum)
     }
 
     @Post('handleComplaintInGroup/:id')
-    @UseGuards(CheckTokenGaurd)
-    async handleComplaintInGroup(@Param("id") id : string , @Body() handleComplaintInGroupDto : HandleComplaintInGroupDto){
+        async handleComplaintInGroup(@Param("id") id : string , @Body() handleComplaintInGroupDto : HandleComplaintInGroupDto){
         
         return this.complaintService.handleComplaintInGroup(id , handleComplaintInGroupDto)
     }
 
     @Put()
-    @UseGuards(CheckTokenGaurd,CheckPermissionGaurd)
+    @UseGuards(CheckPermissionGaurd)
     @Permission("edit_complaint")
     async changeComplaintStatus(@Body() dto : ChangeComplaintStatusDto){
         return this.complaintService.changeComplaintStatus(dto)
     }
 
     @Post()
-    @UseGuards(CheckTokenGaurd,CheckPermissionGaurd)
+    @UseGuards(CheckPermissionGaurd)
     @Permission("view_complaints")
     async listComplaints(@Body() dto : ListComplaintsDto){
         return this.complaintService.listComplaints(dto);
     }
 
     @Get("info/:id")
-    @UseGuards(CheckTokenGaurd)
-    async getComplaintInfo(@Param("id") id : string){
+        async getComplaintInfo(@Param("id") id : string){
         return this.complaintService.getComplaintInfo(id)
     }
 
     @Get("user/:id")
-    @UseGuards(CheckTokenGaurd)
-    async listUserComplaints(@Param("id") id : string){
+        async listUserComplaints(@Param("id") id : string){
         return this.complaintService.listUsrComplaints(id)
     }
 
     @Delete("delete/:userId")
-    @UseGuards(CheckTokenGaurd,CheckPermissionGaurd)
+    @UseGuards(CheckPermissionGaurd)
     @Permission("delete_complaint")
     async deleteComplaint(@Param("userId") userId : string , @Body() dto : DeleteComplaintDto){
         console.log("testing")

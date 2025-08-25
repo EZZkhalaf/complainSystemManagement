@@ -2,23 +2,18 @@ import React from 'react'
 import LeavesTable from './LeavesTable'
 import { useNavigate } from 'react-router-dom'
 
-const LeavesHomePage = () => {
+const LeavesHomePageAdmin = () => {
   const navigate = useNavigate()
   return (
     <div className="p-6 bg-gray-50 rounded-xl shadow-md">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
         <div>
-          <h2 className="text-3xl font-extrabold text-gray-900">My Leaves</h2>
+          <h2 className="text-3xl font-extrabold text-gray-900">View Leaves</h2>
           <p className="text-gray-600 mt-1 text-sm">
-            View all your leave requests, track their status, and create new requests.
+            View all The leave requests, track their status, and accept or reject them 
           </p>
         </div>
-        <button
-          onClick={() => navigate('add-leave')}
-          className="mt-4 sm:mt-0 bg-green-600 text-white px-4 py-2 font-semibold rounded-lg hover:bg-green-700 transition duration-200"
-        >
-          + Request Leave
-        </button>
+        
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-x-auto">
@@ -29,4 +24,4 @@ const LeavesHomePage = () => {
   )
 }
 
-export default LeavesHomePage
+export default LeavesHomePageAdmin

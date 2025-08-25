@@ -2,12 +2,15 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { LeavesService } from './leaves.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { UserEntity } from '../user/entities/user.entity';
-import { LeavesEntity, LeaveType } from './entities/leaves.entity';
+import { LeavesEntity, LeaveStatus, LeaveType } from './entities/leaves.entity';
 import { AddLeaveDto } from './dtos/add-leave.dto';
 import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { GroupEntity } from '../groups/entities/group.entity';
-import { ILike } from 'typeorm';
+import { Between, ILike } from 'typeorm';
 import { PagingDto } from './dtos/paging.dto';
+import { LeaveItemDto } from './dtos/get-user-leaves.dto';
+import { format } from 'date-fns';
+import { PaginAndFilterDto } from './dtos/paging-and-filter.dto';
 
 describe('LeavesService', () => {
   let service: LeavesService;
@@ -888,7 +891,8 @@ describe('LeavesService - get user leaves ', () => {
     create : jest.Mock ,
     save : jest.Mock,
     delete:jest.Mock,
-    count : jest.Mock
+    count : jest.Mock,
+    findAndCount:jest.Mock
   }
   let groupRepo : {
     findOne : jest.Mock,
@@ -906,7 +910,8 @@ describe('LeavesService - get user leaves ', () => {
       create : jest.fn() ,
       save : jest.fn() , 
       delete  :jest.fn(),
-      count : jest.fn()
+      count : jest.fn(),
+      findAndCount : jest.fn()
     }
     groupRepo = {
       findOne : jest.fn(),
@@ -957,126 +962,228 @@ describe('LeavesService - get user leaves ', () => {
       const dto : PagingDto = {currentPage : "1" , leavesPerPage : "8"}
       const skip = (Number(dto.currentPage) -1) * Number(dto.leavesPerPage)
       const take = Number(dto.leavesPerPage)
-      const queryBuilder = {
-        leftJoinAndSelect:jest.fn().mockReturnThis(),
-        where:jest.fn().mockReturnThis(),
-        orderBy:jest.fn().mockReturnThis(),
-        skip:jest.fn().mockReturnThis(),
-        take:jest.fn().mockReturnThis(),
-        getOne:jest.fn().mockResolvedValue(null),
-      }
+      
 
-      userRepo.createQueryBuilder.mockReturnValue(queryBuilder)
+      userRepo.findOne.mockResolvedValue(null)
 
       await expect(service.getUserLeaves(userId , dto)).rejects.toThrow(
         new NotFoundException("user not found")
       )
-      expect(userRepo.createQueryBuilder).toHaveBeenCalledWith("user_info")
-      expect(queryBuilder.leftJoinAndSelect).toHaveBeenCalledWith('user_info.own_leaves', 'leave_info')
-      expect(queryBuilder.leftJoinAndSelect).toHaveBeenCalledWith('leave_info.leave_user', 'leave_user')
-      expect(queryBuilder.leftJoinAndSelect).toHaveBeenCalledWith('leave_info.leave_handler', 'leave_handler')
-      expect(queryBuilder.where).toHaveBeenCalledWith('user_info.user_id = :userId' , {userId : Number(userId)})
-      expect(queryBuilder.orderBy).toHaveBeenCalledWith('leave_info.created_at' , 'DESC')
-      expect(queryBuilder.skip).toHaveBeenCalledWith(skip)
-      expect(queryBuilder.take).toHaveBeenCalledWith(take)
-      expect(queryBuilder.getOne).toHaveBeenCalled()
+      
 
-
-
-
-    });
-    it('should find the user and return his/her leaves ', async () => {
-      const userId = "1"
-      const dto : PagingDto = {currentPage : "1" , leavesPerPage : "8"}
-      const skip = (Number(dto.currentPage) -1) * Number(dto.leavesPerPage)
-      const take = Number(dto.leavesPerPage)
-      const fakeUser = {
-        user_id: 1,
-        user_name: "ezz",
-        own_leaves: [
-          {
-            leave_id: 1,
-            leave_description: "testing",
-            leave_type: "sick",
-            leave_status: "pending",
-            created_at: "2025-08-24 16:54",
-            updated_at: "2025-08-24 16:54",
-            leave_user_name: "",
-            leave_handler_name: "",
-          },
-          {
-            leave_id: 2,
-            leave_description: "testing2",
-            leave_type: "sick",
-            leave_status: "accepted",
-            created_at: "2025-08-24 16:54",
-            updated_at: "2025-08-24 16:54",
-            leave_user_name: "",
-            leave_handler_name: "",
-          }
-        ]
-      };
-
-
-
-      const fakeLeaves =  [
-          {
-            leave_id: 1,
-            leave_description: "testing",
-            leave_type: "sick",
-            leave_status: "pending",
-            created_at: new Date(),
-            updated_at: new Date(),
-            leave_user: { user_name: "" },
-            leave_handler: { user_name: "" },
-          },
-          {
-            leave_id: 2,
-            leave_description: "testing2",
-            leave_type: "sick",
-            leave_status: "accepted",
-            created_at: new Date(),
-            updated_at: new Date(),
-            leave_user: { user_name: "" },
-            leave_handler: { user_name: "" },
-          }
-        ] 
-      const queryBuilder = {
-        leftJoinAndSelect: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        orderBy: jest.fn().mockReturnThis(),
-        skip: jest.fn().mockReturnThis(),
-        take: jest.fn().mockReturnThis(),
-        getOne: jest.fn().mockResolvedValue(fakeUser),
-      }
-
-      userRepo.createQueryBuilder.mockReturnValue(queryBuilder)
-      leavesRepo.count.mockResolvedValue(fakeLeaves.length)
-
-      const result = await service.getUserLeaves(userId , dto)
-      expect(result.leaves).toMatchObject(fakeUser.own_leaves)
-      expect(result.currentPage).toEqual(Number(dto.currentPage))
-
-      expect(userRepo.createQueryBuilder).toHaveBeenCalledWith("user_info")
-      expect(queryBuilder.leftJoinAndSelect).toHaveBeenCalledWith('user_info.own_leaves', 'leave_info')
-      expect(queryBuilder.leftJoinAndSelect).toHaveBeenCalledWith('leave_info.leave_user', 'leave_user')
-      expect(queryBuilder.leftJoinAndSelect).toHaveBeenCalledWith('leave_info.leave_handler', 'leave_handler')
-      expect(queryBuilder.where).toHaveBeenCalledWith('user_info.user_id = :userId' , {userId : Number(userId)})
-      expect(queryBuilder.orderBy).toHaveBeenCalledWith('leave_info.created_at' , 'DESC')
-      expect(queryBuilder.skip).toHaveBeenCalledWith(skip)
-      expect(queryBuilder.take).toHaveBeenCalledWith(take)
-      expect(queryBuilder.getOne).toHaveBeenCalled()
-
-      expect(leavesRepo.count).toHaveBeenCalledWith(
+      expect(userRepo.findOne).toHaveBeenCalledWith(
         {
-          where: { leave_user: { user_id: Number(userId) } }
+          where : {user_id : Number(userId)},
+          select : ['user_id' , 'user_name']
         }
       )
 
     });
+    it('should throw not found exception when the user not found ', async () => {
+      const userId = "1"
+      const dto : PagingDto = {currentPage : "1" , leavesPerPage : "8"}
+      const skip = (Number(dto.currentPage) -1) * Number(dto.leavesPerPage)
+      const take = Number(dto.leavesPerPage)
+      const fakeUser = { user_id: 1, user_name: 'John Doe' } as UserEntity;
+      const fakeLeaves = [
+        {
+          leave_id: 101,
+          leave_description: 'Vacation',
+          leave_status: 'accepted',
+          leave_type: LeaveType.SICK,
+          created_at: new Date('2025-08-20T10:00:00Z'),
+          updated_at: new Date('2025-08-22T15:00:00Z'),
+          leave_user: { user_name: 'John Doe' },
+          leave_handler: { user_name: 'Admin' },
+        },
+      ];
 
 
 
 
+      userRepo.findOne.mockResolvedValue(fakeUser)
+      leavesRepo.findAndCount.mockResolvedValue([fakeLeaves , 10])
+      
+      
+      const result = await service.getUserLeaves(userId, dto);
+      
 
+      expect(userRepo.findOne).toHaveBeenCalledWith({
+        where: { user_id: Number(userId) },
+        select: ['user_id', 'user_name'],
+      });
+
+      expect(leavesRepo.findAndCount).toHaveBeenCalledWith({
+        where: { leave_user: { user_id: Number(userId) } },
+        relations: ['leave_user', 'leave_handler'],
+        order: { created_at: 'DESC' },
+        skip: skip, 
+        take: take,
+      });
+
+      expect(result).toEqual({
+        user_id: fakeUser.user_id,
+        user_name: fakeUser.user_name,
+        leaves: [
+          {
+            leave_id: 101,
+            leave_description: 'Vacation',
+            leave_status: fakeLeaves[0].leave_status, // accepted
+            leave_type: fakeLeaves[0].leave_type, // sick
+            created_at: format(fakeLeaves[0].created_at, 'yyyy-MM-dd HH:mm'),
+            updated_at: format(fakeLeaves[0].updated_at, 'yyyy-MM-dd HH:mm'),
+            leave_user_name: 'John Doe',
+            leave_handler_name: 'Admin',
+          },
+        ],
+        currentPage: Number(dto.currentPage),
+        leavesPerPage: Number(dto.leavesPerPage),
+        totalLeaves: 10,
+      });
+
+    });
 });
+
+
+describe('LeavesService - get all leaves ', () => {
+  let service: LeavesService;
+  let userRepo : {
+    findOne : jest.Mock,
+    createQueryBuilder : jest.Mock
+  }
+  let leavesRepo : {
+    findOne : jest.Mock,
+    create : jest.Mock ,
+    save : jest.Mock,
+    delete:jest.Mock,
+    count : jest.Mock,
+    findAndCount:jest.Mock
+  }
+  let groupRepo : {
+    findOne : jest.Mock,
+    create : jest.Mock ,
+    save : jest.Mock
+  }
+  beforeEach(async () => {
+
+    userRepo = {
+      findOne : jest.fn(),
+      createQueryBuilder : jest.fn()
+    }
+    leavesRepo = {
+      findOne : jest.fn(),
+      create : jest.fn() ,
+      save : jest.fn() , 
+      delete  :jest.fn(),
+      count : jest.fn(),
+      findAndCount : jest.fn()
+    }
+    groupRepo = {
+      findOne : jest.fn(),
+      create : jest.fn() ,
+      save : jest.fn()
+    }
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        LeavesService,
+        {provide : getRepositoryToken(UserEntity) , useValue:userRepo},
+        {provide : getRepositoryToken(LeavesEntity) , useValue:leavesRepo},
+        {provide : getRepositoryToken(GroupEntity) , useValue : groupRepo}
+      ],
+    }).compile();
+
+    service = module.get<LeavesService>(LeavesService);
+  });
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should throw bad request when the paging inputs are invalid', async () => {
+    const invalidDtos: PaginAndFilterDto[] = [
+      { currentPage: 'abc', leavesPerPage: '5' },      // currentPage not a number
+      { currentPage: '1', leavesPerPage: 'xyz' },      // leavesPerPage not a number
+      { currentPage: '-1', leavesPerPage: '5' },       // currentPage negative
+      { currentPage: '1', leavesPerPage: '-10' },      // leavesPerPage negative
+    ];
+
+    for (const dto of invalidDtos) {
+      await expect(service.getLeaves(dto)).rejects.toThrow(
+        new BadRequestException('error in the input page'),
+      );
+    }
+  });
+
+  it('should fetch the leaves , a few of them in time ', async () => {
+    const dto: PaginAndFilterDto = {
+      currentPage: '1',
+      leavesPerPage: '2',
+      leave_status: LeaveStatus.PENDING,
+      leave_type: LeaveType.SICK,
+      date_from: '2025-08-20',
+      date_to: '2025-08-25',
+    };
+    const skip = (Number(dto.currentPage) - 1) * Number(dto.leavesPerPage);
+    const take = Number(dto.leavesPerPage);
+
+    const fakeLeaves: LeavesEntity[] = [
+      {
+        leave_id: 1,
+        leave_description: 'Sick leave',
+        leave_status: LeaveStatus.PENDING,
+        leave_type: LeaveType.SICK,
+        created_at: new Date('2025-08-21T10:00:00Z'),
+        updated_at: new Date('2025-08-21T12:00:00Z'),
+        leave_user: { user_name: 'John Doe' } as any,
+        leave_handler: { user_name: 'Admin' } as any,
+      },
+      {
+        leave_id: 2,
+        leave_description: 'Sick leave 2',
+        leave_status: LeaveStatus.PENDING,
+        leave_type: LeaveType.SICK,
+        created_at: new Date('2025-08-22T10:00:00Z'),
+        updated_at: new Date('2025-08-22T12:00:00Z'),
+        leave_user: { user_name: 'Jane Doe' } as any,
+        leave_handler: { user_name: 'Admin' } as any,
+      },
+    ];
+
+    leavesRepo.findAndCount.mockResolvedValue([fakeLeaves, 10]);
+
+    const result = await service.getLeaves(dto);
+
+    expect(leavesRepo.findAndCount).toHaveBeenCalledWith({
+      where: {
+        leave_status: dto.leave_status,
+        leave_type: dto.leave_type,
+        created_at: Between(new Date(dto.date_from), new Date(dto.date_to)),
+      },
+      order: { created_at: 'DESC' },
+      skip,
+      take,
+      relations: ['leave_user', 'leave_handler'],
+    });
+
+    expect(result).toEqual({
+      currentPage: 1,
+      leavesPerPage: 2,
+      totalLeaves: 10,
+      leaves: fakeLeaves.map((leave) => ({
+        leave_id: leave.leave_id,
+        leave_description: leave.leave_description,
+        leave_status: leave.leave_status,
+        leave_type: leave.leave_type,
+        created_at: format(leave.created_at, 'yyyy-MM-dd HH:mm'),
+        updated_at: format(leave.updated_at, 'yyyy-MM-dd HH:mm'),
+        leave_user_name: leave.leave_user.user_name,
+        leave_handler_name: leave.leave_handler.user_name,
+      })),
+    });
+
+    
+  }); 
+});
+
+  
+
+

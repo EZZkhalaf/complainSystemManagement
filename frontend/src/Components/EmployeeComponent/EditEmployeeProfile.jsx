@@ -62,7 +62,7 @@ const EditEmployeeProfile = () => {
       <form 
       onSubmit={(e) =>handleSubmit(e)} 
       className="max-w-md mx-auto space-y-4">
-            <div className="flex flex-col md:flex-row items-center gap-6">
+            <div className="flex flex-col md:flex-row items-center justify-center gap-6">
 
                 {isEditing ? (
                     <div className="flex flex-col items-center space-y-3">
