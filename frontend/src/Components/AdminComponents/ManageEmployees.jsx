@@ -1,38 +1,47 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuthContext } from '../../Context/authContext';
-import { fetchUsersHook } from '../../utils/UserHelper';
-import defaultPhoto from '../../assets/defaultPhoto.png';
-import { toast } from 'react-toastify';
-import { OrbitProgress } from 'react-loading-indicators';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuthContext } from "../../Context/authContext";
+import { fetchUsersHook } from "../../utils/UserHelper";
+import defaultPhoto from "../../assets/defaultPhoto.png";
+import { toast } from "react-toastify";
+import { OrbitProgress } from "react-loading-indicators";
 
 const EmpCard = ({ emp }) => {
   const { user } = useAuthContext();
   const navigate = useNavigate();
-  console.log(emp)
+  console.log(emp);
   return (
     <div
-      onClick={() =>{
-        navigate(`/${user.role === 'admin' ? "adminPage" : "userPage"}/listEmployees/employee/${emp?.user?.user_id}`)
-        }
-      }
+      onClick={() => {
+        navigate(
+          `/${
+            user.role === "admin" ? "adminPage" : "userPage"
+          }/listEmployees/employee/${emp?.user?.user_id}`
+        );
+      }}
       className="bg-white rounded-3xl shadow-md p-6 border border-gray-100 hover:shadow-xl hover:border-blue-200 transition duration-200 flex flex-col items-center cursor-pointer group"
       key={emp.user._id}
     >
       <img
-        src={emp.user.profilePicture ? `http://localhost:5000${emp?.user?.profilePicture}` : defaultPhoto}
+        src={
+          emp.user.profilePicture
+            ? `http://localhost:5000${emp?.user?.profilePicture}`
+            : defaultPhoto
+        }
         alt="Profile"
         className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-lg group-hover:scale-105 transition-transform duration-300"
       />
 
       <div className="mt-4 text-center">
-        <h3 className="text-lg sm:text-xl font-semibold text-gray-800 capitalize">{emp.user.user_name}</h3>
+        <h3 className="text-lg sm:text-xl font-semibold text-gray-800 capitalize">
+          {emp.user.user_name}
+        </h3>
         <p className="mt-1 text-sm text-gray-500">{emp.user.user_email}</p>
       </div>
 
       <div className="mt-3">
         <span className="inline-block px-3 py-1 text-sm rounded-full bg-blue-100 text-blue-700 capitalize font-medium">
-          {emp. role}
+          {emp.role}
         </span>
       </div>
     </div>
@@ -44,15 +53,16 @@ const ManageEmployees = () => {
   const [search, setSearch] = useState("");
   const [employees, setEmployees] = useState([]);
   const [filteredEmployees, setFilteredEmployees] = useState([]);
-  const [loading , setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
 
   const getEmployees = async () => {
     setLoading(true);
     try {
       const roles = await fetchUsersHook();
-      console.log(roles)
-      let updatedUsers = roles.users.filter(emp => user.user_id !== emp.user.user_id)
-       .filter(emp => emp.user_role !== 'admin');
+      console.log(roles);
+      let updatedUsers = roles.users
+        .filter((emp) => user.user_id !== emp.user.user_id)
+        .filter((emp) => emp.user_role !== "admin");
       setEmployees(updatedUsers);
       setFilteredEmployees(updatedUsers);
       setLoading(false);
@@ -69,17 +79,20 @@ const ManageEmployees = () => {
   useEffect(() => {
     const lower = search.toLowerCase();
     setFilteredEmployees(
-      employees.filter(emp =>
-        emp.user.user_name.toLowerCase().includes(lower) || emp.user.user_email.toLowerCase().includes(lower)
+      employees.filter(
+        (emp) =>
+          emp.user.user_name.toLowerCase().includes(lower) ||
+          emp.user.user_email.toLowerCase().includes(lower)
       )
     );
   }, [search, employees]);
 
-  if(loading) return(
-            <div className="max-w-md min-h-full mx-auto p-8 bg-gradient-to-br space-y-6 flex justify-center items-center">
-                <OrbitProgress color="#32cd32" size="medium" text="" textColor="" />
-            </div>
-    )
+  if (loading)
+    return (
+      <div className="max-w-md min-h-full mx-auto p-8 bg-gradient-to-br space-y-6 flex justify-center items-center">
+        <OrbitProgress color="#32cd32" size="medium" text="" textColor="" />
+      </div>
+    );
 
   return (
     <div className="max-w-7xl mx-auto  ">
@@ -88,10 +101,10 @@ const ManageEmployees = () => {
         <div>
           <h1 className="text-3xl font-bold mb-2">Manage Employees</h1>
           <p className="text-gray-600 max-w-xl">
-            Easily view employee profiles, update their information, and assign roles to control access and responsibilities across the system.
+            Easily view employee profiles, update their information, and assign
+            roles to control access and responsibilities across the system.
           </p>
         </div>
-
 
         {/* Search Input */}
         <div className="flex justify-center">
@@ -108,7 +121,7 @@ const ManageEmployees = () => {
         {filteredEmployees && filteredEmployees.length > 0 ? (
           <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {filteredEmployees.map((emp) => (
-              <EmpCard  emp={emp} />
+              <EmpCard emp={emp} />
             ))}
           </div>
         ) : (
