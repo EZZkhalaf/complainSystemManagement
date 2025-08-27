@@ -18,7 +18,7 @@ import { VerifyOtpDto } from './dtos/verify-otp.dto';
 import { ChangeOtpPasswordDto } from './dtos/change-otp-password.dto';
 import type { Response } from 'express';
 import { CheckTokenGaurd } from '../gaurds/check-token-gaurd.gaurd';
-import { Public } from 'src/decorators/public.decorator';
+import { Public } from '../decorators/public.decorator';
 
 @Controller('auth')
 export class AuthController {

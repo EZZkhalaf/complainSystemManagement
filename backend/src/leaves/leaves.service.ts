@@ -15,8 +15,8 @@ import { PagingDto } from './dtos/paging.dto';
 import { format } from 'date-fns'; // for date formatting
 import { GetUserLeavesDto, LeaveItemDto } from './dtos/get-user-leaves.dto';
 import { PaginAndFilterDto } from './dtos/paging-and-filter.dto';
-import { LogsService } from 'src/logs/logs.service';
-import { sendEmail } from 'src/utils/email.util';
+import { LogsService } from '../logs/logs.service';
+import { sendEmail } from '../utils/email.util';
 
 @Injectable()
 export class LeavesService {
