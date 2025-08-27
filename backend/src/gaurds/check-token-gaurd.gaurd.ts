@@ -11,7 +11,7 @@ import { RolesEntity } from '../roles/entities/roles.entity';
 import { UserEntity } from '../user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { Reflector } from '@nestjs/core';
-import { META_PUBLIC } from 'src/decorators/public.decorator';
+import { META_PUBLIC } from '../decorators/public.decorator';
 
 @Injectable()
 export class CheckTokenGaurd implements CanActivate {
