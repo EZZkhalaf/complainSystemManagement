@@ -2,51 +2,11 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "../../Context/authContext";
 import { fetchUsersHook } from "../../utils/UserHelper";
-import defaultPhoto from "../../assets/defaultPhoto.png";
 import { toast } from "react-toastify";
 import { OrbitProgress } from "react-loading-indicators";
-
-const EmpCard = ({ emp }) => {
-  const { user } = useAuthContext();
-  const navigate = useNavigate();
-  console.log(emp);
-  return (
-    <div
-      onClick={() => {
-        navigate(
-          `/${
-            user.role === "admin" ? "adminPage" : "userPage"
-          }/listEmployees/employee/${emp?.user?.user_id}`
-        );
-      }}
-      className="bg-white rounded-3xl shadow-md p-6 border border-gray-100 hover:shadow-xl hover:border-blue-200 transition duration-200 flex flex-col items-center cursor-pointer group"
-      key={emp.user._id}
-    >
-      <img
-        src={
-          emp.user.profilePicture
-            ? `http://localhost:5000${emp?.user?.profilePicture}`
-            : defaultPhoto
-        }
-        alt="Profile"
-        className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-lg group-hover:scale-105 transition-transform duration-300"
-      />
-
-      <div className="mt-4 text-center">
-        <h3 className="text-lg sm:text-xl font-semibold text-gray-800 capitalize">
-          {emp.user.user_name}
-        </h3>
-        <p className="mt-1 text-sm text-gray-500">{emp.user.user_email}</p>
-      </div>
-
-      <div className="mt-3">
-        <span className="inline-block px-3 py-1 text-sm rounded-full bg-blue-100 text-blue-700 capitalize font-medium">
-          {emp.role}
-        </span>
-      </div>
-    </div>
-  );
-};
+import PageHeader from "../../Molecules/PageHeader";
+import InputText from "../../Atoms/InputText";
+import ListEmployees from "../../MainComponents/ManageEmployees/ListEmployees";
 
 const ManageEmployees = () => {
   const { user } = useAuthContext();
@@ -59,7 +19,6 @@ const ManageEmployees = () => {
     setLoading(true);
     try {
       const roles = await fetchUsersHook();
-      console.log(roles);
       let updatedUsers = roles.users
         .filter((emp) => user.user_id !== emp.user.user_id)
         .filter((emp) => emp.user_role !== "admin");
@@ -97,38 +56,24 @@ const ManageEmployees = () => {
   return (
     <div className="max-w-7xl mx-auto  ">
       <div className=" rounded-2xl  p-10 space-y-10">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Manage Employees</h1>
-          <p className="text-gray-600 max-w-xl">
+        <PageHeader
+          header={"Manage Employees"}
+          paragraph={`
             Easily view employee profiles, update their information, and assign
-            roles to control access and responsibilities across the system.
-          </p>
-        </div>
+            roles to control access and responsibilities across the system.  
+          `}
+        />
 
-        {/* Search Input */}
         <div className="flex justify-center">
-          <input
-            type="text"
-            placeholder="Search by name or email..."
+          <InputText
+            type={"text"}
+            setTarget={setSearch}
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full md:w-1/2 px-5 py-3 border border-gray-300 rounded-xl shadow-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            width={"w-full"}
           />
         </div>
 
-        {/* Employee List */}
-        {filteredEmployees && filteredEmployees.length > 0 ? (
-          <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {filteredEmployees.map((emp) => (
-              <EmpCard emp={emp} />
-            ))}
-          </div>
-        ) : (
-          <div className="flex justify-center items-center h-32">
-            <p className="text-gray-500 text-lg italic">No employees found.</p>
-          </div>
-        )}
+        <ListEmployees filteredEmployees={filteredEmployees} />
       </div>
     </div>
   );

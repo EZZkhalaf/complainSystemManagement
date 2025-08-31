@@ -126,7 +126,7 @@ const App = () => {
               ></Route>
             </>
           )}
-          user,
+
           <Route path="/adminPage/manageRoles" element={<ManageRoles />} />
           <Route
             path="/adminPage/manageRoles/role/adduser/:id"

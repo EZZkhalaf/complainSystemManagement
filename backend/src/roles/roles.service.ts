@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -231,9 +232,15 @@ export class RolesService {
     const roleToDelete = await this.rolesRepo.findOne({
       where: { role_id: Number(id) },
       relations: ['users', 'permissions'],
+      select: ['role_name', 'role_id', 'permissions', 'users'],
     });
     if (!roleToDelete) {
       throw new NotFoundException('Role not found');
+    } else if (
+      roleToDelete.role_name === 'admin' ||
+      roleToDelete.role_name === 'user'
+    ) {
+      throw new BadRequestException('cannot delete this Role');
     }
 
     const usersToReassign = roleToDelete.users || [];
@@ -242,6 +249,7 @@ export class RolesService {
       where: { role_name: 'user' },
       relations: ['users'],
     });
+
     if (!userRole) {
       userRole = this.rolesRepo.create({
         role_name: 'user',
