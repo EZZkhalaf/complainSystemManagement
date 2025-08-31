@@ -19,7 +19,7 @@ import { AdminEditUserInfoDto } from './dtos/admin-edit-user-info.dto';
 import { LogsService } from '../logs/logs.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
-import { Between, Repository } from 'typeorm';
+import { Between, IsNull, Repository } from 'typeorm';
 import { RolesEntity } from '../roles/entities/roles.entity';
 import { GroupEntity } from '../groups/entities/group.entity';
 import { ComplaintEntity } from '../complaint/entities/complaint.entity';

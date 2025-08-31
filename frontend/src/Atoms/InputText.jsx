@@ -1,6 +1,6 @@
 import React from "react";
 
-const InputText = ({ type, setTarget, value, width }) => {
+const InputText = ({ type, setTarget, value, width, placeholder }) => {
   return (
     <div className={`mb-6 ${width}`}>
       {!width && (

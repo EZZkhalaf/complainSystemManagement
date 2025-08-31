@@ -1,61 +1,17 @@
-
-import React, { useEffect, useState } from 'react';
-import { listGroupComplaintsHook } from '../../utils/GroupsHelper';
-import { useAuthContext } from '../../Context/authContext';
-import { useNavigate, useParams } from 'react-router-dom';
-
-const getStatusStyles = (status) => {
-  const styles = {
-    resolved: 'bg-green-100 text-green-800',
-    pending: 'bg-yellow-100 text-yellow-800',
-    'in-progress': 'bg-blue-100 text-blue-800',
-    rejected: 'bg-red-100 text-red-800',
-  };
-  return styles[status] || 'bg-gray-100 text-gray-700';
-};
-
-const ComplaintCard = ({ complaint }) => {
-  const navigate = useNavigate();
-  const { user } = useAuthContext();
-
-  return (
-    <div
-      onClick={() => {
-        const path = user.role === 'admin'
-          ? `/adminPage/groupsForComplaints/complaint/${complaint.complaint_id}`
-          : `/userPage/groupsForComplaints/complaint/${complaint.complaint_id}`;
-        navigate(path);
-      }}
-      className="bg-white shadow-lg rounded-xl p-6 cursor-pointer hover:shadow-xl transition-all duration-200 flex flex-col justify-between border border-gray-100"
-    >
-      <div>
-        <h3 className="text-xl font-semibold text-gray-800 mb-2 capitalize">
-          {complaint.complaint_type} Complaint
-        </h3>
-        <p className="text-sm text-gray-600 leading-relaxed">{complaint.description}</p>
-      </div>
-
-      <div className="flex justify-between items-center mt-6">
-        <span
-          className={`text-xs font-medium px-3 py-1 rounded-full ${getStatusStyles(
-            complaint.comaplint_status
-          )}`}
-        >
-          {complaint.complaint_status}
-        </span>
-        <div className="text-right">
-          <p className="text-sm font-medium text-gray-700">{complaint.creator_user?.user_name}</p>
-          <p className="text-xs text-gray-500">{complaint.creator_user?.user_email}</p>
-        </div>
-      </div>
-    </div>
-  );
-};
+import React, { useEffect, useState } from "react";
+import { listGroupComplaintsHook } from "../../utils/GroupsHelper";
+import { useAuthContext } from "../../Context/authContext";
+import { useNavigate, useParams } from "react-router-dom";
+import ComplaintCard from "../../Molecules/ComplaintCard";
+import PageHeader from "../../Molecules/PageHeader";
+import SelectInput from "../../Atoms/SelectInput";
+import ComplaintsListing from "../../MainComponents/ComplaintsList.jsx/ComplaintsListing";
+import PagingButtons from "../../Molecules/PagingButtons";
 
 const ComplaintsList = () => {
   const [complaints, setComplaints] = useState([]);
-  const [statusFilter, setStatusFilter] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -70,11 +26,10 @@ const ComplaintsList = () => {
         page,
         limit: 10,
       });
-      // console.log(data)
       setComplaints(data.complaints);
       setTotalPages(data.totalPages);
     } catch (error) {
-      console.error('Error fetching complaints:', error);
+      console.error("Error fetching complaints:", error);
     }
   };
 
@@ -88,75 +43,40 @@ const ComplaintsList = () => {
 
   return (
     <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      {/* Header */}
-      <div className="mb-10 ">
-        <h1 className=" text-3xl font-bold text-black mb-3">Group Complaints</h1>
-        <p className="  text-gray-500 max-w-2xl ">
-          View and track complaints submitted by group members. You can filter by type or status to focus on what matters most.
-        </p>
-      </div>
+      <PageHeader
+        header={"Group Complaints"}
+        paragraph={`View and track complaints submitted by group members. You can filter
+          by type or status to focus on what matters most.`}
+      />
 
       {/* Filters */}
       <div className="mb-8 flex flex-row sm:flex-row sm:items-center gap-4 justify-center">
-        <select
-          className="px-4 py-2 rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={typeFilter}
+        <SelectInput
+          list={["All Types", "General", "Technical", "Billing", "Other"]}
           onChange={(e) => setTypeFilter(e.target.value)}
-        >
-          <option value="">All Types</option>
-          <option value="general">General</option>
-          <option value="technical">Technical</option>
-          <option value="billing">Billing</option>
-          <option value="other">Other</option>
-        </select>
+          value={typeFilter}
+        />
 
-        <select
-          className="px-4 py-2 rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        <SelectInput
+          list={[
+            "All Statuses",
+            "Pending",
+            "In Progress",
+            "Resolved",
+            "Rejected",
+          ]}
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-        >
-          <option value="">All Statuses</option>
-          <option value="pending">Pending</option>
-          <option value="in-progress">In Progress</option>
-          <option value="resolved">Resolved</option>
-          <option value="rejected">Rejected</option>
-        </select>
+        />
       </div>
 
-      {/* Complaint Grid */}
-      {filtered.length === 0 ? (
-        <p className="text-center text-gray-500 mt-10">No complaints found.</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filtered.map((complaint) => (
-            <ComplaintCard key={complaint.complaint_id} complaint={complaint} />
-          ))}
-        </div>
-      )}
+      <ComplaintsListing filtered={filtered} />
 
-      {/* Pagination */}
-      <div className="mt-12 flex justify-center items-center gap-6">
-        <button
-          disabled={page === 1}
-          onClick={() => setPage((prev) => prev - 1)}
-          className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-sm rounded-lg disabled:opacity-50 transition"
-        >
-          ← Previous
-        </button>
-
-        <span className="text-gray-700 font-medium">
-          Page <span className="text-blue-600">{page}</span> of{' '}
-          <span className="text-blue-600">{totalPages}</span>
-        </span>
-
-        <button
-          disabled={page === totalPages}
-          onClick={() => setPage((prev) => prev + 1)}
-          className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-sm rounded-lg disabled:opacity-50 transition"
-        >
-          Next →
-        </button>
-      </div>
+      <PagingButtons
+        currentPage={page}
+        setCurrentPage={setPage}
+        totalPages={totalPages}
+      />
     </div>
   );
 };

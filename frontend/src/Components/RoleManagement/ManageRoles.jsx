@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import RoleComponent from "./RoleComponent";
+import RoleComponent from "../../MainComponents/ManageRoles/RoleComponent";
 import AssignUsersToRole from "./AssignUsersToRole";
 import { useNavigate } from "react-router-dom";
 import { addnewRoleHook, fetchRolesHook } from "../../utils/RolesHelper";
@@ -19,16 +19,6 @@ const ManageRoles = () => {
   const [selectedRoleToAddEmployee, setSelectedRoleToAddEmployee] = useState(
     {}
   );
-
-  //   <input
-  //   type="text"
-  //   value={newRole}
-  //   onChange={(e) => setNewRoleName(e.target.value)}
-  //   placeholder="Enter role name"
-  //   required
-  //   autoFocus
-  //   className="px-3 py-2 border rounded-md w-48"
-  // />
 
   const fields = [
     {
@@ -63,7 +53,6 @@ const ManageRoles = () => {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header and description */}
       <div className="flex justify-between">
         <PageHeader
           header={"Manage Roles"}
@@ -114,7 +103,6 @@ const ManageRoles = () => {
         />
       )}
 
-      {/* Assign Users Modal / Drawer */}
       {addingEmployee && (
         <OptionsList
           setAddEmployee={setAddEmployee}
