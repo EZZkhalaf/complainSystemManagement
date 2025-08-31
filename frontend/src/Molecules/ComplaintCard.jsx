@@ -11,17 +11,20 @@ const getStatusStyles = (status) => {
   return styles[status] || "bg-gray-100 text-gray-700";
 };
 
-const ComplaintCard = ({ complaint }) => {
+const ComplaintCard = ({ complaint, group = false }) => {
   const navigate = useNavigate();
   const { user } = useAuthContext();
 
   return (
     <div
       onClick={() => {
-        const path =
-          user.role === "admin"
-            ? `/adminPage/complaint/${complaint.complaint_id}`
-            : `/userPage/otherComplaint/${complaint.complaint_id}`;
+        const path = group
+          ? `/${
+              user.role === "admin" ? "adminPage" : "userPage"
+            }/groupsForComplaints/complaint/${complaint.complaint_id}`
+          : `/${user.role === "admin" ? "adminPage" : "userPage"}/complaint/${
+              complaint.complaint_id
+            }`;
         navigate(path);
       }}
       className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg transition duration-200 cursor-pointer flex flex-col justify-between p-6"

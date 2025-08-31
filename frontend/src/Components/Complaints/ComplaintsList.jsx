@@ -70,7 +70,7 @@ const ComplaintsList = () => {
         />
       </div>
 
-      <ComplaintsListing filtered={filtered} />
+      <ComplaintsListing filtered={filtered} group={true} />
 
       <PagingButtons
         currentPage={page}

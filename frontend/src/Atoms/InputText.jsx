@@ -16,7 +16,7 @@ const InputText = ({ type, setTarget, value, width, placeholder }) => {
         type={type}
         value={value}
         onChange={(e) => setTarget(e.target.value)}
-        placeholder={`Enter ${type}`}
+        placeholder={placeholder ? placeholder : `Enter ${type}`}
         className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 ${width}`}
       />
     </div>
