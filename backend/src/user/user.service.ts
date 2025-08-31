@@ -26,7 +26,7 @@ import { ComplaintEntity } from '../complaint/entities/complaint.entity';
 import { plainToInstance } from 'class-transformer';
 import { UserOutputDto } from './dtos/user-output.dto';
 import { ComplaintOutputDto } from '../complaint/dtos/complaint-output.dto';
-import { LeavesEntity, LeaveStatus } from 'src/leaves/entities/leaves.entity';
+import { LeavesEntity, LeaveStatus } from '../leaves/entities/leaves.entity';
 
 export interface UserWithRole {
   user: any;
@@ -248,12 +248,12 @@ export class UserService {
       select: ['user_email', 'user_name', 'user_id'],
     });
     if (!user) throw new NotFoundException('user not found');
+
     const now = new Date();
     const firstDayOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastDayOfLastMonth = new Date();
     const totalLeaves = await this.leaveRepo.count({
       where: { leave_user: { user_id: Number(userId) } },
-      take: 15,
     });
     const acceptedLeaves = await this.leaveRepo.count({
       where: {
@@ -282,7 +282,6 @@ export class UserService {
         leave_handler: { user_id: Number(userId) },
         created_at: Between(firstDayOfLastMonth, lastDayOfLastMonth),
       },
-      take: 20,
     });
 
     return {

@@ -2,10 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { LeavesController } from './leaves.controller';
 import { LeavesService } from './leaves.service';
 import { getRandomValues } from 'crypto';
-import { UserEntity } from 'src/user/entities/user.entity';
+import { UserEntity } from '../user/entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { LeavesEntity } from './entities/leaves.entity';
-import { GroupEntity } from 'src/groups/entities/group.entity';
+import { GroupEntity } from '../groups/entities/group.entity';
+import { LogsService } from '../logs/logs.service';
 
 describe('LeavesController', () => {
   let controller: LeavesController;
@@ -27,6 +28,9 @@ describe('LeavesController', () => {
     create: jest.Mock;
     save: jest.Mock;
   };
+  let logsService: {
+    logAction: jest.Mock;
+  };
   beforeEach(async () => {
     userRepo = {
       findOne: jest.fn(),
@@ -45,13 +49,17 @@ describe('LeavesController', () => {
       count: jest.fn(),
       findAndCount: jest.fn(),
     };
+    logsService = {
+      logAction: jest.fn(),
+    };
     const module: TestingModule = await Test.createTestingModule({
       controllers: [LeavesController],
       providers: [
-        // { provide: LeavesService, useValue: leavesService },
+        LeavesService,
         { provide: getRepositoryToken(UserEntity), useValue: userRepo },
         { provide: getRepositoryToken(LeavesEntity), useValue: leavesRepo },
         { provide: getRepositoryToken(GroupEntity), useValue: groupRepo },
+        { provide: LogsService, useValue: logsService },
       ],
     }).compile();
 

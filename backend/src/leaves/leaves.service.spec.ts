@@ -16,6 +16,11 @@ import { LeaveItemDto } from './dtos/get-user-leaves.dto';
 import { format } from 'date-fns';
 import { PaginAndFilterDto } from './dtos/paging-and-filter.dto';
 import { LogsService } from '../logs/logs.service';
+import * as EmailUtils from '../utils/email.util';
+
+jest.mock('../utils/email.util', () => ({
+  sendEmail: jest.fn(),
+}));
 
 describe('LeavesService', () => {
   let service: LeavesService;
@@ -252,6 +257,7 @@ describe('LeavesService - change leave status', () => {
           user_id: true,
           user_password: false,
           user_name: true,
+          user_email: true,
         },
       },
     });
@@ -289,6 +295,7 @@ describe('LeavesService - change leave status', () => {
           user_id: true,
           user_password: false,
           user_name: true,
+          user_email: true,
         },
       },
     });
@@ -338,6 +345,7 @@ describe('LeavesService - change leave status', () => {
           user_id: true,
           user_password: false,
           user_name: true,
+          user_email: true,
         },
       },
     });
@@ -362,6 +370,7 @@ describe('LeavesService - change leave status', () => {
       leave_user: {
         user_id: 1,
         user_name: 'ezz',
+        user_email: 'ezz@gmail.com',
       },
       leave_handler: null,
     };
@@ -376,11 +385,12 @@ describe('LeavesService - change leave status', () => {
     };
     leavesRepo.findOne.mockResolvedValue(fakeLeave);
     userRepo.findOne.mockResolvedValue(fakeUser);
+    leavesRepo.save.mockResolvedValue(updatedLeave);
 
     const result = await service.changeLeaveState(leave_id, dto);
     expect(result.success).toBe(true);
     expect(result.message).toEqual('leave state updated successfully');
-    expect(result.leave).toMatchObject(updatedLeave);
+    expect(result.leave).toEqual(updatedLeave);
 
     expect(leavesRepo.findOne).toHaveBeenCalledWith({
       where: { leave_id: Number(leave_id) },
@@ -394,6 +404,7 @@ describe('LeavesService - change leave status', () => {
           user_id: true,
           user_password: false,
           user_name: true,
+          user_email: true,
         },
       },
     });
@@ -406,6 +417,22 @@ describe('LeavesService - change leave status', () => {
         user_name: true,
       },
     });
+
+    expect(leavesRepo.save).toHaveBeenCalled();
+
+    expect(EmailUtils.sendEmail).toHaveBeenCalledWith(
+      fakeLeave.leave_user.user_email,
+      'Leave Update',
+      `Your Leave has been ${dto.new_state}`,
+    );
+
+    expect(logsService.logAction).toHaveBeenCalledWith(
+      fakeUser,
+      'Leave-Action',
+      'Leave',
+      fakeUser.user_id,
+      `${dto.new_state} ${fakeLeave.leave_user.user_name} leave `,
+    );
   });
 });
 
