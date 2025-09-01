@@ -1,40 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { useAuthContext } from '../../Context/authContext';
-import { addGroupToRuleHook, getRulesHook, removeGroupFromRuleHook, searchGroupsHook } from '../../utils/GroupsHelper';
+import React, { useState, useEffect } from "react";
+import { useAuthContext } from "../../Context/authContext";
+import {
+  addGroupToRuleHook,
+  getRulesHook,
+  removeGroupFromRuleHook,
+  searchGroupsHook,
+} from "../../utils/GroupsHelper";
 import { ImArrowRight } from "react-icons/im";
-import { toast } from 'react-toastify';
-
-const GroupCard = ({ group , index,setRuleGroups}) => {
-    const {user}= useAuthContext()
-    const removeGroup = async()=>{
-        const data = await removeGroupFromRuleHook(group.group_id , user._id)
-        if(data.success)
-            setRuleGroups(data?.groupsSequence || data?.rule?.groups || [])
-    }
-    return (
-        <div className="bg-white border border-gray-200 shadow-sm rounded-lg px-5 py-4 w-64 flex justify-between items-start space-x-4 hover:shadow-md transition-shadow duration-200">
-            <div className="flex flex-col text-left">
-            <span className="text-xs text-gray-500 font-semibold tracking-wide">
-                Group #{index + 1}
-            </span>
-            <span className="text-base font-medium text-gray-700 mt-1">
-                {group.group_name}
-            </span>
-            </div>
-
-            {/* Right: Remove Button */}
-            <button
-            onClick={() => removeGroup()}
-            className="text-gray-400 hover:text-red-500 transition-colors duration-200"
-            title="Remove Group"
-            >
-            ✕
-            </button>
-        </div>
-    );
-
-
-};
+import { toast } from "react-toastify";
+import PageHeader from "../../Molecules/PageHeader";
+import InputText from "../../Atoms/InputText";
+import GroupCard from "../../Molecules/GroupCard";
+import GroupsCardListing from "../../MainComponents/ComplaintsGroupRule.jsx/GroupsCardListing";
 
 const ComplaintGroupsRule = () => {
   const [groups, setGroups] = useState([]);
@@ -44,20 +21,19 @@ const ComplaintGroupsRule = () => {
   const { user } = useAuthContext();
 
   const addGroupToRule = async (group) => {
-    const groupId = group.group_id
-    if(ruleGroups.some(g => g.group_id === groupId)){
-        toast.error("group already added ")
-        return
+    const groupId = group.group_id;
+    if (ruleGroups.some((g) => g.group_id === groupId)) {
+      toast.error("group already added ");
+      return;
     }
     const data = await addGroupToRuleHook(groupId, user._id);
     if (data.success) {
-        setRuleGroups(data?.groupsSequence || data?.rule?.groupsSequence || [])
+      setRuleGroups(data?.groupsSequence || data?.rule?.groupsSequence || []);
     }
   };
 
   const fetchRule = async () => {
     const data = await getRulesHook(user._id);
-    console.log(data)
     setRuleGroups(data?.rule?.groups || []);
   };
 
@@ -68,7 +44,7 @@ const ComplaintGroupsRule = () => {
           const data = await searchGroupsHook(searchText, user._id);
           setSearchResults(data.groups);
         } catch (error) {
-          console.error('Error fetching groups:', error);
+          console.error("Error fetching groups:", error);
         }
       } else {
         setSearchResults([]);
@@ -82,26 +58,22 @@ const ComplaintGroupsRule = () => {
     fetchRule();
   }, []);
 
-  
   return (
     <div className="max-w-full mx-auto p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-3xl font-semibold mb-4  text-gray-800 tracking-tight">
-        Complaint Group Flow
-      </h1>
+      <PageHeader
+        header={"Complaint Group Flow"}
+        paragraph={`This page allows you to add and organize groups responsible for handling
+        complaints. You can define the sequence in which groups will manage
+        complaints based on your organizational flow.`}
+      />
 
-      <p className=" text-gray-600 mb-8 text-sm md:text-base max-w-2xl">
-        This page allows you to add and organize groups responsible for handling complaints.
-        You can define the sequence in which groups will manage complaints based on your organizational flow.
-      </p>
-
-      {/* Search Box */}
       <div className="mb-8">
-        <input
-          type="text"
-          placeholder="🔍 Search groups..."
-          className="w-full p-3 text-sm md:text-base border border-gray-300 rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+        <InputText
+          type={"text"}
+          setTarget={setSearchText}
           value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
+          width={"w-full"}
+          placeholder={"🔍 Search groups..."}
         />
 
         {searchResults.length > 0 && (
@@ -119,29 +91,10 @@ const ComplaintGroupsRule = () => {
         )}
       </div>
 
-      {/* Current Rule Sequence */}
-      {ruleGroups.length > 0 && (
-        <div className="mt-10">
-          <h2 className="text-lg font-semibold mb-4 text-gray-700 text-center">
-            Current Rule Sequence
-          </h2>
-
-          <div className="flex flex-wrap gap-4 items-center justify-center">
-            {ruleGroups.map((group, index) => (
-              <React.Fragment key={group.group_id}>
-                <GroupCard
-                  group={group}
-                  index={index}
-                  setRuleGroups={setRuleGroups}
-                />
-                {index < ruleGroups.length - 1 && (
-                  <ImArrowRight size={20} className="text-gray-400" />
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-        </div>
-      )}
+      <GroupsCardListing
+        ruleGroups={ruleGroups}
+        setRuleGroups={setRuleGroups}
+      />
     </div>
   );
 };
