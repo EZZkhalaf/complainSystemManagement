@@ -2,6 +2,9 @@ import { useState } from "react";
 import { changeLeaveStatus } from "../utils/LeavesHelper";
 import PageLoading from "../Atoms/PageLoading";
 import SelectInput from "../Atoms/SelectInput";
+import LeaveStatusSelect from "../Atoms/LeaveStatusSelect";
+import { useAuthContext } from "../Context/authContext";
+import { toast } from "react-toastify";
 const LeaveComponent = ({ leave, idx }) => {
   const [loading, setLoading] = useState(false);
   const { user } = useAuthContext();
@@ -40,31 +43,11 @@ const LeaveComponent = ({ leave, idx }) => {
         {loading ? (
           <PageLoading />
         ) : (
-          <div>
-            {hasPermission(user, "handle-leaves") && state === "pending" ? (
-              <select
-                className="bg-gray-300 text-black px-3 py-1 rounded text-sm font-semibold focus:outline-none"
-                value={state}
-                onChange={changeStatus}
-              >
-                <option value="pending">Pending</option>
-                <option value="accepted">Accept</option>
-                <option value="rejected">Reject</option>
-              </select>
-            ) : (
-              <span
-                className={`px-3 py-1 rounded-full text-white text-sm font-semibold ${
-                  leave.leave_status === "pending"
-                    ? "bg-yellow-500"
-                    : leave.leave_status === "accepted"
-                    ? "bg-green-500"
-                    : "bg-red-500"
-                }`}
-              >
-                {state}
-              </span>
-            )}
-          </div>
+          <LeaveStatusSelect
+            state={state}
+            changeStatus={changeStatus}
+            leave={leave}
+          />
         )}
       </td>
       <td className="px-6 py-3 text-gray-700">{leave.leave_user_name}</td>
