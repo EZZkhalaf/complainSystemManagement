@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   changeLeaveStatus,
   getLeaves,
+  getLeaves2,
   getUserLeaves,
 } from "../../../utils/LeavesHelper";
 import { useAuthContext } from "../../../Context/authContext";
@@ -34,7 +35,7 @@ const LeavesTable = () => {
   const totalPages = Math.ceil(totalLeaves / leavesPerPage);
 
   const fetchLeaves = async () => {
-    const response = await getLeaves(
+    const response = await getLeaves2(
       user._id,
       currentPage,
       leavesPerPage,
@@ -43,6 +44,7 @@ const LeavesTable = () => {
       dateFrom || undefined,
       dateTo || undefined
     );
+    console.log(response);
 
     setLeaves(response.leaves);
     setCurrentPage(response.currentPage);

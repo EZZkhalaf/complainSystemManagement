@@ -7,8 +7,12 @@ const GroupsTable = ({ groups }) => {
   const { user } = useAuthContext();
   return (
     <div>
-      {groups.length === 0 ? (
-        <p className="text-center text-gray-500 text-lg">No groups found.</p>
+      {groups?.length === 0 ? (
+        <div className="text-center mt-8">
+          <p className="text-gray-500 italic text-lg">
+            This user is not in any group at the moment.
+          </p>
+        </div>
       ) : (
         <div className="overflow-x-auto rounded-2xl bg-white shadow-md border border-gray-200">
           <table className="min-w-full divide-y divide-gray-200 text-sm text-left">
@@ -26,9 +30,9 @@ const GroupsTable = ({ groups }) => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {groups.map((group) => (
+              {groups?.map((group) => (
                 <tr
-                  key={group._id}
+                  key={group.group_id}
                   onClick={() =>
                     navigate(
                       `/${
@@ -42,21 +46,21 @@ const GroupsTable = ({ groups }) => {
                     {group.group_name}
                   </td>
                   <td className="px-6 py-4 text-gray-600">
-                    {group.users.length}
+                    {group.users?.length}
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-wrap gap-2">
-                      {group.users.slice(0, 3).map((user) => (
+                      {group.users?.slice(0, 3).map((user) => (
                         <span
-                          key={user._id}
+                          key={user?.user_id}
                           className="text-xs bg-gray-100 text-gray-700 px-3 py-1 rounded-full"
                         >
-                          {user.user_name}
+                          {user?.user_name}
                         </span>
                       ))}
-                      {group.users.length > 3 && (
+                      {group.users?.length > 3 && (
                         <span className="text-xs text-gray-400">
-                          +{group.users.length - 3} more
+                          +{group.users?.length - 3} more
                         </span>
                       )}
                     </div>

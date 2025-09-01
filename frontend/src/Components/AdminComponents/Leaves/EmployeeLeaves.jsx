@@ -10,6 +10,7 @@ import { toast } from "react-toastify";
 import PagingButtons from "../../../Molecules/PagingButtons";
 import TableHeaders from "../../../Molecules/TableHeaders";
 import LeaveTableFilteringButtons from "../../../Molecules/LeaveTableFilteringButtons";
+import FailedMessage from "../../../Atoms/FailedMessage";
 
 const EmployeeLeaves = ({ user }) => {
   const [leaves, setLeaves] = useState([]);
@@ -32,7 +33,7 @@ const EmployeeLeaves = ({ user }) => {
 
   const fetchLeaves = async () => {
     const response = await getLeaves(
-      user.user_id,
+      user.user_id || user._id,
       currentPage,
       leavesPerPage,
       leave_type || undefined,
@@ -88,19 +89,24 @@ const EmployeeLeaves = ({ user }) => {
               "Updated At",
             ]}
           />
-
-          <tbody>
-            {leaves.map((leave, idx) => (
-              <LeaveComponent leave={leave} idx={idx} />
-            ))}
-          </tbody>
+          {leaves.length > 0 ? (
+            <tbody>
+              {leaves.map((leave, idx) => (
+                <LeaveComponent leave={leave} idx={idx} user={user} />
+              ))}
+            </tbody>
+          ) : (
+            <FailedMessage message={"No Leaves For This Month"} />
+          )}
         </table>
       </div>
-      <PagingButtons
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-        totalPages={totalPages}
-      />
+      {leaves.length >= 10 && (
+        <PagingButtons
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          totalPages={totalPages}
+        />
+      )}
     </div>
   );
 };
