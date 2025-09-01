@@ -454,11 +454,17 @@ export class UserService {
     if (!role) throw new NotFoundException('role  not found');
 
     const groups = await this.groupRepo
-      .createQueryBuilder('group_entity')
-      .leftJoin('group_entity.users', 'user_info')
+      .createQueryBuilder('group')
+      .leftJoin('group.users', 'user_info')
       .where('user_info.user_id = :id', { id: Number(id) })
-      .loadRelationCountAndMap('group_entity.userCount', 'group_entity.users')
+      .select([
+        'group.group_id',
+        'group.group_name',
+        'user_info.user_id',
+        'user_info.user_name',
+      ])
       .getMany();
+
     const complaints = await this.complaintRepo.find({
       where: { creator_user: { user_id: Number(id) } },
     });

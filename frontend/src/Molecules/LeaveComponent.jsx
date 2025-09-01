@@ -5,9 +5,8 @@ import SelectInput from "../Atoms/SelectInput";
 import LeaveStatusSelect from "../Atoms/LeaveStatusSelect";
 import { useAuthContext } from "../Context/authContext";
 import { toast } from "react-toastify";
-const LeaveComponent = ({ leave, idx }) => {
+const LeaveComponent = ({ leave, idx, user }) => {
   const [loading, setLoading] = useState(false);
-  const { user } = useAuthContext();
 
   const [state, setState] = useState(leave.leave_status);
   const changeStatus = async (e) => {
@@ -17,7 +16,7 @@ const LeaveComponent = ({ leave, idx }) => {
 
     const response = await changeLeaveStatus(
       leave.leave_id,
-      user._id,
+      user._id || user.user_id,
       newState
     );
     setLoading(false);
@@ -36,7 +35,7 @@ const LeaveComponent = ({ leave, idx }) => {
         idx % 2 === 0 ? "bg-gray-50" : "bg-white"
       } hover:bg-gray-100 transition-colors`}
     >
-      <td className="px-6 py-3 text-gray-700">{leave.leave_id}</td>
+      <td className="px-6 py-3 text-gray-700">{idx}</td>
       <td className="px-6 py-3 text-gray-700">{leave.leave_description}</td>
       <td className="px-6 py-3 capitalize text-gray-700">{leave.leave_type}</td>
       <td className="px-6 py-3">
