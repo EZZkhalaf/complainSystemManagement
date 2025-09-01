@@ -1,9 +1,9 @@
 import React from "react";
 
-const SelectInput = ({ list, onChange, value, leaveStatus = false }) => {
+const SelectInput = ({ list, onChange, value, leaveStatus = false, width }) => {
   return (
     <select
-      className="px-4 py-2 rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      className={`px-4 py-2 rounded-lg border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 ${width}`}
       value={value}
       onChange={onChange}
     >

@@ -44,7 +44,6 @@ const LeavesTable = () => {
       dateFrom || undefined,
       dateTo || undefined
     );
-    console.log(response);
 
     setLeaves(response.leaves);
     setCurrentPage(response.currentPage);
