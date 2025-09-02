@@ -1,4 +1,3 @@
-import React from "react";
 import FailedMessage from "../../Atoms/FailedMessage";
 import ComplaintCard from "../../Molecules/ComplaintCard";
 
