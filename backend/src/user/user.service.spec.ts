@@ -149,216 +149,6 @@ describe('UserService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
-
-  //get user by id
-  it('should throw new error if the user not found', async () => {
-    const id = '1';
-    userRepo.findOne.mockResolvedValue(null);
-
-    await expect(service.getUserById(id)).rejects.toThrow(
-      new NotFoundException('user not found'),
-    );
-    expect(userRepo.findOne).toHaveBeenCalledWith({
-      where: { user_id: Number(id) },
-    });
-  });
-  it('should throw new error if the user not found', async () => {
-    const id = '1';
-    const fakeUser = {
-      user_id: 1,
-      user_name: 'ezz',
-      user_email: 'ezz@gmail.com',
-    };
-    userRepo.findOne.mockResolvedValue(fakeUser);
-    rolesRepo.findOne.mockResolvedValue(null);
-
-    await expect(service.getUserById(id)).rejects.toThrow(
-      new NotFoundException('role  not found'),
-    );
-    expect(userRepo.findOne).toHaveBeenCalledWith({
-      where: { user_id: Number(id) },
-    });
-    expect(rolesRepo.findOne).toHaveBeenCalledWith({
-      where: { users: { user_id: Number(id) } },
-    });
-  });
-  it('should return the user groups and complaints and other data', async () => {
-    const id = '1';
-    const fakeUser = {
-      user_id: 1,
-      user_name: 'ezz',
-      user_email: 'ezz@gmail.com',
-    };
-    const fakeRole = {
-      role_id: 1,
-      role_name: 'user',
-      users: [fakeUser],
-      permissions: [],
-    };
-    const fakeGroups = [
-      {
-        group_id: 1,
-        group_name: 'HR',
-        users: [],
-      },
-    ];
-
-    const fakeComplaints = [
-      {
-        complaint_id: 1,
-        description: 'testing',
-        creator_user: fakeUser,
-        complaint_status: 'pending',
-        complaint_type: 'general',
-      },
-    ];
-    userRepo.findOne.mockResolvedValue(fakeUser);
-    rolesRepo.findOne.mockResolvedValue(fakeRole);
-    const queryBuilder: any = {
-      leftJoin: jest.fn().mockReturnThis(),
-      where: jest.fn().mockReturnThis(),
-      loadRelationCountAndMap: jest.fn().mockReturnThis(),
-      getMany: jest.fn().mockReturnValue(fakeGroups),
-    };
-    groupRepo.createQueryBuilder.mockReturnValue(queryBuilder);
-    complaintRepo.find.mockResolvedValue(fakeComplaints);
-
-    const expectedUser = plainToInstance(UserOutputDto, fakeUser, {
-      excludeExtraneousValues: true,
-    });
-    const expectedComplaints = plainToInstance(
-      ComplaintOutputDto,
-      fakeComplaints,
-      { excludeExtraneousValues: true },
-    );
-    const result = await service.getUserById(id);
-    expect(result.success).toBe(true);
-    expect(result.user).toMatchObject(expectedUser);
-    expect(result.groups).toMatchObject(fakeGroups);
-    expect(result.role).toEqual(fakeRole.role_name);
-    expect(result.complaints).toMatchObject(expectedComplaints);
-
-    expect(userRepo.findOne).toHaveBeenCalledWith({
-      where: { user_id: Number(id) },
-    });
-    expect(rolesRepo.findOne).toHaveBeenCalledWith({
-      where: { users: { user_id: Number(id) } },
-    });
-
-    expect(groupRepo.createQueryBuilder).toHaveBeenCalledWith('group_entity');
-    expect(queryBuilder.leftJoin).toHaveBeenCalledWith(
-      'group_entity.users',
-      'user_info',
-    );
-    expect(queryBuilder.where).toHaveBeenCalledWith('user_info.user_id = :id', {
-      id: Number(id),
-    });
-    expect(queryBuilder.loadRelationCountAndMap).toHaveBeenCalledWith(
-      'group_entity.userCount',
-      'group_entity.users',
-    );
-    expect(queryBuilder.getMany).toHaveBeenCalled();
-
-    expect(complaintRepo.find).toHaveBeenCalledWith({
-      where: { creator_user: { user_id: Number(id) } },
-    });
-  });
-
-  //verify email update
-  it('should throw if no token is provided', async () => {
-    await expect(service.verifyEmailUpdate(null)).rejects.toThrow(
-      HttpException,
-    );
-  });
-  it('should throw if token is invalid', async () => {
-    jest.spyOn(jwt, 'verify').mockImplementation(() => {
-      throw new Error('invalid');
-    });
-
-    await expect(service.verifyEmailUpdate('fakeToken')).rejects.toThrow(
-      'Invalid or expired token',
-    );
-  });
-  it('should throw if user not found', async () => {
-    const fakeDecoded = { _id: 1, newName: 'Ezz' };
-    jest.spyOn(jwt, 'verify').mockReturnValue(fakeDecoded);
-    userRepo.findOne.mockResolvedValue(null);
-
-    await expect(service.verifyEmailUpdate('fakeToken')).rejects.toThrow(
-      'user not found',
-    );
-  });
-  it('should update the user and return the verification URL', async () => {
-    const fakeDecoded = {
-      _id: 1,
-      newName: 'Ezz',
-      newEmail: 'ezz@gmail.com',
-      newHashPassword: 'hash',
-      imagePath: '/uploads/img.png',
-    };
-    const fakeUser = { user_id: 1, user_email: 'old@gmail.com' };
-
-    jest.spyOn(jwt, 'verify').mockReturnValue(fakeDecoded);
-    userRepo.findOne.mockResolvedValue(fakeUser);
-    userRepo.update.mockResolvedValue({});
-
-    const result = await service.verifyEmailUpdate('fakeToken');
-
-    expect(userRepo.update).toHaveBeenCalledWith(fakeDecoded._id, {
-      user_name: 'Ezz',
-      user_email: 'ezz@gmail.com',
-      user_password: 'hash',
-      profilePicture: '/uploads/img.png',
-    });
-
-    expect(result).toBe('http://localhost:5173/email-verified?token=fakeToken');
-  });
-
-  //delete user
-  it('should throw not found error when the user is not found', async () => {
-    const userId = '1';
-    userRepo.findOne.mockResolvedValue(null);
-
-    await expect(service.deleteUser(userId)).rejects.toThrow(
-      new NotFoundException('User not found'),
-    );
-
-    expect(userRepo.findOne).toHaveBeenCalledWith({
-      where: { user_id: Number(userId) },
-    });
-  });
-  it('should throw not found error when the user is not found', async () => {
-    const userId = '1';
-    const fakeUser = {
-      user_id: 1,
-      user_name: 'ezz',
-      useR_email: 'ezz@gmail.com',
-    };
-    userRepo.findOne.mockResolvedValue(fakeUser);
-    const queryBuilder = {
-      relation: jest.fn().mockReturnThis(),
-      of: jest.fn().mockReturnThis(),
-      remove: jest.fn().mockResolvedValue(true),
-    };
-    rolesRepo.createQueryBuilder.mockReturnValue(queryBuilder);
-    userRepo.delete.mockResolvedValue(true);
-
-    const result = await service.deleteUser(userId);
-    expect(result.success).toBe(true);
-    expect(result.message).toEqual(
-      'User and associated data deleted successfully.',
-    );
-
-    expect(userRepo.findOne).toHaveBeenCalledWith({
-      where: { user_id: Number(userId) },
-    });
-    expect(rolesRepo.createQueryBuilder).toHaveBeenCalledWith('role_info');
-    expect(queryBuilder.relation).toHaveBeenCalledWith(RolesEntity, 'users');
-    expect(queryBuilder.of).toHaveBeenCalledWith(fakeUser);
-    expect(queryBuilder.remove).toHaveBeenCalledWith(fakeUser);
-
-    expect(userRepo.delete).toHaveBeenCalledWith(Number(userId));
-  });
 });
 
 describe('UserService - changeUserRole', () => {
@@ -2146,7 +1936,7 @@ describe('UserService -get user by id ', () => {
       {
         group_id: 1,
         group_name: 'HR',
-        users: [],
+        users: [fakeUser],
       },
     ];
 
@@ -2164,7 +1954,7 @@ describe('UserService -get user by id ', () => {
     const queryBuilder: any = {
       leftJoin: jest.fn().mockReturnThis(),
       where: jest.fn().mockReturnThis(),
-      loadRelationCountAndMap: jest.fn().mockReturnThis(),
+      select: jest.fn().mockReturnThis(),
       getMany: jest.fn().mockReturnValue(fakeGroups),
     };
     groupRepo.createQueryBuilder.mockReturnValue(queryBuilder);
@@ -2200,10 +1990,13 @@ describe('UserService -get user by id ', () => {
     expect(queryBuilder.where).toHaveBeenCalledWith('user_info.user_id = :id', {
       id: Number(id),
     });
-    expect(queryBuilder.loadRelationCountAndMap).toHaveBeenCalledWith(
-      'group_entity.userCount',
-      'group_entity.users',
-    );
+
+    expect(queryBuilder.select).toHaveBeenCalledWith([
+      'group_entity.group_id',
+      'group_entity.group_name',
+      'user_info.user_id',
+      'user_info.user_name',
+    ]);
     expect(queryBuilder.getMany).toHaveBeenCalled();
 
     expect(complaintRepo.find).toHaveBeenCalledWith({
@@ -2543,5 +2336,307 @@ describe('UserService - get leaves summary as charts data', () => {
         created_at: Between(firstDayOfLastMonth, lastDayOfLastMonth),
       },
     });
+  });
+});
+
+describe('UserService - verify email update', () => {
+  let service: UserService;
+
+  let userRepo: {
+    findOne: jest.Mock;
+    count: jest.Mock;
+    save: jest.Mock;
+    update: jest.Mock;
+    delete: jest.Mock;
+  };
+  let groupRepo: {
+    findOne: jest.Mock;
+    save: jest.Mock;
+    count: jest.Mock;
+    createQueryBuilder: jest.Mock;
+  };
+  let complaintRepo: {
+    create: jest.Mock;
+    findOne: jest.Mock;
+    delete: jest.Mock;
+    save: jest.Mock;
+    find: jest.Mock;
+    count: jest.Mock;
+  };
+  let rolesRepo: {
+    create: jest.Mock;
+    findOne: jest.Mock;
+    delete: jest.Mock;
+    save: jest.Mock;
+    find: jest.Mock;
+    count: jest.Mock;
+    createQueryBuilder: jest.Mock;
+  };
+  let complaintgroupsRuleRepo: {
+    findOne: jest.Mock;
+  };
+  let logsService: {
+    logAction: jest.Mock;
+  };
+  beforeEach(async () => {
+    userRepo = {
+      findOne: jest.fn(),
+      count: jest.fn(),
+      save: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    };
+    groupRepo = {
+      findOne: jest.fn(),
+      save: jest.fn(),
+      count: jest.fn(),
+      createQueryBuilder: jest.fn(),
+    };
+    complaintRepo = {
+      create: jest.fn(),
+      findOne: jest.fn(),
+      find: jest.fn(),
+      delete: jest.fn(),
+      save: jest.fn(),
+      count: jest.fn(),
+    };
+    rolesRepo = {
+      create: jest.fn(),
+      findOne: jest.fn(),
+      find: jest.fn(),
+      delete: jest.fn(),
+      save: jest.fn(),
+      count: jest.fn(),
+      createQueryBuilder: jest.fn(),
+    };
+    complaintgroupsRuleRepo = {
+      findOne: jest.fn(),
+    };
+
+    logsService = {
+      logAction: jest.fn(),
+    };
+    jest.spyOn(EmailUtils2, 'sendComplaintEmail').mockResolvedValue(undefined);
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        UserService,
+        { provide: getRepositoryToken(UserEntity), useValue: userRepo },
+        {
+          provide: getRepositoryToken(ComplaintEntity),
+          useValue: complaintRepo,
+        },
+        { provide: getRepositoryToken(RolesEntity), useValue: rolesRepo },
+        {
+          provide: getRepositoryToken(ComplaintGroupsRuleEntity),
+          useValue: complaintgroupsRuleRepo,
+        },
+        { provide: getRepositoryToken(LeavesEntity), useValue: {} },
+        { provide: getRepositoryToken(GroupEntity), useValue: groupRepo },
+        { provide: LogsService, useValue: logsService },
+      ],
+    }).compile();
+
+    service = module.get<UserService>(UserService);
+  });
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+  it('should throw if no token is provided', async () => {
+    await expect(service.verifyEmailUpdate(null)).rejects.toThrow(
+      HttpException,
+    );
+  });
+  it('should throw if token is invalid', async () => {
+    jest.spyOn(jwt, 'verify').mockImplementation(() => {
+      throw new Error('invalid');
+    });
+
+    await expect(service.verifyEmailUpdate('fakeToken')).rejects.toThrow(
+      'Invalid or expired token',
+    );
+  });
+  it('should throw if user not found', async () => {
+    const fakeDecoded = { _id: 1, newName: 'Ezz' };
+    jest.spyOn(jwt, 'verify').mockReturnValue(fakeDecoded);
+    userRepo.findOne.mockResolvedValue(null);
+
+    await expect(service.verifyEmailUpdate('fakeToken')).rejects.toThrow(
+      'user not found',
+    );
+  });
+  it('should update the user and return the verification URL', async () => {
+    const fakeDecoded = {
+      _id: 1,
+      newName: 'Ezz',
+      newEmail: 'ezz@gmail.com',
+      newHashPassword: 'hash',
+      imagePath: '/uploads/img.png',
+    };
+    const fakeUser = { user_id: 1, user_email: 'old@gmail.com' };
+
+    jest.spyOn(jwt, 'verify').mockReturnValue(fakeDecoded);
+    userRepo.findOne.mockResolvedValue(fakeUser);
+    userRepo.update.mockResolvedValue({});
+
+    const result = await service.verifyEmailUpdate('fakeToken');
+
+    expect(userRepo.update).toHaveBeenCalledWith(fakeDecoded._id, {
+      user_name: 'Ezz',
+      user_email: 'ezz@gmail.com',
+      user_password: 'hash',
+      profilePicture: '/uploads/img.png',
+    });
+
+    expect(result).toBe('http://localhost:5173/email-verified?token=fakeToken');
+  });
+});
+
+describe('UserService - delete user ', () => {
+  let service: UserService;
+
+  let userRepo: {
+    findOne: jest.Mock;
+    count: jest.Mock;
+    save: jest.Mock;
+    update: jest.Mock;
+    delete: jest.Mock;
+  };
+  let groupRepo: {
+    findOne: jest.Mock;
+    save: jest.Mock;
+    count: jest.Mock;
+    createQueryBuilder: jest.Mock;
+  };
+  let complaintRepo: {
+    create: jest.Mock;
+    findOne: jest.Mock;
+    delete: jest.Mock;
+    save: jest.Mock;
+    find: jest.Mock;
+    count: jest.Mock;
+  };
+  let rolesRepo: {
+    create: jest.Mock;
+    findOne: jest.Mock;
+    delete: jest.Mock;
+    save: jest.Mock;
+    find: jest.Mock;
+    count: jest.Mock;
+    createQueryBuilder: jest.Mock;
+  };
+  let complaintgroupsRuleRepo: {
+    findOne: jest.Mock;
+  };
+  let logsService: {
+    logAction: jest.Mock;
+  };
+  beforeEach(async () => {
+    userRepo = {
+      findOne: jest.fn(),
+      count: jest.fn(),
+      save: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    };
+    groupRepo = {
+      findOne: jest.fn(),
+      save: jest.fn(),
+      count: jest.fn(),
+      createQueryBuilder: jest.fn(),
+    };
+    complaintRepo = {
+      create: jest.fn(),
+      findOne: jest.fn(),
+      find: jest.fn(),
+      delete: jest.fn(),
+      save: jest.fn(),
+      count: jest.fn(),
+    };
+    rolesRepo = {
+      create: jest.fn(),
+      findOne: jest.fn(),
+      find: jest.fn(),
+      delete: jest.fn(),
+      save: jest.fn(),
+      count: jest.fn(),
+      createQueryBuilder: jest.fn(),
+    };
+    complaintgroupsRuleRepo = {
+      findOne: jest.fn(),
+    };
+
+    logsService = {
+      logAction: jest.fn(),
+    };
+    jest.spyOn(EmailUtils2, 'sendComplaintEmail').mockResolvedValue(undefined);
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        UserService,
+        { provide: getRepositoryToken(UserEntity), useValue: userRepo },
+        {
+          provide: getRepositoryToken(ComplaintEntity),
+          useValue: complaintRepo,
+        },
+        { provide: getRepositoryToken(RolesEntity), useValue: rolesRepo },
+        {
+          provide: getRepositoryToken(ComplaintGroupsRuleEntity),
+          useValue: complaintgroupsRuleRepo,
+        },
+        { provide: getRepositoryToken(LeavesEntity), useValue: {} },
+        { provide: getRepositoryToken(GroupEntity), useValue: groupRepo },
+        { provide: LogsService, useValue: logsService },
+      ],
+    }).compile();
+
+    service = module.get<UserService>(UserService);
+  });
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  //delete user
+  it('should throw not found error when the user is not found', async () => {
+    const userId = '1';
+    userRepo.findOne.mockResolvedValue(null);
+
+    await expect(service.deleteUser(userId)).rejects.toThrow(
+      new NotFoundException('User not found'),
+    );
+
+    expect(userRepo.findOne).toHaveBeenCalledWith({
+      where: { user_id: Number(userId) },
+    });
+  });
+  it('should throw not found error when the user is not found', async () => {
+    const userId = '1';
+    const fakeUser = {
+      user_id: 1,
+      user_name: 'ezz',
+      useR_email: 'ezz@gmail.com',
+    };
+    userRepo.findOne.mockResolvedValue(fakeUser);
+    const queryBuilder = {
+      relation: jest.fn().mockReturnThis(),
+      of: jest.fn().mockReturnThis(),
+      remove: jest.fn().mockResolvedValue(true),
+    };
+    rolesRepo.createQueryBuilder.mockReturnValue(queryBuilder);
+    userRepo.delete.mockResolvedValue(true);
+
+    const result = await service.deleteUser(userId);
+    expect(result.success).toBe(true);
+    expect(result.message).toEqual(
+      'User and associated data deleted successfully.',
+    );
+
+    expect(userRepo.findOne).toHaveBeenCalledWith({
+      where: { user_id: Number(userId) },
+    });
+    expect(rolesRepo.createQueryBuilder).toHaveBeenCalledWith('role_info');
+    expect(queryBuilder.relation).toHaveBeenCalledWith(RolesEntity, 'users');
+    expect(queryBuilder.of).toHaveBeenCalledWith(fakeUser);
+    expect(queryBuilder.remove).toHaveBeenCalledWith(fakeUser);
+
+    expect(userRepo.delete).toHaveBeenCalledWith(Number(userId));
   });
 });
