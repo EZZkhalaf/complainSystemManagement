@@ -114,7 +114,7 @@ const EmployeeInfo = () => {
     }
   }, [employee]);
   return (
-    <div className="max-w-full mx-auto p-6 sm:p-10 bg-white rounded-3xl shadow-xl  border border-gray-200">
+    <div className="max-w-full mx-auto p-6 sm:p-10 bg-gray-50   ">
       <PageHeader
         header={"Employee Info"}
         paragraph={
@@ -127,7 +127,7 @@ const EmployeeInfo = () => {
         handleSaveChanges={handleSaveChanges}
         editing={editing}
       />
-      <div className="flex  justify-between w-full sm:flex-row  sm:items-start ">
+      <div className="grid lg:grid-cols-2 grid-cols-1 sm  justify-around sm:flex-row  sm:items-start ">
         <EmployeeDetails
           employee={employee}
           setEditableEmail={setEditableEmail}
@@ -156,7 +156,6 @@ const EmployeeInfo = () => {
           </div>
         )}
 
-        {/* complaint listing */}
         <h1 className=" flex text-xl text-gray-500">Complaints : </h1>
 
         <ComplaintListing filtered={complaints} />

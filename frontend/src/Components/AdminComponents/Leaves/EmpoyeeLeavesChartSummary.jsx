@@ -42,11 +42,11 @@ const LeavesBarChart = ({ data }) => {
   ];
 
   return (
-    <div className="w-200 h-64">
+    <div className="w-[50vw] h-64">
       <ResponsiveContainer width="70%" height="100%">
         <BarChart
           data={chartData}
-          margin={{ top: 20, right: 0, left: 20, bottom: 5 }}
+          margin={{ top: 20, right: 10, left: 20, bottom: 5 }}
         >
           <XAxis dataKey="category" />
           <YAxis />

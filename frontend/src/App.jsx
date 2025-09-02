@@ -13,7 +13,6 @@ import AdminHero from "./Components/AdminComponents/AdminHero";
 import ListComplaints from "./Components/AdminComponents/ListComplaints";
 import ListGroups from "./Components/AdminComponents/ListGroups";
 import AddComplaint from "./Components/EmployeeComponent/AddComplaint";
-// import CurrentGroupInfo from './Components/EmployeeComponent/ListUserGroups'
 import ListUserGroups from "./Components/EmployeeComponent/ListUserGroups";
 import UserGroupInfo from "./Components/EmployeeComponent/UserGroupInfo";
 import AddGroup from "./Components/AdminComponents/AddGroup";
@@ -28,7 +27,6 @@ import ManageEmployees from "./Components/AdminComponents/ManageEmployees";
 import EmployeeInfo from "./Components/AdminComponents/EmployeeInfo";
 import EmailVerified from "./Components/EmailVerified";
 import { useAuthContext } from "./Context/authContext";
-// import AddRolePage from './Components/RoleManagement/ManageRoles'
 import ManageRoles from "./Components/RoleManagement/ManageRoles";
 import AssignUsersToRole from "./Components/RoleManagement/AssignUsersToRole";
 import AddPermissionsToRole from "./Components/RoleManagement/AddPermissionsToRole";
@@ -167,12 +165,6 @@ const App = () => {
             path="/userPage/complaint/:id"
             element={<UserComplaintInfo />}
           ></Route>
-          {/* {hasPermission(user,"view_complaints") && (
-            <>
-              <Route path="/userPage/complaints" element = {<ListComplaints />}></Route>
-              <Route path="/userPage/otherComplaint/:id" element = {<AdminComplainInfo />}></Route>     
-            </>
-          )} */}
 
           {hasPermission(user, "view_employees") && (
             <Route

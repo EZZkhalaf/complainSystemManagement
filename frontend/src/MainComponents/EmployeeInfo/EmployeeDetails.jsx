@@ -14,6 +14,7 @@ const EmployeeDetails = ({
   editing,
   defaultPhoto,
 }) => {
+  console.log(employee);
   return (
     <div className="flex  w-full">
       <div className="mr-5">

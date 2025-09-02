@@ -6,7 +6,7 @@ const TableHeaders = ({ headers }) => {
       {headers.map((h, index) => (
         <th
           key={index}
-          className="border border-gray-200 px-5 py-3 text-gray-600 text-left font-medium"
+          className="border border-gray-200 px-3 py-3 text-gray-600 text-left lg:text-lg text-sm"
         >
           {h}
         </th>
