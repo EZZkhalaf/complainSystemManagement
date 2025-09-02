@@ -62,10 +62,10 @@ export class AppModule {
   constructor(private dataSource: DataSource) {}
 
   async onApplicationBootstrap() {
-    if (this.dataSource.isInitialized) {
-      console.log('Connected to Postgres database');
-    } else {
-      console.error('Failed to connect to Postgres database');
-    }
+    // if (this.dataSource.isInitialized) {
+    //   console.log('Connected to Postgres database');
+    // } else {
+    //   console.error('Failed to connect to Postgres database');
+    // }
   }
 }

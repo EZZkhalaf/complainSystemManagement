@@ -454,12 +454,12 @@ export class UserService {
     if (!role) throw new NotFoundException('role  not found');
 
     const groups = await this.groupRepo
-      .createQueryBuilder('group')
-      .leftJoin('group.users', 'user_info')
+      .createQueryBuilder('group_entity')
+      .leftJoin('group_entity.users', 'user_info')
       .where('user_info.user_id = :id', { id: Number(id) })
       .select([
-        'group.group_id',
-        'group.group_name',
+        'group_entity.group_id',
+        'group_entity.group_name',
         'user_info.user_id',
         'user_info.user_name',
       ])
@@ -473,7 +473,7 @@ export class UserService {
       success: true,
       user: plainToInstance(UserOutputDto, user, {
         excludeExtraneousValues: true,
-      }), // only the populated user object
+      }),
       role: role.role_name,
       groups,
       complaints: plainToInstance(ComplaintOutputDto, complaints, {
